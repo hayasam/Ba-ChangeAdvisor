@@ -17,18 +17,20 @@ import static org.hamcrest.core.Is.is;
  */
 public class FSProjectParserTest {
 
+    private static final String TEST_DIRECTORY = "test_files_parser/com.frostwire.android";
+
     private FSProjectParser projectParser = new FSProjectParser();
 
     @Test
     public void parseFrostwireRoot() throws Exception {
-        final Path projectRoot = Paths.get("/Users/alexanderhofmann/Dropbox/UZH/Bsc/Ba/changeadvisor_input/sources/com.frostwire.android/");
+        final Path projectRoot = Paths.get(TEST_DIRECTORY);
         List<PackageBean> projectPackages = projectParser.parse(projectRoot);
         Assert.assertThat(projectPackages.size(), is(135));
     }
 
     @Test
     public void parseCommonRoot() throws Exception {
-        final Path projectCommonRoot = Paths.get("/Users/alexanderhofmann/Dropbox/UZH/Bsc/Ba/changeadvisor_input/sources/com.frostwire.android/common");
+        final Path projectCommonRoot = Paths.get(TEST_DIRECTORY + "/common");
         List<PackageBean> commonPackages = projectParser.parse(projectCommonRoot);
         Collections.sort(commonPackages);
         Assert.assertThat(commonPackages.size(), is(32));
@@ -36,35 +38,35 @@ public class FSProjectParserTest {
 
     @Test
     public void parseAndroidRoot() throws Exception {
-        final Path projectAndroidRoot = Paths.get("/Users/alexanderhofmann/Dropbox/UZH/Bsc/Ba/changeadvisor_input/sources/com.frostwire.android/android");
+        final Path projectAndroidRoot = Paths.get(TEST_DIRECTORY + "/android");
         List<PackageBean> androidPackages = projectParser.parse(projectAndroidRoot);
         Assert.assertThat(androidPackages.size(), is(50));
     }
 
     @Test
     public void parseAndroidApolloRoot() throws Exception {
-        final Path projectAndroidApolloRoot = Paths.get("/Users/alexanderhofmann/Dropbox/UZH/Bsc/Ba/changeadvisor_input/sources/com.frostwire.android/android/apollo");
+        final Path projectAndroidApolloRoot = Paths.get(TEST_DIRECTORY + "/android/apollo");
         List<PackageBean> androidApolloPackages = projectParser.parse(projectAndroidApolloRoot);
         Assert.assertThat(androidApolloPackages.size(), is(22));
     }
 
     @Test
     public void parseAndroidTestsRoot() throws Exception {
-        final Path projectAndroidTestsRoot = Paths.get("/Users/alexanderhofmann/Dropbox/UZH/Bsc/Ba/changeadvisor_input/sources/com.frostwire.android/android/tests");
+        final Path projectAndroidTestsRoot = Paths.get(TEST_DIRECTORY + "/android/tests");
         List<PackageBean> androidTestspackages = projectParser.parse(projectAndroidTestsRoot);
         Assert.assertThat(androidTestspackages.size(), is(6));
     }
 
     @Test
     public void parseDesktopRoot() throws Exception {
-        final Path projectDesktopRoot = Paths.get("/Users/alexanderhofmann/Dropbox/UZH/Bsc/Ba/changeadvisor_input/sources/com.frostwire.android/desktop");
+        final Path projectDesktopRoot = Paths.get(TEST_DIRECTORY + "/desktop");
         List<PackageBean> desktopPackages = projectParser.parse(projectDesktopRoot);
         Assert.assertThat(desktopPackages.size(), is(55));
     }
 
     @Test
     public void parseAndGetPublicCorpusFrostwireTest() throws Exception {
-        final Path root = Paths.get("/Users/alexanderhofmann/Dropbox/UZH/Bsc/Ba/changeadvisor_input/sources/com.frostwire.android/common/src/main/java/com/frostwire/bittorrent");
+        final Path root = Paths.get(TEST_DIRECTORY + "/common/src/main/java/com/frostwire/bittorrent");
         List<PackageBean> packages = projectParser.parse(root);
         Assert.assertThat(packages.size(), is(1));
 
