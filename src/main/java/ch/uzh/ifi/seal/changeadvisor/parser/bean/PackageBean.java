@@ -2,6 +2,7 @@ package ch.uzh.ifi.seal.changeadvisor.parser.bean;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by alexanderhofmann on 13.07.17.
@@ -28,6 +29,10 @@ public class PackageBean implements Comparable<PackageBean> {
 
     public String getName() {
         return name;
+    }
+
+    public List<ClassBean> getClasses() {
+        return compilationUnits.stream().flatMap(c -> c.getClasses().stream()).collect(Collectors.toList());
     }
 
     @Override
