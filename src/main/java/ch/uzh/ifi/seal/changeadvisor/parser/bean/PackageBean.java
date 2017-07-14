@@ -15,6 +15,7 @@ public class PackageBean implements Comparable<PackageBean> {
     public PackageBean(String name) {
         this.name = name;
         this.compilationUnits = new ArrayList<>();
+
     }
 
     public List<CompilationUnitBean> getCompilationUnits() {

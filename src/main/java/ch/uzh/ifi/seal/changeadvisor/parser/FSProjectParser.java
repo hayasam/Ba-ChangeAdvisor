@@ -33,7 +33,7 @@ public class FSProjectParser {
         projectFiles.forEach(file -> {
             try {
                 CompilationUnitBean compilationUnit = CompilationUnitBean.fromPath(file);
-                final String packageName = compilationUnit.getPackageName().orElse("default");
+                final String packageName = compilationUnit.getPackageName();
 
                 PackageBean packageBean = packageMap.getOrDefault(packageName, new PackageBean(packageName));
                 packageBean.addCompilationUnit(compilationUnit);

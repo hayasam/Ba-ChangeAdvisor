@@ -1,6 +1,7 @@
 package ch.uzh.ifi.seal.changeadvisor.parser.visitor;
 
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import org.apache.log4j.Logger;
@@ -31,6 +32,18 @@ public class MethodVisitor extends VoidVisitorAdapter<Void> {
     }
 
     /**
+     * Returns the public corpus for a given {@link ClassOrInterfaceDeclaration}.
+     *
+     * @param node Compilation unit to parse.
+     * @return the public corpus.
+     */
+    public static String getCorpus(ClassOrInterfaceDeclaration node) {
+        MethodVisitor visitor = new MethodVisitor();
+        visitor.visit(node, null);
+        return visitor.getPublicCorpus();
+    }
+
+    /**
      * Visit each method and adds to the string builder only those which are public.
      * Should never be used multiple times. Prefer to create new instance or use the
      * static method {@link #getCorpus(CompilationUnit)}}
@@ -43,8 +56,6 @@ public class MethodVisitor extends VoidVisitorAdapter<Void> {
         if (n.isPublic()) {
             String methodText = n.toString();
             sb.append(String.format("%s\n------\n", methodText));
-        } else {
-            logger.info("ITS PRIVATE: " + n.getNameAsString());
         }
         super.visit(n, arg);
     }

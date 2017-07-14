@@ -38,6 +38,6 @@ public class BagOfWordsTest {
 
         List<String> orderedBagOfWords = bagOfWords.getOrderedBagOfWords();
 
-        Assert.assertEquals(split.size(), orderedBagOfWords.size());
+        Assert.assertEquals(126, orderedBagOfWords.size());
     }
 }

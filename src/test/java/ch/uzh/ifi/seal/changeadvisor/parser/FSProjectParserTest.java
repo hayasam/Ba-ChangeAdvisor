@@ -72,9 +72,5 @@ public class FSProjectParserTest {
 
         PackageBean packageBean = packages.get(0);
         Assert.assertThat(packageBean.getCompilationUnits().size(), is(11));
-
-//        for (CompilationUnitBean compilationUnitBean : packageBean.getCompilationUnits()) {
-//            FileUtils.write(new File("test_files/method_corpus.txt"), compilationUnitBean.getPublicCorpus(), "utf-8", true);
-//        }
     }
 }

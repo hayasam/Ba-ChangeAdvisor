@@ -14,27 +14,27 @@ import java.util.Set;
  * Represents a Bag-of-Words. A set of words essentially.
  * Created by alex on 14.07.2017.
  */
-public class BagOfWords {
+public class BagOfWords implements Comparable<BagOfWords> {
 
-    private String packageName;
+    private String fullyQualifiedClassName;
 
     private Set<String> bagOfWords;
 
-    public BagOfWords(String packageName, Set<String> bagOfWords) {
-        this.packageName = packageName;
+    public BagOfWords(String fullyQualifiedClassName, Set<String> bagOfWords) {
+        this.fullyQualifiedClassName = fullyQualifiedClassName;
         this.bagOfWords = bagOfWords;
     }
 
     /**
      * Factory method to instantiate a new BagOfWords.
      *
-     * @param packageName the name of the package this bag comes from.
-     * @param corpus      text content. The future bagOfWords.
-     * @return a bagOfWords containing the processed corpus and the packageName.
+     * @param fullyQualifiedClassName the fqcn of the class this bag comes from.
+     * @param corpus                  text content. The future bagOfWords.
+     * @return a bagOfWords containing the processed corpus and the fullyQualifiedClassName.
      */
-    public static BagOfWords fromCorpus(final String packageName, final String corpus) {
+    public static BagOfWords fromCorpus(final String fullyQualifiedClassName, final String corpus) {
         final Set<String> preprocessed = PreprocessingFacade.preprocess(corpus);
-        return new BagOfWords(packageName, ImmutableSet.copyOf(preprocessed));
+        return new BagOfWords(fullyQualifiedClassName, ImmutableSet.copyOf(preprocessed));
     }
 
     public Set<String> getBagOfWords() {
@@ -48,6 +48,10 @@ public class BagOfWords {
      */
     public List<String> getOrderedBagOfWords() {
         return ImmutableList.sortedCopyOf(bagOfWords);
+    }
+
+    public String getFullyQualifiedClassName() {
+        return fullyQualifiedClassName;
     }
 
     public int size() {
@@ -64,15 +68,20 @@ public class BagOfWords {
      * @throws IOException in case of an I/O error
      */
     public void writeToFile(Path path, boolean append) throws IOException {
-        String bagString = bagOfWords.toString()
+        final String bagString = String.format("%s\n", bagOfWords.toString()
                 .replace("[", "")
                 .replace("]", "")
-                .replace(", ", " ");
-        FileUtils.write(path.toFile(), packageName + "," + bagString, "utf8", append);
+                .replace(", ", " "));
+        FileUtils.write(path.toFile(), fullyQualifiedClassName + "," + bagString, "utf8", append);
     }
 
     @Override
     public String toString() {
         return bagOfWords.toString();
+    }
+
+    @Override
+    public int compareTo(BagOfWords o) {
+        return fullyQualifiedClassName.compareTo(o.fullyQualifiedClassName);
     }
 }
