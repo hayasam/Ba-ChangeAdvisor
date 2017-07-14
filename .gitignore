@@ -160,5 +160,3 @@ Temporary Items
 
 # End of https://www.gitignore.io/api/macos
 /test_files/
-src/main/resources/lib/
-test_files/
