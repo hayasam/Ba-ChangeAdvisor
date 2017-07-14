@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -151,4 +152,11 @@ public class DirectoryCrawlerTest {
         return root.getParent().getParent();
     }
 
+    @Test
+    public void frostwireProjectTest() throws Exception {
+        DirectoryCrawler explorer = new DirectoryCrawler();
+        Path frostwireRoot = Paths.get("/Users/alexanderhofmann/Dropbox/UZH/Bsc/Ba/changeadvisor_input/sources/com.frostwire.android/");
+        List<Path> paths = explorer.explore(frostwireRoot);
+        Assert.assertThat(paths.size(), is(1518));
+    }
 }
