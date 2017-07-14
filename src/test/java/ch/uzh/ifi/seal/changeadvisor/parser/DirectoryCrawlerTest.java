@@ -20,6 +20,8 @@ import static org.hamcrest.core.Is.is;
  */
 public class DirectoryCrawlerTest {
 
+    private static final String TEST_DIRECTORY = "test_files_parser/com.frostwire.android";
+
     @Test
     public void exploreDirectoryOneFile() throws Exception {
         DirectoryCrawler explorer = new DirectoryCrawler();
@@ -155,7 +157,7 @@ public class DirectoryCrawlerTest {
     @Test
     public void frostwireProjectTest() throws Exception {
         DirectoryCrawler explorer = new DirectoryCrawler();
-        Path frostwireRoot = Paths.get("/Users/alexanderhofmann/Dropbox/UZH/Bsc/Ba/changeadvisor_input/sources/com.frostwire.android/");
+        Path frostwireRoot = Paths.get(TEST_DIRECTORY);
         List<Path> paths = explorer.explore(frostwireRoot);
         Assert.assertThat(paths.size(), is(1518));
     }
