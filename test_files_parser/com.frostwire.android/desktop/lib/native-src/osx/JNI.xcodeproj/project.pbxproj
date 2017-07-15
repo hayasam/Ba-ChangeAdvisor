@@ -345,7 +345,7 @@
 			);
 			mainGroup = 08FB7794FE84155DC02AAC07 /* GURL */;
 			projectDirPath = "";
-			projectRoot = "";
+			projectRootPath = "";
 			targets = (
 				F9B18D9E0DB3EFE400F89148 /* BuildAll */,
 				F96581080DA1764500F02016 /* Dock */,

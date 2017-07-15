@@ -1,6 +1,7 @@
 package ch.uzh.ifi.seal.changeadvisor.parser.bean;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,6 +34,10 @@ public class PackageBean implements Comparable<PackageBean> {
 
     public List<ClassBean> getClasses() {
         return compilationUnits.stream().flatMap(c -> c.getClasses().stream()).collect(Collectors.toList());
+    }
+
+    public Iterator<ClassBean> classIterator() {
+        return getClasses().iterator();
     }
 
     @Override

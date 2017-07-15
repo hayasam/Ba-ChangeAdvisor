@@ -3,6 +3,7 @@ package ch.uzh.ifi.seal.changeadvisor.parser;
 import ch.uzh.ifi.seal.changeadvisor.parser.bean.CompilationUnitBean;
 import ch.uzh.ifi.seal.changeadvisor.parser.bean.PackageBean;
 import org.apache.log4j.Logger;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -15,6 +16,7 @@ import java.util.Map;
  * File System parser for java projects.
  * Created by alexanderhofmann on 14.07.17.
  */
+@Component
 public class FSProjectParser {
 
     private static final Logger logger = Logger.getLogger(FSProjectParser.class);

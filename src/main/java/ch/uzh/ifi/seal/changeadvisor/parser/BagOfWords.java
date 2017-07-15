@@ -68,11 +68,13 @@ public class BagOfWords implements Comparable<BagOfWords> {
      * @throws IOException in case of an I/O error
      */
     public void writeToFile(Path path, boolean append) throws IOException {
-        final String bagString = String.format("%s\n", bagOfWords.toString()
-                .replace("[", "")
-                .replace("]", "")
-                .replace(", ", " "));
+        final String bagString = asCsv();
         FileUtils.write(path.toFile(), fullyQualifiedClassName + "," + bagString, "utf8", append);
+    }
+
+    public String asCsv() {
+        String bagString = String.join(" ", bagOfWords);
+        return String.format("%s,%s", fullyQualifiedClassName, bagString);
     }
 
     @Override
