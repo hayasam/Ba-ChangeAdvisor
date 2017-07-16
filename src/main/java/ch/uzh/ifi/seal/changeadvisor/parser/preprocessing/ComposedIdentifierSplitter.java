@@ -3,14 +3,16 @@ package ch.uzh.ifi.seal.changeadvisor.parser.preprocessing;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Splits composed identifies (e.g. CamelCase, snake_case, and digit separated text) into tokens.
  * Created by alex on 14.07.2017.
  */
-class ComposedIdentifierSplitter {
+public class ComposedIdentifierSplitter implements CorpusTokenizer {
 
     private static final Pattern DIGIT_SEPARATED_TEXT_PATTERN = Pattern.compile("(?<=\\D)(?=\\d)|(?<=\\d)(?=\\D)");
 
@@ -43,5 +45,13 @@ class ComposedIdentifierSplitter {
     private static String splitDigitSeparatedText(String s) {
         Iterable<String> split = Splitter.on(DIGIT_SEPARATED_TEXT_PATTERN).trimResults().omitEmptyStrings().split(s);
         return String.join(" ", split);
+    }
+
+    @Override
+    public List<String> tokenize(String corpus) {
+        List<String> split = Splitter.on(' ').omitEmptyStrings().trimResults().splitToList(corpus);
+        return split.stream()
+                .map(ComposedIdentifierSplitter::split)
+                .flatMap(Collection::stream).collect(Collectors.toList());
     }
 }

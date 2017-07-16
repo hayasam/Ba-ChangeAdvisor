@@ -9,10 +9,10 @@ import java.nio.file.Paths;
 import java.util.Set;
 
 /**
- * Filter for stopwords. Uses dictionary files located at /resources/nlp for filtering.
+ * Filter for stop words. Uses dictionary files located at /resources/nlp for filtering.
  * Created by alex on 14.07.2017.
  */
-class StopWordFilter {
+public class StopWordFilter {
 
     private static final Logger logger = Logger.getLogger(StopWordFilter.class);
 
@@ -29,7 +29,7 @@ class StopWordFilter {
         }
     }
 
-    static boolean isNotStopWord(String token) {
+    public static boolean isNotStopWord(String token) {
         return isNotNormalStopWord(token) && isNotProgrammingStopWord(token);
     }
 

@@ -7,6 +7,7 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -19,6 +20,8 @@ public class BagOfWords implements Comparable<BagOfWords> {
     private String fullyQualifiedClassName;
 
     private Set<String> bagOfWords;
+
+    private LocalDateTime timestamp = LocalDateTime.now();
 
     public BagOfWords(String fullyQualifiedClassName, Set<String> bagOfWords) {
         this.fullyQualifiedClassName = fullyQualifiedClassName;
@@ -52,6 +55,10 @@ public class BagOfWords implements Comparable<BagOfWords> {
 
     public String getFullyQualifiedClassName() {
         return fullyQualifiedClassName;
+    }
+
+    public LocalDateTime getTimestamp() {
+        return timestamp;
     }
 
     public int size() {

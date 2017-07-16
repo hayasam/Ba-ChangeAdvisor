@@ -3,6 +3,7 @@ package ch.uzh.ifi.seal.changeadvisor.batch.job;
 import ch.uzh.ifi.seal.changeadvisor.parser.BagOfWords;
 import ch.uzh.ifi.seal.changeadvisor.parser.FSProjectParser;
 import ch.uzh.ifi.seal.changeadvisor.parser.bean.ClassBean;
+import ch.uzh.ifi.seal.changeadvisor.parser.preprocessing.*;
 import com.mongodb.MongoClient;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -20,6 +21,8 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.data.mongodb.MongoDbFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.SimpleMongoDbFactory;
+
+import java.util.function.Predicate;
 
 /**
  * Created by alex on 15.07.2017.
@@ -46,7 +49,7 @@ public class BatchConfig {
 
     @Bean
     public Job job(JobCompletionNotificationListener listener) {
-        return jobBuilderFactory.get("importUserJob")
+        return jobBuilderFactory.get("changeAdvisor")
                 .incrementer(new RunIdIncrementer())
                 .listener(listener)
                 .flow(extractBagOfWords())
@@ -59,8 +62,7 @@ public class BatchConfig {
         return stepBuilderFactory.get("extractBagOfWords")
                 .<ClassBean, BagOfWords>chunk(10)
                 .reader(reader())
-                .processor(processor())
-//                .writer(writer())
+                .processor(preprocessor())
                 .writer(mongoWriter())
                 .build();
     }
@@ -79,7 +81,43 @@ public class BatchConfig {
     }
 
     @Bean
-    public FlatFileItemWriter<BagOfWords> writer() {
+    public CorpusProcessor preprocessor() {
+        return new CorpusProcessor.Builder(true, tokenizer())
+                .step(lowerCaseStep())
+                .step(stemmerStep())
+                .filter(stopWordFilter())
+                .filter(tokenLengthFilter())
+                .build();
+    }
+
+    @Bean
+    public CorpusTokenizer tokenizer() {
+        return new ComposedIdentifierSplitter();
+    }
+
+    @Bean
+    public ProcessingStep lowerCaseStep() {
+        return new LowerCaseProcessor();
+    }
+
+    @Bean
+    public ProcessingStep stemmerStep() {
+        return new Stemmer(Stemmer.MINIMUM_WORD_LENGTH);
+    }
+
+    @Bean
+    public Predicate<String> stopWordFilter() {
+        return StopWordFilter::isNotStopWord;
+    }
+
+    @Bean
+    public Predicate<String> tokenLengthFilter() {
+        return t -> t.length() > 3;
+    }
+
+
+    @Bean
+    public FlatFileItemWriter<BagOfWords> fileWriter() {
         FlatFileItemWriter<BagOfWords> writer = new FlatFileItemWriter<>();
         writer.setResource(new FileSystemResource(TEST_DIRECTORY + "/batch_test.csv"));
         writer.setHeaderCallback((headerWriter) -> headerWriter.write("component,bag"));

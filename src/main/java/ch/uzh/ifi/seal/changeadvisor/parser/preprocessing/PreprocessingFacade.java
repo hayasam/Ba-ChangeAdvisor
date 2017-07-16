@@ -14,13 +14,12 @@ import java.util.stream.Collectors;
 public class PreprocessingFacade {
 
     public static Set<String> preprocess(String text) {
-        text = EscapeSpecialCharacters.escape(text);
+        text = new EscapeSpecialCharacters().escape(text);
         List<String> split = Splitter.on(' ').omitEmptyStrings().trimResults().splitToList(text);
 
         return split.stream()
                 .map(ComposedIdentifierSplitter::split)
                 .flatMap(Collection::stream)
-                .map(EscapeSpecialCharacters::escape)
                 .map(String::toLowerCase)
                 .filter(StopWordFilter::isNotStopWord)
                 .map(Stemmer::stem)
