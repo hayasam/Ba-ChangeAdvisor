@@ -15,7 +15,7 @@ import java.util.ListIterator;
 public class SpellChecker {
 
     private static final Language ENGLISH = new BritishEnglish();
-    private static final char EMPTY_SPACE = ' ';
+    
     private JLanguageTool languageTool;
 
     public SpellChecker() {
