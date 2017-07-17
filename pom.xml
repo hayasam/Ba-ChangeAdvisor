@@ -123,6 +123,21 @@
             <version>22.0</version>
         </dependency>
 
+        <!-- Spell checking -->
+        <!-- https://mvnrepository.com/artifact/org.languagetool/languagetool-core -->
+        <dependency>
+            <groupId>org.languagetool</groupId>
+            <artifactId>languagetool-core</artifactId>
+            <version>3.8</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.languagetool/language-en -->
+        <dependency>
+            <groupId>org.languagetool</groupId>
+            <artifactId>language-en</artifactId>
+            <version>3.8</version>
+        </dependency>
+
     </dependencies>
 
     <build>

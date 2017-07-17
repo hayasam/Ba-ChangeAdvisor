@@ -1,0 +1,25 @@
+package ch.uzh.ifi.seal.changeadvisor.parser;
+
+import org.junit.Assert;
+import org.junit.Test;
+
+import static org.hamcrest.core.Is.is;
+
+/**
+ * Created by alex on 17.07.2017.
+ */
+public class SpellCheckerTest {
+
+
+    @Test
+    public void checkAndCorrect() throws Exception {
+        final String sentence = "A sentence with a error in the Hitchhiker's Guide tot he Galaxy";
+        final String correctedSentence = "A sentence with an error in the Hitch-hiker's Guide to the Galaxy";
+        SpellChecker spellChecker = new SpellChecker();
+
+        String correction = spellChecker.correct(sentence);
+
+        Assert.assertThat(correction, is(correctedSentence));
+    }
+
+}
