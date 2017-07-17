@@ -159,3 +159,6 @@ Temporary Items
 
 # End of https://www.gitignore.io/api/macos
 /test_files/
+/test_files_parser/com.frostwire.android/
+/test_files_parser/test_generated/
+/test_files_parser/batch_test.csv
