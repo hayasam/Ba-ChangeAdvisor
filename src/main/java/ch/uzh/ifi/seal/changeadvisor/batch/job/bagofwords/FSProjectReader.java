@@ -1,4 +1,4 @@
-package ch.uzh.ifi.seal.changeadvisor.batch.job;
+package ch.uzh.ifi.seal.changeadvisor.batch.job.bagofwords;
 
 import ch.uzh.ifi.seal.changeadvisor.parser.FSProjectParser;
 import ch.uzh.ifi.seal.changeadvisor.parser.bean.ClassBean;
@@ -16,7 +16,7 @@ import java.util.List;
 
 
 /**
- * File System project reader.
+ * File System project reviewReader.
  * Created by alex on 15.07.2017.
  */
 public class FSProjectReader implements ItemReader<ClassBean> {
@@ -47,7 +47,7 @@ public class FSProjectReader implements ItemReader<ClassBean> {
     }
 
     /**
-     * Sets whether this reader should read the classes sorted or unsorted.
+     * Sets whether this reviewReader should read the classes sorted or unsorted.
      * Sort order is defined by the {@link PackageBean}.
      *
      * @param sortedRead true iff reads should happens in order. False otherwise.

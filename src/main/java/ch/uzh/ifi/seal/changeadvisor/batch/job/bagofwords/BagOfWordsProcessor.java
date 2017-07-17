@@ -1,4 +1,4 @@
-package ch.uzh.ifi.seal.changeadvisor.batch.job;
+package ch.uzh.ifi.seal.changeadvisor.batch.job.bagofwords;
 
 import ch.uzh.ifi.seal.changeadvisor.parser.BagOfWords;
 import ch.uzh.ifi.seal.changeadvisor.parser.bean.ClassBean;
