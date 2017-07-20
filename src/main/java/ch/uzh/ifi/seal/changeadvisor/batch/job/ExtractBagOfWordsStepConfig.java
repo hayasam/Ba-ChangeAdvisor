@@ -79,7 +79,7 @@ public class ExtractBagOfWordsStepConfig {
     }
 
     @Bean
-    public CorpusTokenizer tokenizer() {
+    public Tokenizer tokenizer() {
         return new ComposedIdentifierSplitter();
     }
 

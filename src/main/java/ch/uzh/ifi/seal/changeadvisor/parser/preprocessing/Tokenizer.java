@@ -6,7 +6,7 @@ import java.util.List;
  * Defines interface for a corpus tokenizer.
  * Created by alexanderhofmann on 16.07.17.
  */
-public interface CorpusTokenizer {
+public interface Tokenizer {
 
     List<String> tokenize(String corpus);
 }

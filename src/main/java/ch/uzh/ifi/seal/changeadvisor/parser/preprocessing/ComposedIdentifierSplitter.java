@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
  * Splits composed identifies (e.g. CamelCase, snake_case, and digit separated text) into tokens.
  * Created by alex on 14.07.2017.
  */
-public class ComposedIdentifierSplitter implements CorpusTokenizer {
+public class ComposedIdentifierSplitter implements Tokenizer {
 
     private static final Pattern DIGIT_SEPARATED_TEXT_PATTERN = Pattern.compile("(?<=\\D)(?=\\d)|(?<=\\d)(?=\\D)");
 

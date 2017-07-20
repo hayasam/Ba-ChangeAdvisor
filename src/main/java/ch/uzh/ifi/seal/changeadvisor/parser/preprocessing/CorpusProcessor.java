@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
  *
  * @see CorpusProcessor.Builder
  * @see CorpusEscaper
- * @see CorpusTokenizer
+ * @see Tokenizer
  * @see ProcessingStep
  * Created by alexanderhofmann on 16.07.17.
  */
@@ -33,7 +33,7 @@ public class CorpusProcessor implements ItemProcessor<ClassBean, BagOfWords> {
 
     private CorpusEscaper escaper;
 
-    private CorpusTokenizer tokenizer;
+    private Tokenizer tokenizer;
 
     private Predicate<String> filter;
 
@@ -60,14 +60,10 @@ public class CorpusProcessor implements ItemProcessor<ClassBean, BagOfWords> {
 
     public static class Builder {
 
-        private CorpusProcessor processor;
-
-        private Queue<ProcessingStep> steps;
-
-        private List<Predicate<String>> filters = new ArrayList<>();
-
         private static final CorpusEscaper DO_NOTHING_ESCAPER = corpus -> corpus;
-
+        private CorpusProcessor processor;
+        private Queue<ProcessingStep> steps;
+        private List<Predicate<String>> filters = new ArrayList<>();
         private ProcessingStep finalStep = new ProcessingStep() {
             @Override
             public String handle(String text) {
@@ -75,7 +71,7 @@ public class CorpusProcessor implements ItemProcessor<ClassBean, BagOfWords> {
             }
         };
 
-        public Builder(boolean escapeChars, CorpusTokenizer tokenizer) {
+        public Builder(boolean escapeChars, Tokenizer tokenizer) {
             processor = new CorpusProcessor();
             steps = new LinkedList<>();
             processor.escaper = getEscaper(escapeChars);
