@@ -1,4 +1,4 @@
-package ch.uzh.ifi.seal.changeadvisor.parser;
+package ch.uzh.ifi.seal.changeadvisor.parser.preprocessing;
 
 import org.apache.log4j.Logger;
 import org.languagetool.JLanguageTool;

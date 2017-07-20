@@ -1,4 +1,4 @@
-package ch.uzh.ifi.seal.changeadvisor.parser;
+package ch.uzh.ifi.seal.changeadvisor.parser.preprocessing;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;

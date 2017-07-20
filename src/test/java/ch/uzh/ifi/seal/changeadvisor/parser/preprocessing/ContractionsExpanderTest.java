@@ -1,25 +1,20 @@
-package ch.uzh.ifi.seal.changeadvisor.parser;
+package ch.uzh.ifi.seal.changeadvisor.parser.preprocessing;
 
 import com.google.common.collect.ImmutableMap;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
+import org.junit.Assert;
+import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+import static org.hamcrest.core.Is.is;
 
 /**
- * Expands contractions in the english language.
  * Created by alex on 17.07.2017.
  */
-public class ContractionsExpander {
+public class ContractionsExpanderTest {
 
-    private static final String TWO_PARTS_CONTRACTION_REGEXP = "(\\w*)\\s*'\\s*(\\w+)";
-    private static final String THREE_PARTS_CONTRACTION_REGEXP = "(\\w+)\\s*'\\s*(\\w+)\\s*'\\s*(\\w+)";
-
-    private static final Pattern TWO_PARTS_CONTRACTION_PATTERN = Pattern.compile(TWO_PARTS_CONTRACTION_REGEXP);
-    private static final Pattern THREE_PARTS_CONTRACTION_PATTERN = Pattern.compile(THREE_PARTS_CONTRACTION_REGEXP);
+    private static final Logger logger = Logger.getLogger(ContractionsExpander.class);
 
     private Map<String, String> contractions =
             ImmutableMap.<String, String>builder()
@@ -139,44 +134,54 @@ public class ContractionsExpander {
                     .put("you'll", "you will")
                     .put("you'll've", "you will have")
                     .put("you're", "you are")
-                    .put("you've", "you have")
-                    .build();
+                    .put("you've", "you have").build();
 
-    boolean isTwoPartsContraction(String text) {
-        return TWO_PARTS_CONTRACTION_PATTERN.matcher(text).matches();
-    }
-
-    boolean isThreePartsContraction(String text) {
-        return THREE_PARTS_CONTRACTION_PATTERN.matcher(text).matches();
-    }
-
-    public String expand(String text) {
-        if (!StringUtils.isEmpty(text)) {
-            Matcher matcher = TWO_PARTS_CONTRACTION_PATTERN.matcher(text);
-            List<String> twoPartsMatches = new ArrayList<>();
-            while (matcher.find()) {
-                String match = matcher.group(0);
-                twoPartsMatches.add(match);
+    @Test
+    public void isTwoPartsContraction() throws Exception {
+        ContractionsExpander contractionsExpander = new ContractionsExpander();
+        for (Map.Entry<String, String> entry : contractions.entrySet()) {
+            long count = entry.getKey().chars().filter(ch -> ch == '\'').count();
+            if (count == 1) {
+                logger.info(entry.getKey());
+                Assert.assertTrue(contractionsExpander.isTwoPartsContraction(entry.getKey()));
             }
-
-            matcher = THREE_PARTS_CONTRACTION_PATTERN.matcher(text);
-            List<String> threePartsMatches = new ArrayList<>();
-            while (matcher.find()) {
-                threePartsMatches.add(matcher.group(0));
-            }
-
-            text = replaceMatches(text, twoPartsMatches);
-            text = replaceMatches(text, threePartsMatches);
-        } else {
-            text = "";
         }
-        return text;
     }
 
-    private String replaceMatches(String corpus, List<String> matches) {
-        for (String match : matches) {
-            corpus = corpus.replace(match, contractions.getOrDefault(match, match));
+    @Test
+    public void isThreePartsContraction() throws Exception {
+        ContractionsExpander contractionsExpander = new ContractionsExpander();
+        for (Map.Entry<String, String> entry : contractions.entrySet()) {
+            long count = entry.getKey().chars().filter(ch -> ch == '\'').count();
+            if (count == 2) {
+                Assert.assertTrue(contractionsExpander.isThreePartsContraction(entry.getKey()));
+            }
         }
-        return corpus;
+    }
+
+    @Test
+    public void contractionExpansion() throws Exception {
+        final String s = "This is completely normal text, although the following token is not a contraction: abc's, this one is: haven't";
+        final String expected = "This is completely normal text, although the following token is not a contraction: abc's, this one is: have not";
+        final String noContras = "This text does not even contain one contraction!";
+        final String threePartContras = "I mean... does this even mean anything at all??? 'we'll've'";
+        final String threePartContrasExpected = "I mean... does this even mean anything at all??? 'we will have'";
+
+        ContractionsExpander contractionsExpander = new ContractionsExpander();
+
+        String expand = contractionsExpander.expand(s);
+        Assert.assertThat(expand, is(expected));
+
+        expand = contractionsExpander.expand(noContras);
+        Assert.assertThat(expand, is(noContras));
+
+        expand = contractionsExpander.expand(threePartContras);
+        Assert.assertThat(expand, is(threePartContrasExpected));
+
+        expand = contractionsExpander.expand("");
+        Assert.assertThat(expand, is(""));
+
+        expand = contractionsExpander.expand(null);
+        Assert.assertThat(expand, is(""));
     }
 }

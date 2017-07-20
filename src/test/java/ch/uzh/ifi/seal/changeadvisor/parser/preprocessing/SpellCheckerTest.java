@@ -1,4 +1,4 @@
-package ch.uzh.ifi.seal.changeadvisor.parser;
+package ch.uzh.ifi.seal.changeadvisor.parser.preprocessing;
 
 import org.junit.Assert;
 import org.junit.Test;
