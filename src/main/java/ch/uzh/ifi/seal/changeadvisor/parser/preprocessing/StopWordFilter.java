@@ -25,12 +25,12 @@ public class StopWordFilter {
             stopwords = ImmutableSet.copyOf(FileUtils.readLines(Paths.get("src/main/resources/nlp/stopwords").toFile(), "utf8"));
             programmingStopwords = ImmutableSet.copyOf(FileUtils.readLines(Paths.get("src/main/resources/nlp/code_stopwords").toFile(), "utf8"));
         } catch (IOException e) {
-            logger.info("Failed to read stopwords file! Not going to filter stopwords!", e);
+            logger.info("Failed to read stopwords file! Not going to annotate stopwords!", e);
         }
     }
 
     public static boolean isNotStopWord(String token) {
-        return isNotNormalStopWord(token) && isNotProgrammingStopWord(token);
+        return isNotNormalStopWord(token.toLowerCase()) && isNotProgrammingStopWord(token.toLowerCase());
     }
 
     private static boolean isNotNormalStopWord(String token) {

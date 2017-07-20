@@ -24,11 +24,14 @@ public class BatchConfig {
 
     private final ArdocStepConfig ardocStepConfig;
 
+    private final FeedbackTransformationStepConfig transformationStepConfig;
+
     @Autowired
-    public BatchConfig(JobBuilderFactory jobBuilderFactory, ExtractBagOfWordsStepConfig bagOfWordsStepConfig, ArdocStepConfig ardocStepConfig) {
+    public BatchConfig(JobBuilderFactory jobBuilderFactory, ExtractBagOfWordsStepConfig bagOfWordsStepConfig, ArdocStepConfig ardocStepConfig, FeedbackTransformationStepConfig transformationStepConfig) {
         this.jobBuilderFactory = jobBuilderFactory;
         this.bagOfWordsStepConfig = bagOfWordsStepConfig;
         this.ardocStepConfig = ardocStepConfig;
+        this.transformationStepConfig = transformationStepConfig;
     }
 
     @Bean
@@ -38,6 +41,7 @@ public class BatchConfig {
                 .listener(listener)
                 .flow(bagOfWordsStepConfig.extractBagOfWords())
                 .next(ardocStepConfig.ardocAnalysis())
+                .next(transformationStepConfig.transformFeedback())
                 .end()
                 .build();
     }

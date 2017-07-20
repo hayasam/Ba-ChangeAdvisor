@@ -16,11 +16,14 @@ import java.util.List;
 @Component
 public class ArdocResultsWriter implements ItemWriter<ArdocResults> {
 
+    public static final String COLLECTION_NAME = "ardoc";
+
     private MongoItemWriter<ArdocResult> writer = new MongoItemWriter<>();
 
     @Autowired
     public ArdocResultsWriter(MongoTemplate mongoTemplate) {
         writer.setTemplate(mongoTemplate);
+        writer.setCollection(COLLECTION_NAME);
     }
 
     @Override
