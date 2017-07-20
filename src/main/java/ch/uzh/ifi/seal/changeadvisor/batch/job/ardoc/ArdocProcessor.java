@@ -29,7 +29,7 @@ public class ArdocProcessor implements ItemProcessor<String, ArdocResults> {
     private void trackProgress() {
         COUNTER += 1;
         if (COUNTER % 10 == 0) {
-            logger.info(String.format("Ardoc: Finished processing %d lines.", COUNTER++));
+            logger.info(String.format("Ardoc: Finished processing %d lines.", COUNTER));
         }
     }
 }
