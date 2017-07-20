@@ -23,7 +23,7 @@ public class BagOfWordsTest {
 
     @Test
     public void frostwireClass() throws Exception {
-        String bagOfWordFromPoC = "convert activ void call name inherit cach click final holder build paus user extra start grid text constructor listen touch play privat disk util otherwis para fetcher stabl view gener null music adapt list label unload layout datum line context item imag true count background overlay link boolean temporarili flush album resourc plural artist style load overrid type return public posit method popul fals parent song artwork code hold color idea els remov super pollo determin inflat";
+        String bagOfWordFromPoC = "Constructor code Album Adapter param context link Context layout resource view inflate style Determines which therefore items load public final Activity super Layout Image Fetcher Apollo Utils Overlay Resources Color color list background inherit Override View position convert Group parent Music Holder holder null Inflater from false else Data data Line Text Item Load Extra Background Three Artist Touch Play play return boolean Stable true Type Count VIEW TYPE COUNT Method used cache populate grid idea everything before called void build Cache album Name make Label plurals Nsongs Song Number Starts playing user touches artwork holding private Click Listener long that unloads clears adapter pause True temporarily disk otherwise Pause Disk find cached remove From generate Flushes flush extra line three image when touched";
         List<String> split = new ArrayList<>(Splitter.on(' ').trimResults().omitEmptyStrings().splitToList(bagOfWordFromPoC));
         Collections.sort(split);
 

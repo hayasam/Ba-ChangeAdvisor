@@ -12,9 +12,9 @@ import static org.hamcrest.core.Is.is;
 /**
  * Created by alex on 17.07.2017.
  */
-public class ExpandContractionsTest {
+public class ContractionsExpanderTest {
 
-    private static final Logger logger = Logger.getLogger(ExpandContractions.class);
+    private static final Logger logger = Logger.getLogger(ContractionsExpander.class);
 
     private Map<String, String> contractions =
             ImmutableMap.<String, String>builder()
@@ -138,23 +138,23 @@ public class ExpandContractionsTest {
 
     @Test
     public void isTwoPartsContraction() throws Exception {
-        ExpandContractions expandContractions = new ExpandContractions();
+        ContractionsExpander contractionsExpander = new ContractionsExpander();
         for (Map.Entry<String, String> entry : contractions.entrySet()) {
             long count = entry.getKey().chars().filter(ch -> ch == '\'').count();
             if (count == 1) {
                 logger.info(entry.getKey());
-                Assert.assertTrue(expandContractions.isTwoPartsContraction(entry.getKey()));
+                Assert.assertTrue(contractionsExpander.isTwoPartsContraction(entry.getKey()));
             }
         }
     }
 
     @Test
     public void isThreePartsContraction() throws Exception {
-        ExpandContractions expandContractions = new ExpandContractions();
+        ContractionsExpander contractionsExpander = new ContractionsExpander();
         for (Map.Entry<String, String> entry : contractions.entrySet()) {
             long count = entry.getKey().chars().filter(ch -> ch == '\'').count();
             if (count == 2) {
-                Assert.assertTrue(expandContractions.isThreePartsContraction(entry.getKey()));
+                Assert.assertTrue(contractionsExpander.isThreePartsContraction(entry.getKey()));
             }
         }
     }
@@ -167,21 +167,21 @@ public class ExpandContractionsTest {
         final String threePartContras = "I mean... does this even mean anything at all??? 'we'll've'";
         final String threePartContrasExpected = "I mean... does this even mean anything at all??? 'we will have'";
 
-        ExpandContractions expandContractions = new ExpandContractions();
+        ContractionsExpander contractionsExpander = new ContractionsExpander();
 
-        String expand = expandContractions.expand(s);
+        String expand = contractionsExpander.expand(s);
         Assert.assertThat(expand, is(expected));
 
-        expand = expandContractions.expand(noContras);
+        expand = contractionsExpander.expand(noContras);
         Assert.assertThat(expand, is(noContras));
 
-        expand = expandContractions.expand(threePartContras);
+        expand = contractionsExpander.expand(threePartContras);
         Assert.assertThat(expand, is(threePartContrasExpected));
 
-        expand = expandContractions.expand("");
+        expand = contractionsExpander.expand("");
         Assert.assertThat(expand, is(""));
 
-        expand = expandContractions.expand(null);
+        expand = contractionsExpander.expand(null);
         Assert.assertThat(expand, is(""));
     }
 }

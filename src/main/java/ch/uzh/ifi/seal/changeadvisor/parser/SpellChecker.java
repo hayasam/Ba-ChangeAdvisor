@@ -1,7 +1,9 @@
 package ch.uzh.ifi.seal.changeadvisor.parser;
 
+import org.apache.log4j.Logger;
 import org.languagetool.JLanguageTool;
 import org.languagetool.Language;
+import org.languagetool.MultiThreadedJLanguageTool;
 import org.languagetool.language.BritishEnglish;
 import org.languagetool.rules.RuleMatch;
 
@@ -10,35 +12,49 @@ import java.util.List;
 import java.util.ListIterator;
 
 /**
+ * Spell Checker. Tries to apply possible fixes where possible.
  * Created by alex on 17.07.2017.
  */
 public class SpellChecker {
 
-    private static final Language ENGLISH = new BritishEnglish();
-    
+    private static final Logger logger = Logger.getLogger(SpellChecker.class);
+
+    private static final Language EN_UK = new BritishEnglish();
+
     private JLanguageTool languageTool;
 
     public SpellChecker() {
-        languageTool = new JLanguageTool(ENGLISH);
+        languageTool = new MultiThreadedJLanguageTool(EN_UK);
     }
 
+    /**
+     * Try to auto-correct the given text using the rules given by {@link BritishEnglish}.
+     *
+     * @param text text to auto-correct.
+     * @return auto-corrected text.
+     * @throws IOException I/O exception.
+     */
     public String correct(String text) throws IOException {
         List<RuleMatch> matches = languageTool.check(text);
-        ListIterator<RuleMatch> iterator = matches.listIterator(matches.size());
+        ListIterator<RuleMatch> iterator = matches.listIterator();
 
-        while (iterator.hasPrevious()) {
-            final RuleMatch match = iterator.previous();
+        StringBuilder correctSentence = new StringBuilder(text);
+
+        int offset = 0;
+        while (iterator.hasNext()) {
+            RuleMatch match = iterator.next();
 
             List<String> suggestedReplacements = match.getSuggestedReplacements();
-            int fromPos = match.getFromPos();
-            int toPos = match.getToPos();
-            String suggestion = suggestedReplacements.get(0);
 
-            String textBefore = text.substring(0, fromPos);
-            String textAfter = text.substring(toPos);
-            text = textBefore + suggestion + textAfter;
+            if (!suggestedReplacements.isEmpty()) {
+                String suggestedReplacement = suggestedReplacements.get(0);
+                correctSentence.replace(match.getFromPos() - offset, match.getToPos() - offset, suggestedReplacement);
+                offset += (match.getToPos() - match.getFromPos() - suggestedReplacement.length());
+            } else {
+                logger.warn(String.format("Spellchecker found a probable mistake it can't auto correct: %s", match.toString()));
+            }
         }
 
-        return text;
+        return correctSentence.toString();
     }
 }

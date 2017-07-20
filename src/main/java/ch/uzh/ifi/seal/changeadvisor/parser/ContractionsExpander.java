@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
  * Expands contractions in the english language.
  * Created by alex on 17.07.2017.
  */
-public class ExpandContractions {
+public class ContractionsExpander {
 
     private static final String TWO_PARTS_CONTRACTION_REGEXP = "(\\w*)\\s*'\\s*(\\w+)";
     private static final String THREE_PARTS_CONTRACTION_REGEXP = "(\\w+)\\s*'\\s*(\\w+)\\s*'\\s*(\\w+)";

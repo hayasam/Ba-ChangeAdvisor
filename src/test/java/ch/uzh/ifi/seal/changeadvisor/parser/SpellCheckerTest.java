@@ -22,4 +22,13 @@ public class SpellCheckerTest {
         Assert.assertThat(correction, is(correctedSentence));
     }
 
+    @Test
+    public void checkAndCorrect2() throws Exception {
+        final String sentence = "Thiss is som text wewant to ceck for typos";
+        final String correctedSentence = "This is some text we want to check for typos";
+        SpellChecker spellChecker = new SpellChecker();
+
+        final String correction = spellChecker.correct(sentence);
+        Assert.assertThat(correction, is(correctedSentence));
+    }
 }
