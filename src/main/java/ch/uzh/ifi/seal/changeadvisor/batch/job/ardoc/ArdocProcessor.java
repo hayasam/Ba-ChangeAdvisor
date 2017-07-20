@@ -9,19 +9,19 @@ import org.springframework.batch.item.ItemProcessor;
  * Processor for app reviews.
  * Created by alex on 17.07.2017.
  */
-public class ArdocProcessor implements ItemProcessor<String, ArdocResult> {
+public class ArdocProcessor implements ItemProcessor<String, ArdocResults> {
 
     private static final Logger logger = Logger.getLogger(ArdocProcessor.class);
 
     private static final Parser parser = Parser.getInstance();
 
-    private static final String ARDOC_METHODS = "NLP+TA+SA";
+    private static final String ARDOC_METHODS = "NLP+SA";
 
     private static int COUNTER = 0;
 
     @Override
-    public ArdocResult process(String item) throws UnknownCombinationException {
-        ArdocResult result = new ArdocResult(parser.extract(ARDOC_METHODS, item));
+    public ArdocResults process(String item) throws UnknownCombinationException {
+        ArdocResults result = new ArdocResults(parser.extract(ARDOC_METHODS, item));
         trackProgress();
         return result;
     }

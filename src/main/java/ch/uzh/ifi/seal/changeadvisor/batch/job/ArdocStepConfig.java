@@ -1,18 +1,16 @@
 package ch.uzh.ifi.seal.changeadvisor.batch.job;
 
 import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocProcessor;
-import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResult;
+import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResults;
+import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResultsWriter;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.item.ItemProcessor;
-import org.springframework.batch.item.ItemWriter;
-import org.springframework.batch.item.data.MongoItemWriter;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.mapping.PassThroughLineMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
 /**
@@ -33,21 +31,21 @@ public class ArdocStepConfig {
 
     private final StepBuilderFactory stepBuilderFactory;
 
-    private final MongoTemplate mongoTemplate;
+    private final ArdocResultsWriter ardocWriter;
 
     @Autowired
-    public ArdocStepConfig(StepBuilderFactory stepBuilderFactory, MongoTemplate mongoTemplate) {
+    public ArdocStepConfig(StepBuilderFactory stepBuilderFactory, ArdocResultsWriter ardocWriter) {
         this.stepBuilderFactory = stepBuilderFactory;
-        this.mongoTemplate = mongoTemplate;
+        this.ardocWriter = ardocWriter;
     }
 
     @Bean
     public Step ardocAnalysis() {
         return stepBuilderFactory.get(STEP_NAME)
-                .<String, ArdocResult>chunk(10)
+                .<String, ArdocResults>chunk(10)
                 .reader(reviewReader())
                 .processor(ardocProcessor())
-                .writer(ardocWriter())
+                .writer(ardocWriter)
                 .build();
     }
 
@@ -60,15 +58,7 @@ public class ArdocStepConfig {
     }
 
     @Bean
-    public ItemProcessor<String, ArdocResult> ardocProcessor() {
+    public ItemProcessor<String, ArdocResults> ardocProcessor() {
         return new ArdocProcessor();
     }
-
-    @Bean
-    public ItemWriter<ArdocResult> ardocWriter() {
-        MongoItemWriter<ArdocResult> writer = new MongoItemWriter<>();
-        writer.setTemplate(mongoTemplate);
-        return writer;
-    }
-
 }

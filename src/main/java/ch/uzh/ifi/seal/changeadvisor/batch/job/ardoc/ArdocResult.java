@@ -3,26 +3,25 @@ package ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc;
 import org.ardoc.Result;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 /**
- * Represents a result from the Ardoc parser timestamped with its creation time.
+ * Represents a single result from the Ardoc parser timestamped with its creation time.
  * Created by alex on 17.07.2017.
  */
 @SuppressWarnings("unused")
 public class ArdocResult {
 
-    private List<Result> results;
+    private Result result;
 
     private LocalDateTime timestamp;
 
-    public ArdocResult(List<Result> results) {
-        this.results = results;
+    public ArdocResult(Result result) {
+        this.result = result;
         this.timestamp = LocalDateTime.now();
     }
 
-    public List<Result> getResults() {
-        return results;
+    public Result getResult() {
+        return result;
     }
 
     public LocalDateTime getTimestamp() {
@@ -32,7 +31,7 @@ public class ArdocResult {
     @Override
     public String toString() {
         return "ArdocResult{" +
-                "results=" + results +
+                "result=" + result +
                 ", timestamp=" + timestamp +
                 '}';
     }
