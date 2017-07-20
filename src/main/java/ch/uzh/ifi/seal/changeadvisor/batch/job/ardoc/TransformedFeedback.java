@@ -28,7 +28,27 @@ public class TransformedFeedback {
         return bagOfWords;
     }
 
+    public String getBagAsString() {
+        return String.join(" ", bagOfWords);
+    }
+
     public LocalDateTime getTimestamp() {
         return timestamp;
+    }
+
+    public String getSentence() {
+        return ardocResult.getResult().getSentence();
+    }
+
+    public String getCategory() {
+        return ardocResult.getResult().getSentenceClass();
+    }
+
+    @Override
+    public String toString() {
+        return "TransformedFeedback{" +
+                "sentence=" + ardocResult.getResult().getSentence() +
+                ", bagOfWords=" + bagOfWords +
+                '}';
     }
 }
