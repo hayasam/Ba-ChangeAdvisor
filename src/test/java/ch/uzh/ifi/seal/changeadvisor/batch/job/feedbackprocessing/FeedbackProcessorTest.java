@@ -32,6 +32,7 @@ public class FeedbackProcessorTest {
         TransformedFeedback transformedFeedback = processor.process(ardocResult);
 
         final Set<String> pocResults = Sets.newHashSet("add rearrang complaint etc organ remov".split(" "));
+        final Set<String> expectedResults = Sets.newHashSet("complaint", "organ", "remov", "add", "album", "pic", "rearrang");
         final Set<String> results = transformedFeedback.getBagOfWords();
 
         List<String> pocSorted = new ArrayList<>(pocResults);
@@ -39,12 +40,10 @@ public class FeedbackProcessorTest {
         Collections.sort(pocSorted);
         Collections.sort(resultsSorted);
 
-        Assert.assertThat(pocResults.size(), is(results.size()));
+        Assert.assertThat(expectedResults.size(), is(results.size()));
         for (String s : results) {
-            Assert.assertTrue(pocResults.contains(s));
+            Assert.assertTrue(String.format("Collection does not contain: %s", s), expectedResults.contains(s));
         }
-
-        System.out.println(transformedFeedback.getBagOfWords());
     }
 
 }

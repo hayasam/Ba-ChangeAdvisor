@@ -3,7 +3,6 @@ package ch.uzh.ifi.seal.changeadvisor.parser.preprocessing;
 import org.apache.log4j.Logger;
 import org.languagetool.JLanguageTool;
 import org.languagetool.Language;
-import org.languagetool.MultiThreadedJLanguageTool;
 import org.languagetool.language.BritishEnglish;
 import org.languagetool.rules.RuleMatch;
 
@@ -24,7 +23,7 @@ public class EnglishSpellChecker implements SpellChecker {
     private JLanguageTool languageTool;
 
     public EnglishSpellChecker() {
-        languageTool = new MultiThreadedJLanguageTool(EN_UK);
+        languageTool = new JLanguageTool(EN_UK);
     }
 
     /**

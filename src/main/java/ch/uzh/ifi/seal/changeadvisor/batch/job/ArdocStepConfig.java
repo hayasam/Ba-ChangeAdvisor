@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
  * Configuration of Ardoc step of ChangeAdvisor.
  * Created by alex on 17.07.2017.
  *
- * @see ExtractBagOfWordsStepConfig
+ * @see ExtractSourceStepConfig
  * @see ArdocStepConfig
  */
 @Component
@@ -25,7 +25,7 @@ public class ArdocStepConfig {
 
     private static final String TEST_DIRECTORY = "test_files_parser";
 
-    private static final String FROSTWIRE_REVIEW = "com.frostwire.android.200subset.txt";
+    private static final String FROSTWIRE_REVIEW = "com.frostwire.android.20subset.txt";
 
     private static final String STEP_NAME = "ardoc";
 

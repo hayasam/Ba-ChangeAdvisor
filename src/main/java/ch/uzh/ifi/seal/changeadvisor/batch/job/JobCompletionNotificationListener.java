@@ -20,6 +20,8 @@ public class JobCompletionNotificationListener extends JobExecutionListenerSuppo
     public void afterJob(JobExecution jobExecution) {
         if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
             log.info("!!! JOB FINISHED!");
+            long timeElapsed = jobExecution.getEndTime().getTime() - jobExecution.getStartTime().getTime();
+            log.info(String.format("Job finished in %.2f minutes", timeElapsed / 60.));
         }
     }
 }

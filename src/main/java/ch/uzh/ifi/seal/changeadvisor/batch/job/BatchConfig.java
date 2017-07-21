@@ -20,14 +20,14 @@ public class BatchConfig {
 
     private final JobBuilderFactory jobBuilderFactory;
 
-    private final ExtractBagOfWordsStepConfig bagOfWordsStepConfig;
+    private final ExtractSourceStepConfig bagOfWordsStepConfig;
 
     private final ArdocStepConfig ardocStepConfig;
 
     private final FeedbackTransformationStepConfig transformationStepConfig;
 
     @Autowired
-    public BatchConfig(JobBuilderFactory jobBuilderFactory, ExtractBagOfWordsStepConfig bagOfWordsStepConfig, ArdocStepConfig ardocStepConfig, FeedbackTransformationStepConfig transformationStepConfig) {
+    public BatchConfig(JobBuilderFactory jobBuilderFactory, ExtractSourceStepConfig bagOfWordsStepConfig, ArdocStepConfig ardocStepConfig, FeedbackTransformationStepConfig transformationStepConfig) {
         this.jobBuilderFactory = jobBuilderFactory;
         this.bagOfWordsStepConfig = bagOfWordsStepConfig;
         this.ardocStepConfig = ardocStepConfig;

@@ -1,7 +1,6 @@
 package ch.uzh.ifi.seal.changeadvisor.parser.bean;
 
 import ch.uzh.ifi.seal.changeadvisor.parser.visitor.ClassVisitor;
-import ch.uzh.ifi.seal.changeadvisor.parser.visitor.MethodVisitor;
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.PackageDeclaration;
@@ -28,21 +27,12 @@ public final class CompilationUnitBean {
     }
 
     public static CompilationUnitBean fromPath(Path path) throws IOException {
-        CompilationUnit cu = JavaParser.parse(path);
-        return new CompilationUnitBean(cu);
-    }
-
-    public CompilationUnit getCompilationUnit() {
-        return compilationUnit;
+        return new CompilationUnitBean(JavaParser.parse(path));
     }
 
     public String getPackageName() {
         Optional<PackageDeclaration> packageDeclaration = compilationUnit.getPackageDeclaration();
         return packageDeclaration.map(NodeWithName::getNameAsString).orElse("default");
-    }
-
-    public String getPublicCorpus() {
-        return MethodVisitor.getCorpus(compilationUnit);
     }
 
     public List<ClassBean> getClasses() {

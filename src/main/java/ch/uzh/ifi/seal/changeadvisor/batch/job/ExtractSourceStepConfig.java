@@ -1,6 +1,5 @@
 package ch.uzh.ifi.seal.changeadvisor.batch.job;
 
-import ch.uzh.ifi.seal.changeadvisor.batch.job.bagofwords.BagOfWordsProcessor;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.bagofwords.FSProjectReader;
 import ch.uzh.ifi.seal.changeadvisor.parser.BagOfWords;
 import ch.uzh.ifi.seal.changeadvisor.parser.FSProjectParser;
@@ -24,9 +23,9 @@ import java.util.function.Predicate;
  * Created by alex on 17.07.2017.
  */
 @Component
-public class ExtractBagOfWordsStepConfig {
+public class ExtractSourceStepConfig {
 
-    private static final String STEP_NAME = "extractBagOfWords";
+    private static final String STEP_NAME = "extractSource";
 
     private static final String TEST_DIRECTORY = "test_files_parser";
 
@@ -39,7 +38,7 @@ public class ExtractBagOfWordsStepConfig {
     private final MongoTemplate mongoTemplate;
 
     @Autowired
-    public ExtractBagOfWordsStepConfig(StepBuilderFactory stepBuilderFactory, FSProjectParser projectParser, MongoTemplate mongoTemplate) {
+    public ExtractSourceStepConfig(StepBuilderFactory stepBuilderFactory, FSProjectParser projectParser, MongoTemplate mongoTemplate) {
         this.stepBuilderFactory = stepBuilderFactory;
         this.projectParser = projectParser;
         this.mongoTemplate = mongoTemplate;
@@ -61,11 +60,6 @@ public class ExtractBagOfWordsStepConfig {
         reader.setProjectRootPath(TEST_DIRECTORY + FROSTWIRE_DIRECTORY);
         reader.setSortedRead(true);
         return reader;
-    }
-
-    @Bean
-    public BagOfWordsProcessor processor() {
-        return new BagOfWordsProcessor();
     }
 
     @Bean
