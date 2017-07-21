@@ -17,7 +17,7 @@ public class ArdocProcessor implements ItemProcessor<String, ArdocResults> {
 
     private static final String ARDOC_METHODS = "NLP+SA";
 
-    private static int COUNTER = 0;
+    private int counter = 0;
 
     @Override
     public ArdocResults process(String item) throws UnknownCombinationException {
@@ -27,9 +27,9 @@ public class ArdocProcessor implements ItemProcessor<String, ArdocResults> {
     }
 
     private void trackProgress() {
-        COUNTER += 1;
-        if (COUNTER % 10 == 0) {
-            logger.info(String.format("Ardoc: Finished processing %d lines.", COUNTER));
+        counter += 1;
+        if (counter % 10 == 0) {
+            logger.info(String.format("Ardoc: Finished processing %d lines.", counter));
         }
     }
 }

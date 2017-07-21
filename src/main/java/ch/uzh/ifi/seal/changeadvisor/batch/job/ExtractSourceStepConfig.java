@@ -84,7 +84,7 @@ public class ExtractSourceStepConfig {
 
     @Bean
     public ProcessingStep stemmerStep() {
-        return new Stemmer(Stemmer.MINIMUM_WORD_LENGTH);
+        return new Stemmer(Stemmer.DEFAULT_MINIMUM_WORD_LENGTH);
     }
 
     @Bean
@@ -102,7 +102,7 @@ public class ExtractSourceStepConfig {
     public FlatFileItemWriter<BagOfWords> fileWriter() {
         FlatFileItemWriter<BagOfWords> writer = new FlatFileItemWriter<>();
         writer.setResource(new FileSystemResource(TEST_DIRECTORY + "/batch_test.csv"));
-        writer.setHeaderCallback((headerWriter) -> headerWriter.write("component,bag"));
+        writer.setHeaderCallback(headerWriter -> headerWriter.write("component,bag"));
         writer.setLineAggregator(BagOfWords::asCsv);
         return writer;
     }

@@ -20,7 +20,7 @@ public class DirectoryCrawler {
         boolean filter(Path file);
     }
 
-    private CrawlerFilter filter = CrawlerFilter.JAVA_FILTER;
+    private CrawlerFilter filter = file -> file.toString().endsWith(".java");
 
     private List<Path> paths = new LinkedList<>();
 
@@ -30,7 +30,7 @@ public class DirectoryCrawler {
     }
 
     private void explore(Path file, int depth) {
-        if (Files.isDirectory(file)) {
+        if (file.toFile().isDirectory()) {
             try {
                 Files.list(file).forEach(p -> explore(p, depth + 1));
             } catch (IOException e) {

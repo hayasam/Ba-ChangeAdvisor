@@ -14,14 +14,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class JobCompletionNotificationListener extends JobExecutionListenerSupport {
 
-    private static final Logger log = LoggerFactory.getLogger(JobCompletionNotificationListener.class);
+    private static final Logger logger = LoggerFactory.getLogger(JobCompletionNotificationListener.class);
 
     @Override
     public void afterJob(JobExecution jobExecution) {
         if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
-            log.info("!!! JOB FINISHED!");
             long timeElapsed = jobExecution.getEndTime().getTime() - jobExecution.getStartTime().getTime();
-            log.info(String.format("Job finished in %.2f minutes", timeElapsed / 60.));
+            logger.info("Job finished in %.2f minutes", timeElapsed / 60.);
         }
     }
 }

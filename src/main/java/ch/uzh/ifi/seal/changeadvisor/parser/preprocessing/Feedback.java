@@ -77,7 +77,7 @@ public class Feedback {
     }
 
     public boolean isTooShort(int minLength) {
-        return tokens.size() < 3;
+        return tokens.size() < minLength;
     }
 
     public TransformedFeedback transform() {
@@ -88,8 +88,8 @@ public class Feedback {
         removeStopWords();
         stem();
         removeShortTokens();
-        Set<String> tokens = this.tokens.stream().map(AnnotatedToken::getToken).collect(Collectors.toSet());
-        TransformedFeedback result = new TransformedFeedback(document, tokens);
+        Set<String> annotatedTokens = this.tokens.stream().map(AnnotatedToken::getToken).collect(Collectors.toSet());
+        TransformedFeedback result = new TransformedFeedback(document, annotatedTokens);
         return isTooShort() ? null : result;
     }
 

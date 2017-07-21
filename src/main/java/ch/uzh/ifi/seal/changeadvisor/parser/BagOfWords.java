@@ -19,13 +19,13 @@ public class BagOfWords implements Comparable<BagOfWords> {
 
     private String fullyQualifiedClassName;
 
-    private Set<String> bagOfWords;
+    private Set<String> bag;
 
     private LocalDateTime timestamp = LocalDateTime.now();
 
-    public BagOfWords(String fullyQualifiedClassName, Set<String> bagOfWords) {
+    public BagOfWords(String fullyQualifiedClassName, Set<String> bag) {
         this.fullyQualifiedClassName = fullyQualifiedClassName;
-        this.bagOfWords = bagOfWords;
+        this.bag = bag;
     }
 
     /**
@@ -40,8 +40,8 @@ public class BagOfWords implements Comparable<BagOfWords> {
         return new BagOfWords(fullyQualifiedClassName, ImmutableSet.copyOf(preprocessed));
     }
 
-    public Set<String> getBagOfWords() {
-        return bagOfWords;
+    public Set<String> getBag() {
+        return bag;
     }
 
     /**
@@ -50,7 +50,7 @@ public class BagOfWords implements Comparable<BagOfWords> {
      * @return immutable sorted bag of words.
      */
     public List<String> getOrderedBagOfWords() {
-        return ImmutableList.sortedCopyOf(bagOfWords);
+        return ImmutableList.sortedCopyOf(bag);
     }
 
     public String getFullyQualifiedClassName() {
@@ -62,7 +62,7 @@ public class BagOfWords implements Comparable<BagOfWords> {
     }
 
     public int size() {
-        return bagOfWords.size();
+        return bag.size();
     }
 
     /**
@@ -80,17 +80,45 @@ public class BagOfWords implements Comparable<BagOfWords> {
     }
 
     public String asCsv() {
-        String bagString = String.join(" ", bagOfWords);
+        String bagString = String.join(" ", bag);
         return String.format("%s,%s", fullyQualifiedClassName, bagString);
     }
 
     @Override
     public String toString() {
-        return bagOfWords.toString();
+        return bag.toString();
     }
 
+    /**
+     * Compares two bags.
+     * Note: this class has a natural ordering that is inconsistent with equals.
+     *
+     * @param o other bag.
+     * @return lexicographical comparison of FQCN names.
+     */
     @Override
     public int compareTo(BagOfWords o) {
         return fullyQualifiedClassName.compareTo(o.fullyQualifiedClassName);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        BagOfWords that = (BagOfWords) o;
+
+        if (fullyQualifiedClassName != null ? !fullyQualifiedClassName.equals(that.fullyQualifiedClassName) : that.fullyQualifiedClassName != null)
+            return false;
+        if (bag != null ? !bag.equals(that.bag) : that.bag != null) return false;
+        return timestamp != null ? timestamp.equals(that.timestamp) : that.timestamp == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = fullyQualifiedClassName != null ? fullyQualifiedClassName.hashCode() : 0;
+        result = 31 * result + (bag != null ? bag.hashCode() : 0);
+        result = 31 * result + (timestamp != null ? timestamp.hashCode() : 0);
+        return result;
     }
 }

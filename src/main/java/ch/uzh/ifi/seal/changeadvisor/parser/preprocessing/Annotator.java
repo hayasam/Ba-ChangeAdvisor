@@ -6,7 +6,6 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 
 import java.util.HashSet;
 import java.util.List;
@@ -14,11 +13,10 @@ import java.util.Properties;
 import java.util.Set;
 
 /**
+ * Facade for Stanford CoreNLP.
  * Created by alex on 20.07.2017.
  */
 public class Annotator {
-
-    private static final Logger logger = Logger.getLogger(Annotator.class);
 
     private static final Set<String> NOUN_TAGS = ImmutableSet.of(
             "NN",   // Noun, singular or mass
@@ -39,8 +37,6 @@ public class Annotator {
 
     private StanfordCoreNLP pipeline;
 
-    private StopWordFilter stopWordFilter;
-
     public Annotator() {
         Properties props = new Properties();
         props.setProperty("annotators", "tokenize, ssplit, pos, lemma");
@@ -48,11 +44,11 @@ public class Annotator {
     }
 
     /**
-     * Filters text based on POS tags defined in this class.
+     * Annotates the given text.
      *
      * @param text            text to annotate.
      * @param shouldFilterPos whether to filter while processing, keeping only nouns and verbs.
-     * @return filtered text by POS tags.
+     * @return filtered by POS tags, annotated tokens.
      */
     public Set<AnnotatedToken> annotate(String text, boolean shouldFilterPos) {
         if (StringUtils.isEmpty(text)) {

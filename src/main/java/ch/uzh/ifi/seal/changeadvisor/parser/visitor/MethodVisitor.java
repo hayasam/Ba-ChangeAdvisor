@@ -1,6 +1,5 @@
 package ch.uzh.ifi.seal.changeadvisor.parser.visitor;
 
-import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
@@ -20,18 +19,6 @@ public class MethodVisitor extends VoidVisitorAdapter<Void> {
     private StringBuilder sb = new StringBuilder();
 
     /**
-     * Returns the public corpus for a given {@link CompilationUnit}.
-     *
-     * @param node Compilation unit to parse.
-     * @return the public corpus.
-     */
-    public static String getCorpus(CompilationUnit node) {
-        MethodVisitor visitor = new MethodVisitor();
-        visitor.visit(node, null);
-        return visitor.getPublicCorpus();
-    }
-
-    /**
      * Returns the public corpus for a given {@link ClassOrInterfaceDeclaration}.
      *
      * @param node Compilation unit to parse.
@@ -46,7 +33,7 @@ public class MethodVisitor extends VoidVisitorAdapter<Void> {
     /**
      * Visit each method and adds to the string builder only those which are public.
      * Should never be used multiple times. Prefer to create new instance or use the
-     * static method {@link #getCorpus(CompilationUnit)}}
+     * static method {@link #getCorpus(ClassOrInterfaceDeclaration)}}
      *
      * @param n   method declaration node.
      * @param arg args. Unused, void.
@@ -55,7 +42,7 @@ public class MethodVisitor extends VoidVisitorAdapter<Void> {
     public void visit(MethodDeclaration n, Void arg) {
         if (n.isPublic()) {
             String methodText = n.toString();
-            sb.append(String.format("%s\n------\n", methodText));
+            sb.append(String.format("%s%n------%n", methodText));
         }
         super.visit(n, arg);
     }

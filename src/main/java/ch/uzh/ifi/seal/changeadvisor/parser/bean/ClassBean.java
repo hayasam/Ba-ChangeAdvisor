@@ -39,6 +39,13 @@ public class ClassBean implements Comparable<ClassBean> {
         return MethodVisitor.getCorpus(classOrInterfaceDeclaration);
     }
 
+    /**
+     * Compares two class beans.
+     * Note: this class has a natural ordering that is inconsistent with equals.
+     *
+     * @param o other bean.
+     * @return lexicographical comparison of class names.
+     */
     @Override
     public int compareTo(ClassBean o) {
         return className.compareTo(o.className);

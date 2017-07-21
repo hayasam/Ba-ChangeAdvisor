@@ -8,9 +8,9 @@ import org.tartarus.snowball.ext.PorterStemmer;
  */
 public class Stemmer extends ProcessingStep {
 
-    private static PorterStemmer stemmer = new PorterStemmer();
+    private static PorterStemmer porterStemmer = new PorterStemmer();
 
-    public static final int MINIMUM_WORD_LENGTH = 2;
+    public static final int DEFAULT_MINIMUM_WORD_LENGTH = 2;
 
     /**
      * Minimum word length to apply stemming.
@@ -28,9 +28,9 @@ public class Stemmer extends ProcessingStep {
      * @return stemmed token.
      */
     static String stem(String token) {
-        stemmer.setCurrent(token);
-        stemmer.stem();
-        return stemmer.getCurrent();
+        porterStemmer.setCurrent(token);
+        porterStemmer.stem();
+        return porterStemmer.getCurrent();
     }
 
     @Override

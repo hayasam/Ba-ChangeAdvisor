@@ -10,6 +10,4 @@ public interface CrawlerFilter {
 
     boolean filter(Path file);
 
-    CrawlerFilter JAVA_FILTER = (file) -> file.toString().contains(".java");
-
 }

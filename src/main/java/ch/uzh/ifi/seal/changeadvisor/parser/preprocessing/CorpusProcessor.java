@@ -111,7 +111,7 @@ public class CorpusProcessor implements ItemProcessor<ClassBean, BagOfWords> {
 
         private void buildFilters() {
             if (filters.isEmpty()) {
-                processor.filter = (t) -> t.length() > 3;
+                processor.filter = t -> t.length() > 3;
             } else {
                 processor.filter = filters.stream().reduce(Predicate::and).orElse(x -> true);
             }
