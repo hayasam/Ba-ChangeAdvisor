@@ -8,6 +8,7 @@ import ch.uzh.ifi.seal.changeadvisor.parser.bean.ClassBean;
 import ch.uzh.ifi.seal.changeadvisor.parser.preprocessing.*;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.data.MongoItemWriter;
 import org.springframework.batch.item.file.FlatFileItemWriter;
@@ -64,7 +65,7 @@ public class SourceComponentsTransformationStepConfig {
     }
 
     @Bean
-    public BagOfWordsProcessor processor() {
+    public ItemProcessor<ClassBean, BagOfWords> processor() {
         return new BagOfWordsProcessor();
     }
 
