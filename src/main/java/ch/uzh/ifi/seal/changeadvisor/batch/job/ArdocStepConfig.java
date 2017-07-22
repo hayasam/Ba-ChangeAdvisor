@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
  * Configuration of Ardoc step of ChangeAdvisor.
  * Created by alex on 17.07.2017.
  *
- * @see ExtractBagOfWordsStepConfig
+ * @see SourceComponentsTransformationStepConfig
  * @see ArdocStepConfig
  */
 @Component

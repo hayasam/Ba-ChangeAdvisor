@@ -24,9 +24,9 @@ import java.util.function.Predicate;
  * Created by alex on 17.07.2017.
  */
 @Component
-public class ExtractBagOfWordsStepConfig {
+public class SourceComponentsTransformationStepConfig {
 
-    private static final String STEP_NAME = "extractBagOfWords";
+    private static final String STEP_NAME = "sourceCodeTransformation";
 
     private static final String TEST_DIRECTORY = "test_files_parser";
 
@@ -39,7 +39,7 @@ public class ExtractBagOfWordsStepConfig {
     private final MongoTemplate mongoTemplate;
 
     @Autowired
-    public ExtractBagOfWordsStepConfig(StepBuilderFactory stepBuilderFactory, FSProjectParser projectParser, MongoTemplate mongoTemplate) {
+    public SourceComponentsTransformationStepConfig(StepBuilderFactory stepBuilderFactory, FSProjectParser projectParser, MongoTemplate mongoTemplate) {
         this.stepBuilderFactory = stepBuilderFactory;
         this.projectParser = projectParser;
         this.mongoTemplate = mongoTemplate;
