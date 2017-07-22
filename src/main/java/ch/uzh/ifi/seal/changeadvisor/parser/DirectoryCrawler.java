@@ -15,13 +15,7 @@ import java.util.List;
 public class DirectoryCrawler {
 
     private static final Logger logger = Logger.getLogger(DirectoryCrawler.class);
-
-    public interface Filter {
-        boolean filter(Path file);
-    }
-
-    private CrawlerFilter filter = CrawlerFilter.JAVA_FILTER;
-
+    private CrawlerFilter filter = file -> file.toString().contains(".java");
     private List<Path> paths = new LinkedList<>();
 
     public List<Path> explore(Path root) {
@@ -39,5 +33,9 @@ public class DirectoryCrawler {
         } else if (filter.filter(file)) {
             paths.add(file);
         }
+    }
+
+    public interface Filter {
+        boolean filter(Path file);
     }
 }

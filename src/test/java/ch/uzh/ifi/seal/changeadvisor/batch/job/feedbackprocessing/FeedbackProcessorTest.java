@@ -2,6 +2,9 @@ package ch.uzh.ifi.seal.changeadvisor.batch.job.feedbackprocessing;
 
 import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResult;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.TransformedFeedback;
+import ch.uzh.ifi.seal.changeadvisor.parser.preprocessing.ContractionsExpander;
+import ch.uzh.ifi.seal.changeadvisor.parser.preprocessing.CorpusProcessor;
+import ch.uzh.ifi.seal.changeadvisor.parser.preprocessing.EnglishSpellChecker;
 import com.google.common.collect.Sets;
 import org.ardoc.Result;
 import org.junit.Assert;
@@ -27,12 +30,21 @@ public class FeedbackProcessorTest {
         when(result.getSentence()).thenReturn("My only complaint is that I'd like to organize things more, remove or add album pics, rearrange things, etc.");
         ArdocResult ardocResult = new ArdocResult(result);
 
-        FeedbackProcessor processor = new FeedbackProcessor();
+        FeedbackProcessor processor = new FeedbackProcessor(
+                new CorpusProcessor.Builder()
+                        .escapeSpecialChars()
+                        .withAutoCorrect(new EnglishSpellChecker())
+                        .withContractionExpander(new ContractionsExpander())
+                        .singularize()
+                        .removeStopWords()
+                        .stem()
+                        .removeTokensShorterThan(3)
+                        .build());
 
         TransformedFeedback transformedFeedback = processor.process(ardocResult);
 
         final Set<String> pocResults = Sets.newHashSet("add rearrang complaint etc organ remov".split(" "));
-        final Set<String> expectedResults = Sets.newHashSet("add rearrang complaint album organ remov pic".split(" "));
+        final Set<String> expectedResults = Sets.newHashSet("add rearrang complaint album etc organ remov pic".split(" "));
         final Set<String> results = transformedFeedback.getBagOfWords();
 
         List<String> pocSorted = new ArrayList<>(pocResults);
@@ -47,5 +59,4 @@ public class FeedbackProcessorTest {
 
         System.out.println(transformedFeedback.getBagOfWords());
     }
-
 }

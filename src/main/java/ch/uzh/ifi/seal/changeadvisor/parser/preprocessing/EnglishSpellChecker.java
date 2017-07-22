@@ -59,7 +59,7 @@ public class EnglishSpellChecker implements SpellChecker {
                 correctSentence.replace(match.getFromPos() - offset, match.getToPos() - offset, suggestedReplacement);
                 offset += (match.getToPos() - match.getFromPos() - suggestedReplacement.length());
             } else {
-                logger.warn(String.format("Spellchecker found a probable mistake it can't auto correct: %s", match.toString()));
+                logger.debug(String.format("Spellchecker found a probable mistake it can't auto correct: %s", match.toString()));
             }
         }
 

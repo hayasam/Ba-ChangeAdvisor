@@ -6,11 +6,9 @@ import org.tartarus.snowball.ext.PorterStemmer;
  * Porter Stemmer.
  * Created by alex on 14.07.2017.
  */
-public class Stemmer extends ProcessingStep {
+public class Stemmer {
 
     private static PorterStemmer stemmer = new PorterStemmer();
-
-    public static final int MINIMUM_WORD_LENGTH = 2;
 
     /**
      * Minimum word length to apply stemming.
@@ -27,17 +25,13 @@ public class Stemmer extends ProcessingStep {
      * @param token token to stem.
      * @return stemmed token.
      */
-    static String stem(String token) {
+    static String stem(String token, int minWordLength) {
+        if (token.length() < minWordLength) {
+            return token;
+        }
+
         stemmer.setCurrent(token);
         stemmer.stem();
         return stemmer.getCurrent();
-    }
-
-    @Override
-    public String handle(String text) {
-        if (text.length() > minWordLength) {
-            text = stem(text);
-        }
-        return next(text);
     }
 }

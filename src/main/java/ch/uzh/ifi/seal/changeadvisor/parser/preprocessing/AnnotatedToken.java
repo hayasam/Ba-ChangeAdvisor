@@ -9,11 +9,11 @@ import java.util.Set;
  */
 public class AnnotatedToken {
 
+    public static final AnnotatedToken EMPTY_TOKEN = new AnnotatedToken("", "", "", false);
     private static final Set<String> PLURAL_NOUN_TAGS = ImmutableSet.of(
             "NNS", // Noun, plural
             "NNPS" // Proper noun, plural
     );
-
     private String token;
 
     private String posTag;
@@ -31,6 +31,10 @@ public class AnnotatedToken {
 
     public String getToken() {
         return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 
     public String getPosTag() {
@@ -56,11 +60,15 @@ public class AnnotatedToken {
     }
 
     public void stem() {
-        token = Stemmer.stem(token);
+        token = Stemmer.stem(token, 3);
     }
 
     public int length() {
         return token.length();
+    }
+
+    public boolean isEmpty() {
+        return token.isEmpty();
     }
 
     @Override
@@ -83,5 +91,13 @@ public class AnnotatedToken {
         result = 31 * result + (lemma != null ? lemma.hashCode() : 0);
         result = 31 * result + (isStopWord ? 1 : 0);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "AnnotatedToken{" +
+                "token='" + token + '\'' +
+                ", posTag='" + posTag + '\'' +
+                '}';
     }
 }

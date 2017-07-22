@@ -4,6 +4,8 @@ import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResult;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResultsWriter;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.TransformedFeedback;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.feedbackprocessing.FeedbackProcessor;
+import ch.uzh.ifi.seal.changeadvisor.parser.preprocessing.ContractionsExpander;
+import ch.uzh.ifi.seal.changeadvisor.parser.preprocessing.CorpusProcessor;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.item.ItemProcessor;
@@ -67,7 +69,20 @@ public class FeedbackTransformationStepConfig {
 
     @Bean
     public ItemProcessor<ArdocResult, TransformedFeedback> feedbackProcessor() {
-        return new FeedbackProcessor();
+        return new FeedbackProcessor(corpusProcessor());
+    }
+
+    private CorpusProcessor corpusProcessor() {
+        return new CorpusProcessor.Builder()
+                .escapeSpecialChars()
+//                .withAutoCorrect(new EnglishSpellChecker())
+                .withContractionExpander(new ContractionsExpander())
+                .singularize()
+                .removeStopWords()
+                .posFilter()
+                .stem()
+                .removeTokensShorterThan(3)
+                .build();
     }
 
     @Bean

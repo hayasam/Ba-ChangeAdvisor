@@ -13,8 +13,8 @@ public class StemmerTest {
     @Test
     public void stem() throws Exception {
         String token = "Albums";
-        String stem = Stemmer.stem(token);
-        String stem2 = Stemmer.stem("artist");
+        String stem = Stemmer.stem(token, 3);
+        String stem2 = Stemmer.stem("artist", 3);
 
         Assert.assertThat(stem, is("Album"));
         Assert.assertThat(stem2, is("artist"));

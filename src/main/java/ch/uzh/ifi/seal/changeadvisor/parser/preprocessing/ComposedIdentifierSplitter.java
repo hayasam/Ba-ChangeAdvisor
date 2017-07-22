@@ -1,32 +1,23 @@
 package ch.uzh.ifi.seal.changeadvisor.parser.preprocessing;
 
-import com.google.common.base.Splitter;
-import com.google.common.collect.ImmutableList;
-
-import java.util.Collection;
-import java.util.List;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * Splits composed identifies (e.g. CamelCase, snake_case, and digit separated text) into tokens.
  * Created by alex on 14.07.2017.
  */
-public class ComposedIdentifierSplitter implements Tokenizer {
+public class ComposedIdentifierSplitter {
 
     private static final Pattern DIGIT_SEPARATED_TEXT_PATTERN = Pattern.compile("(?<=\\D)(?=\\d)|(?<=\\d)(?=\\D)");
 
-    static List<String> split(String text) {
-        if (text.length() < 2) {
-            return ImmutableList.of(text);
-        }
+    public String split(String text) {
         text = splitCamelCase(text);
         text = splitUnderScoreText(text);
         text = splitDigitSeparatedText(text);
-        return Splitter.on(" ").omitEmptyStrings().trimResults().splitToList(text);
+        return text;
     }
 
-    private static String splitCamelCase(String s) {
+    private String splitCamelCase(String s) {
         return s.replaceAll(
                 String.format("%s|%s|%s",
                         "(?<=[A-Z])(?=[A-Z][a-z])",
@@ -37,21 +28,11 @@ public class ComposedIdentifierSplitter implements Tokenizer {
         );
     }
 
-    private static String splitUnderScoreText(String s) {
-        Iterable<String> split = Splitter.on('_').omitEmptyStrings().trimResults().split(s);
-        return String.join(" ", split);
+    private String splitUnderScoreText(String s) {
+        return s.replace('_', ' ');
     }
 
-    private static String splitDigitSeparatedText(String s) {
-        Iterable<String> split = Splitter.on(DIGIT_SEPARATED_TEXT_PATTERN).trimResults().omitEmptyStrings().split(s);
-        return String.join(" ", split);
-    }
-
-    @Override
-    public List<String> tokenize(String corpus) {
-        List<String> split = Splitter.on(' ').omitEmptyStrings().trimResults().splitToList(corpus);
-        return split.stream()
-                .map(ComposedIdentifierSplitter::split)
-                .flatMap(Collection::stream).collect(Collectors.toList());
+    private String splitDigitSeparatedText(String s) {
+        return s.replaceAll(DIGIT_SEPARATED_TEXT_PATTERN.toString(), " ");
     }
 }

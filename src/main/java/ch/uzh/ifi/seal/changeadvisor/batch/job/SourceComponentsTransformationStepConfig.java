@@ -1,14 +1,13 @@
 package ch.uzh.ifi.seal.changeadvisor.batch.job;
 
-import ch.uzh.ifi.seal.changeadvisor.batch.job.bagofwords.BagOfWordsProcessor;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.bagofwords.FSProjectReader;
+import ch.uzh.ifi.seal.changeadvisor.batch.job.bagofwords.SourceCodeProcessor;
 import ch.uzh.ifi.seal.changeadvisor.parser.BagOfWords;
 import ch.uzh.ifi.seal.changeadvisor.parser.FSProjectParser;
 import ch.uzh.ifi.seal.changeadvisor.parser.bean.ClassBean;
 import ch.uzh.ifi.seal.changeadvisor.parser.preprocessing.*;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
-import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.data.MongoItemWriter;
 import org.springframework.batch.item.file.FlatFileItemWriter;
@@ -51,7 +50,7 @@ public class SourceComponentsTransformationStepConfig {
         return stepBuilderFactory.get(STEP_NAME)
                 .<ClassBean, BagOfWords>chunk(10)
                 .reader(reader())
-                .processor(preprocessor())
+                .processor(processor())
                 .writer(mongoWriter())
                 .build();
     }
@@ -65,45 +64,39 @@ public class SourceComponentsTransformationStepConfig {
     }
 
     @Bean
-    public ItemProcessor<ClassBean, BagOfWords> processor() {
-        return new BagOfWordsProcessor();
-    }
-
-    @Bean
-    public CorpusProcessor preprocessor() {
-        return new CorpusProcessor.Builder(true, tokenizer())
-                .step(lowerCaseStep())
-                .step(stemmerStep())
-                .filter(stopWordFilter())
-                .filter(tokenLengthFilter())
+    public SourceCodeProcessor processor() {
+        CorpusProcessor processor = new CorpusProcessor.Builder()
+                .escapeSpecialChars()
+                .withComposedIdentifierSplit(composedIdentifierSplitter())
+//                .withAutoCorrect(new EnglishSpellChecker()) // Warning huge performance impact!
+                .withContractionExpander(new ContractionsExpander())
+                .singularize()
+                .removeStopWords()
+                .stem()
+                .removeTokensShorterThan(3)
                 .build();
+        return new SourceCodeProcessor(processor);
     }
 
     @Bean
-    public Tokenizer tokenizer() {
+    public ComposedIdentifierSplitter composedIdentifierSplitter() {
         return new ComposedIdentifierSplitter();
     }
 
     @Bean
-    public ProcessingStep lowerCaseStep() {
-        return new LowerCaseProcessor();
+    public EscapeSpecialCharacters escapeSpecialCharacters() {
+        return new EscapeSpecialCharacters();
     }
 
     @Bean
-    public ProcessingStep stemmerStep() {
-        return new Stemmer(Stemmer.MINIMUM_WORD_LENGTH);
+    public SpellChecker spellChecker() {
+        return new EnglishSpellChecker();
     }
 
     @Bean
     public Predicate<String> stopWordFilter() {
         return StopWordFilter::isNotStopWord;
     }
-
-    @Bean
-    public Predicate<String> tokenLengthFilter() {
-        return t -> t.length() > 3;
-    }
-
 
     @Bean
     public FlatFileItemWriter<BagOfWords> fileWriter() {
