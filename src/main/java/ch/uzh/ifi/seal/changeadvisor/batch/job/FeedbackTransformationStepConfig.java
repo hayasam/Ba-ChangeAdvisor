@@ -4,6 +4,7 @@ import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResult;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResultsWriter;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.TransformedFeedback;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.feedbackprocessing.FeedbackProcessor;
+import ch.uzh.ifi.seal.changeadvisor.batch.job.feedbackprocessing.FeedbackWriter;
 import ch.uzh.ifi.seal.changeadvisor.parser.preprocessing.ContractionsExpander;
 import ch.uzh.ifi.seal.changeadvisor.parser.preprocessing.CorpusProcessor;
 import org.springframework.batch.core.Step;
@@ -11,7 +12,6 @@ import org.springframework.batch.core.configuration.annotation.StepBuilderFactor
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.data.MongoItemReader;
-import org.springframework.batch.item.data.MongoItemWriter;
 import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.item.file.transform.LineAggregator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,9 +87,7 @@ public class FeedbackTransformationStepConfig {
 
     @Bean
     public ItemWriter<TransformedFeedback> writer() {
-        MongoItemWriter<TransformedFeedback> writer = new MongoItemWriter<>();
-        writer.setTemplate(mongoTemplate);
-        return writer;
+        return new FeedbackWriter(mongoTemplate);
     }
 
     @Bean

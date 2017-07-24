@@ -10,7 +10,7 @@ import java.util.Set;
 /**
  * Created by alex on 20.07.2017.
  */
-public class FeedbackProcessor implements ItemProcessor<ArdocResult, TransformedFeedback> {
+public class FeedbackProcessor<T> implements ItemProcessor<ArdocResult, TransformedFeedback> {
 
     private CorpusProcessor corpusProcessor;
 
@@ -21,6 +21,9 @@ public class FeedbackProcessor implements ItemProcessor<ArdocResult, Transformed
     @Override
     public TransformedFeedback process(ArdocResult item) throws Exception {
         Set<String> bag = corpusProcessor.transform(item.getResult().getSentence());
+        if (bag.isEmpty()) {
+            return null;
+        }
         return new TransformedFeedback(item, bag);
     }
 }

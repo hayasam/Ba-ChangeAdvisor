@@ -16,7 +16,7 @@ public class MongoConfig {
 
     @Bean
     public MongoDbFactory mongoDbFactory() {
-        return new SimpleMongoDbFactory(new MongoClient(), "bagOfWords");
+        return new SimpleMongoDbFactory(new MongoClient(), "changeAdvisor");
     }
 
     @Bean

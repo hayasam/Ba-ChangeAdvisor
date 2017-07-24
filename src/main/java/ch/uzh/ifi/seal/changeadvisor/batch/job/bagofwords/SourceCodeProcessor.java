@@ -20,8 +20,10 @@ public class SourceCodeProcessor implements ItemProcessor<ClassBean, BagOfWords>
 
     @Override
     public BagOfWords process(ClassBean item) throws Exception {
-        final String fqcn = item.getFullyQualifiedClassName();
         Set<String> bag = corpusProcessor.transform(item.getPublicCorpus());
-        return new BagOfWords(fqcn, bag);
+        if (bag.isEmpty()) {
+            return null;
+        }
+        return new BagOfWords(item.getFullyQualifiedClassName(), bag);
     }
 }
