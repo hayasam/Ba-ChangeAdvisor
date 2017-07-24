@@ -24,18 +24,22 @@ public class DirectoryCrawler {
     }
 
     private void explore(Path file, int depth) {
-        if (Files.isDirectory(file)) {
-            try {
-                Files.list(file).forEach(p -> explore(p, depth + 1));
-            } catch (IOException e) {
-                logger.error("IOException while parsing folder: " + file.getFileName(), e);
-            }
+        if (isDirectory(file)) {
+            exploreDirectory(file, depth);
         } else if (filter.filter(file)) {
             paths.add(file);
         }
     }
 
-    public interface Filter {
-        boolean filter(Path file);
+    private void exploreDirectory(Path directory, int depth) {
+        try {
+            Files.list(directory).forEach(filePath -> explore(filePath, depth + 1));
+        } catch (IOException e) {
+            logger.error("IOException while parsing directory: " + directory.getFileName(), e);
+        }
+    }
+
+    private boolean isDirectory(Path file) {
+        return Files.isDirectory(file);
     }
 }

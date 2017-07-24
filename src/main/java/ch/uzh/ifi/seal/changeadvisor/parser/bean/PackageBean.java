@@ -45,6 +45,14 @@ public class PackageBean implements Comparable<PackageBean> {
         return name;
     }
 
+    /**
+     * Compares two package beans.
+     * Note: this class has a natural ordering that is inconsistent with equals.
+     *
+     * @param o other package.
+     * @return lexicographical comparison of package names.
+     * @see String#compareTo(String)
+     */
     @Override
     public int compareTo(PackageBean o) {
         return name.compareTo(o.getName());

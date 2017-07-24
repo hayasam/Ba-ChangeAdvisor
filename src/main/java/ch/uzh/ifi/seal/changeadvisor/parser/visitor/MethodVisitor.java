@@ -55,7 +55,7 @@ public class MethodVisitor extends VoidVisitorAdapter<Void> {
     public void visit(MethodDeclaration n, Void arg) {
         if (n.isPublic()) {
             String methodText = n.toString();
-            sb.append(String.format("%s\n------\n", methodText));
+            sb.append(String.format("%s%n------%n", methodText));
         }
         super.visit(n, arg);
     }

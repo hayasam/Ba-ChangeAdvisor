@@ -7,7 +7,6 @@ import org.springframework.batch.item.ItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
@@ -42,8 +41,9 @@ public class FSProjectReader implements ItemReader<ClassBean> {
     public void setProjectRootPath(String projectRoot) {
         Assert.notNull(projectRoot, "Project root to parse must not be null.");
         this.projectRootPath = Paths.get(projectRoot);
-        Assert.isTrue(Files.exists(projectRootPath), String.format("Path [%s] does not exist.", projectRootPath));
-        Assert.isTrue(Files.isDirectory(projectRootPath), String.format("Path [%s] is not a directory. Can't be Project root.", projectRootPath));
+        Assert.isTrue(projectRootPath.toFile().exists(), String.format("Path [%s] does not exist.", projectRootPath));
+        Assert.isTrue(projectRootPath.toFile().isDirectory(),
+                String.format("Path [%s] is not a directory. Can't be Project root.", projectRootPath));
     }
 
     /**

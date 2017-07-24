@@ -1,5 +1,7 @@
 package ch.uzh.ifi.seal.changeadvisor.parser;
 
+import ch.uzh.ifi.seal.changeadvisor.parser.preprocessing.ComposedIdentifierSplitter;
+import ch.uzh.ifi.seal.changeadvisor.parser.preprocessing.CorpusProcessor;
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.google.common.base.Splitter;
@@ -12,6 +14,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by alex on 14.07.2017.
@@ -31,13 +34,25 @@ public class BagOfWordsTest {
         CompilationUnit cu = JavaParser.parse(path);
         String packageName = cu.getPackageDeclaration().get().getName().toString();
 
-        String classString = FileUtils.readFileToString(path.toFile(), "utf-8");
-        BagOfWords bagOfWords = BagOfWords.fromCorpus(packageName, classString);
+        String corpus = FileUtils.readFileToString(path.toFile(), "utf-8");
+
+        CorpusProcessor processor = new CorpusProcessor.Builder()
+                .escapeSpecialChars()
+                .withComposedIdentifierSplit(new ComposedIdentifierSplitter())
+//                .withAutoCorrect(new EnglishSpellChecker()) // Warning huge performance impact
+                .singularize()
+                .lowerCase()
+                .removeStopWords()
+                .stem()
+                .removeTokensShorterThan(3)
+                .build();
+        Set<String> bag = processor.transform(corpus);
+        BagOfWords bagOfWords = new BagOfWords(packageName + "." + path.getFileName().toString(), bag);
 
         bagOfWords.writeToFile(Paths.get(TEST_DIRECTORY + "/test_generated/processed_source_components.csv"), false);
 
-        List<String> orderedBagOfWords = bagOfWords.getOrderedBagOfWords();
+        List<String> orderedBagOfWords = bagOfWords.getSortedBag();
 
-        Assert.assertEquals(126, orderedBagOfWords.size());
+        Assert.assertEquals(138, orderedBagOfWords.size());
     }
 }

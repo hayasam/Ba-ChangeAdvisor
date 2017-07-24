@@ -96,7 +96,7 @@ public class FeedbackTransformationStepConfig {
     public FlatFileItemWriter<TransformedFeedback> fileWriter() {
         FlatFileItemWriter<TransformedFeedback> writer = new FlatFileItemWriter<>();
         writer.setResource(new FileSystemResource(TEST_DIRECTORY + "/transformed_feedback.csv"));
-        writer.setHeaderCallback((headerWriter) -> headerWriter.write("sentence,category,transformed_sentence"));
+        writer.setHeaderCallback(headerWriter -> headerWriter.write("sentence,category,transformed_sentence"));
         writer.setLineAggregator(lineAggregator());
         return writer;
     }

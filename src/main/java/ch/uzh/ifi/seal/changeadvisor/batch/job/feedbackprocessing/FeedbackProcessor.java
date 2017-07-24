@@ -12,7 +12,7 @@ import java.util.Set;
  */
 public class FeedbackProcessor implements ItemProcessor<ArdocResult, TransformedFeedback> {
 
-    public CorpusProcessor corpusProcessor;
+    private CorpusProcessor corpusProcessor;
 
     public FeedbackProcessor(CorpusProcessor corpusProcessor) {
         this.corpusProcessor = corpusProcessor;

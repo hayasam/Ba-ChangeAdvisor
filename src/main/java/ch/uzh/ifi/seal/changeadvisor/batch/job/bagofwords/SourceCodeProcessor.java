@@ -12,7 +12,7 @@ import java.util.Set;
  */
 public class SourceCodeProcessor implements ItemProcessor<ClassBean, BagOfWords> {
 
-    private final CorpusProcessor corpusProcessor;
+    private CorpusProcessor corpusProcessor;
 
     public SourceCodeProcessor(CorpusProcessor corpusProcessor) {
         this.corpusProcessor = corpusProcessor;

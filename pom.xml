@@ -26,7 +26,7 @@
         <!-- Sonar -->
         <sonar.sources>src/main/java</sonar.sources>
         <sonar.java.binaries>target/classes</sonar.java.binaries>
-        <sonar.tests>src/main/test</sonar.tests>
+        <sonar.tests>src/test</sonar.tests>
         <sonar.language>java</sonar.language>
         <sonar.java.source>1.8</sonar.java.source>
         <sonar.junit.reportPaths>target/surefire-reports</sonar.junit.reportPaths>

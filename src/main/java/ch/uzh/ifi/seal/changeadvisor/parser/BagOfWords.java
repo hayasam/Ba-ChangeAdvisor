@@ -1,8 +1,6 @@
 package ch.uzh.ifi.seal.changeadvisor.parser;
 
-import ch.uzh.ifi.seal.changeadvisor.parser.preprocessing.PreprocessingFacade;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import org.apache.commons.io.FileUtils;
 
 import java.io.IOException;
@@ -19,29 +17,17 @@ public class BagOfWords implements Comparable<BagOfWords> {
 
     private String fullyQualifiedClassName;
 
-    private Set<String> bagOfWords;
+    private Set<String> bag;
 
     private LocalDateTime timestamp = LocalDateTime.now();
 
-    public BagOfWords(String fullyQualifiedClassName, Set<String> bagOfWords) {
+    public BagOfWords(String fullyQualifiedClassName, Set<String> bag) {
         this.fullyQualifiedClassName = fullyQualifiedClassName;
-        this.bagOfWords = bagOfWords;
+        this.bag = bag;
     }
 
-    /**
-     * Factory method to instantiate a new BagOfWords.
-     *
-     * @param fullyQualifiedClassName the fqcn of the class this bag comes from.
-     * @param corpus                  text content. The future bagOfWords.
-     * @return a bagOfWords containing the processed corpus and the fullyQualifiedClassName.
-     */
-    public static BagOfWords fromCorpus(final String fullyQualifiedClassName, final String corpus) {
-        final Set<String> preprocessed = PreprocessingFacade.preprocess(corpus);
-        return new BagOfWords(fullyQualifiedClassName, ImmutableSet.copyOf(preprocessed));
-    }
-
-    public Set<String> getBagOfWords() {
-        return bagOfWords;
+    public Set<String> getBag() {
+        return bag;
     }
 
     /**
@@ -49,8 +35,8 @@ public class BagOfWords implements Comparable<BagOfWords> {
      *
      * @return immutable sorted bag of words.
      */
-    public List<String> getOrderedBagOfWords() {
-        return ImmutableList.sortedCopyOf(bagOfWords);
+    public List<String> getSortedBag() {
+        return ImmutableList.sortedCopyOf(bag);
     }
 
     public String getFullyQualifiedClassName() {
@@ -62,7 +48,7 @@ public class BagOfWords implements Comparable<BagOfWords> {
     }
 
     public int size() {
-        return bagOfWords.size();
+        return bag.size();
     }
 
     /**
@@ -80,15 +66,23 @@ public class BagOfWords implements Comparable<BagOfWords> {
     }
 
     public String asCsv() {
-        String bagString = String.join(" ", bagOfWords);
+        String bagString = String.join(" ", bag);
         return String.format("%s,%s", fullyQualifiedClassName, bagString);
     }
 
     @Override
     public String toString() {
-        return bagOfWords.toString();
+        return bag.toString();
     }
 
+    /**
+     * Compares two bags.
+     * Note: this class has a natural ordering that is inconsistent with equals.
+     *
+     * @param o other bag.
+     * @return lexicographical comparison of FQCN names.
+     * @see String#compareTo(String)
+     */
     @Override
     public int compareTo(BagOfWords o) {
         return fullyQualifiedClassName.compareTo(o.fullyQualifiedClassName);

@@ -10,13 +10,7 @@ public class Stemmer {
 
     private static PorterStemmer stemmer = new PorterStemmer();
 
-    /**
-     * Minimum word length to apply stemming.
-     */
-    private final int minWordLength;
-
-    public Stemmer(int minWordLength) {
-        this.minWordLength = minWordLength;
+    private Stemmer() {
     }
 
     /**
@@ -32,6 +26,7 @@ public class Stemmer {
 
         stemmer.setCurrent(token);
         stemmer.stem();
-        return stemmer.getCurrent();
+        token = stemmer.getCurrent();
+        return token;
     }
 }

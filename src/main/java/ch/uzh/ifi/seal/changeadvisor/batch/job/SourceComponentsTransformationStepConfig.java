@@ -102,7 +102,7 @@ public class SourceComponentsTransformationStepConfig {
     public FlatFileItemWriter<BagOfWords> fileWriter() {
         FlatFileItemWriter<BagOfWords> writer = new FlatFileItemWriter<>();
         writer.setResource(new FileSystemResource(TEST_DIRECTORY + "/batch_test.csv"));
-        writer.setHeaderCallback((headerWriter) -> headerWriter.write("component,bag"));
+        writer.setHeaderCallback(headerWriter -> headerWriter.write("component,bag"));
         writer.setLineAggregator(BagOfWords::asCsv);
         return writer;
     }

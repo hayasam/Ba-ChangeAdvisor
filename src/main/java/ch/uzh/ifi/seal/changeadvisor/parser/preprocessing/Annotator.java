@@ -13,6 +13,7 @@ import java.util.Properties;
 import java.util.Set;
 
 /**
+ * Helper class en lieu of Stanford SimpleNLP.
  * Created by alex on 20.07.2017.
  */
 public class Annotator {
@@ -36,13 +37,10 @@ public class Annotator {
 
     private StanfordCoreNLP pipeline;
 
-    private ComposedIdentifierSplitter composedIdentifierSplitter;
-
     public Annotator() {
         Properties props = new Properties();
         props.setProperty("annotators", "tokenize, ssplit, pos, lemma");
         pipeline = new StanfordCoreNLP(props);
-        composedIdentifierSplitter = new ComposedIdentifierSplitter();
     }
 
     /**
