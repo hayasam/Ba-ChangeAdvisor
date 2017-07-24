@@ -1,6 +1,5 @@
 package ch.uzh.ifi.seal.changeadvisor.batch.job.feedbackprocessing;
 
-import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.TransformedFeedback;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.data.MongoItemWriter;
 import org.springframework.data.mongodb.core.MongoTemplate;

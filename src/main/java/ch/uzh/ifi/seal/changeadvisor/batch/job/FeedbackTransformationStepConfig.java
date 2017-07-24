@@ -2,9 +2,9 @@ package ch.uzh.ifi.seal.changeadvisor.batch.job;
 
 import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResult;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResultsWriter;
-import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.TransformedFeedback;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.feedbackprocessing.FeedbackProcessor;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.feedbackprocessing.FeedbackWriter;
+import ch.uzh.ifi.seal.changeadvisor.batch.job.feedbackprocessing.TransformedFeedback;
 import ch.uzh.ifi.seal.changeadvisor.parser.preprocessing.ContractionsExpander;
 import ch.uzh.ifi.seal.changeadvisor.parser.preprocessing.CorpusProcessor;
 import org.springframework.batch.core.Step;

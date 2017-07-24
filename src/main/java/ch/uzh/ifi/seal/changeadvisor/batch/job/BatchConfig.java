@@ -26,12 +26,15 @@ public class BatchConfig {
 
     private final FeedbackTransformationStepConfig transformationStepConfig;
 
+    private final HdpStepConfig hdpStepConfig;
+
     @Autowired
-    public BatchConfig(JobBuilderFactory jobBuilderFactory, SourceComponentsTransformationStepConfig bagOfWordsStepConfig, ArdocStepConfig ardocStepConfig, FeedbackTransformationStepConfig transformationStepConfig) {
+    public BatchConfig(JobBuilderFactory jobBuilderFactory, SourceComponentsTransformationStepConfig bagOfWordsStepConfig, ArdocStepConfig ardocStepConfig, FeedbackTransformationStepConfig transformationStepConfig, HdpStepConfig hdpStepConfig) {
         this.jobBuilderFactory = jobBuilderFactory;
         this.bagOfWordsStepConfig = bagOfWordsStepConfig;
         this.ardocStepConfig = ardocStepConfig;
         this.transformationStepConfig = transformationStepConfig;
+        this.hdpStepConfig = hdpStepConfig;
     }
 
     @Bean
@@ -42,6 +45,8 @@ public class BatchConfig {
                 .flow(bagOfWordsStepConfig.extractBagOfWords())
                 .next(ardocStepConfig.ardocAnalysis())
                 .next(transformationStepConfig.transformFeedback())
+                .next(hdpStepConfig.documentsClustering())
+//                .flow(hdpStepConfig.documentsClustering())
                 .end()
                 .build();
     }

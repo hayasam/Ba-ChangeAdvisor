@@ -1,7 +1,6 @@
 package ch.uzh.ifi.seal.changeadvisor.batch.job.feedbackprocessing;
 
 import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResult;
-import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.TransformedFeedback;
 import ch.uzh.ifi.seal.changeadvisor.parser.preprocessing.ContractionsExpander;
 import ch.uzh.ifi.seal.changeadvisor.parser.preprocessing.CorpusProcessor;
 import ch.uzh.ifi.seal.changeadvisor.parser.preprocessing.EnglishSpellChecker;

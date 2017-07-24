@@ -1,4 +1,8 @@
-package ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc;
+package ch.uzh.ifi.seal.changeadvisor.batch.job.feedbackprocessing;
+
+import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResult;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -6,7 +10,11 @@ import java.util.Set;
 /**
  * Created by alex on 20.07.2017.
  */
+@Document
 public class TransformedFeedback {
+
+    @Id
+    private String id;
 
     private ArdocResult ardocResult;
 
@@ -14,10 +22,17 @@ public class TransformedFeedback {
 
     private LocalDateTime timestamp;
 
+    public TransformedFeedback() {
+    }
+
     public TransformedFeedback(ArdocResult ardocResult, Set<String> tokens) {
         this.ardocResult = ardocResult;
         this.bagOfWords = tokens;
         this.timestamp = LocalDateTime.now();
+    }
+
+    public String getId() {
+        return id;
     }
 
     public ArdocResult getArdocResult() {
@@ -42,6 +57,22 @@ public class TransformedFeedback {
 
     public String getCategory() {
         return ardocResult.getResult().getSentenceClass();
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setArdocResult(ArdocResult ardocResult) {
+        this.ardocResult = ardocResult;
+    }
+
+    public void setBagOfWords(Set<String> bagOfWords) {
+        this.bagOfWords = bagOfWords;
+    }
+
+    public void setTimestamp(LocalDateTime timestamp) {
+        this.timestamp = timestamp;
     }
 
     @Override
