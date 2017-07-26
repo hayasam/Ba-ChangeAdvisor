@@ -22,6 +22,10 @@ public class Vocabulary {
      */
     private List<List<Integer>> documentIds;
 
+    public Vocabulary(Corpus corpus) {
+        this(corpus.getDocuments());
+    }
+
     /**
      * @param documents list of document tokens (Tokens by document).
      */
@@ -29,11 +33,11 @@ public class Vocabulary {
         int initSize = getInitialSize(documents);
         vocabs = new ArrayList<>(initSize);
         tokenIds = new HashMap<>(initSize);
-        this.documentIds = new ArrayList<>(initSize);
+        documentIds = new ArrayList<>(initSize);
 
         for (Set<String> document : documents) {
             List<Integer> ids = documentToIds(document);
-            this.documentIds.add(ids);
+            documentIds.add(ids);
         }
     }
 
@@ -75,5 +79,9 @@ public class Vocabulary {
 
     public List<List<Integer>> getDocumentIds() {
         return documentIds;
+    }
+
+    public int vocabularySize() {
+        return vocabs.size();
     }
 }
