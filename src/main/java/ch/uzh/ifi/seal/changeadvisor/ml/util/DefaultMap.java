@@ -81,5 +81,13 @@ public class DefaultMap<K, V> implements Map<K, V> {
         return map.entrySet();
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("{");
+        for (Entry<K, V> entry : map.entrySet()) {
+            sb.append(entry.getKey() + ": " + entry.getValue());
+        }
 
+        return sb.append("}").toString();
+    }
 }
