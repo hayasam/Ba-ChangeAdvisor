@@ -22,6 +22,10 @@ public class Corpus implements Iterable<Set<String>> {
         return documents;
     }
 
+    public int size() {
+        return documents.size();
+    }
+
     @Override
     public String toString() {
         return "Corpus{" +

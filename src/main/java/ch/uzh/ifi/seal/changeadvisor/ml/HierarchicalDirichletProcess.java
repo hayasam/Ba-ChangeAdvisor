@@ -1,6 +1,7 @@
 package ch.uzh.ifi.seal.changeadvisor.ml;
 
 import cc.mallet.util.Maths;
+import ch.uzh.ifi.seal.changeadvisor.ml.math.MockMultinomial;
 import ch.uzh.ifi.seal.changeadvisor.ml.math.Multinomial;
 import ch.uzh.ifi.seal.changeadvisor.ml.util.DefaultMap;
 import com.google.common.collect.Lists;
@@ -95,6 +96,7 @@ public class HierarchicalDirichletProcess {
         this.gamma = gamma;
     }
 
+
     private void setup(List<List<Integer>> documentIds, int vocabSize) {
         vocabularySize = vocabSize;
         corpusSize = documentIds.size();
@@ -131,14 +133,15 @@ public class HierarchicalDirichletProcess {
         tJi = new ArrayList<>(corpusSize);
         for (List<Integer> document : documentIds) {
             List<Integer> zeros = new ArrayList<>();
-            for (int i = 0; i < document.size() - 1; i++) {
+            for (int i = 0; i < document.size(); i++) {
                 zeros.add(-1);
             }
             tJi.add(zeros);
         }
+        logger.info(tJi.size());
     }
 
-    private void fit(Corpus corpus, int maxIterations) {
+    public void fit(Corpus corpus, int maxIterations) {
         this.corpus = corpus;
         this.vocabulary = new Vocabulary(corpus);
 
@@ -154,6 +157,78 @@ public class HierarchicalDirichletProcess {
             logger.info(String.format("%-15d %-15d %-15f", i + 1, usingK.size() - 1, perplexity()));
             logger.info("=============== =============== ===============");
         }
+    }
+
+    private double perplexity() {
+        List<DefaultMap<Integer, Double>> phi = Lists.newArrayList(new DefaultMap<>(1.0 / vocabularySize)); //phi = [DefaultDict(1.0 / self._V)] + self.topic_word_distribution()
+        phi.addAll(topicWordDistribution());
+        List<List<Double>> theta = documentTopicDistribution(); //        theta = self.document_topic_distribution()
+
+        double logLikelihood = 0.0;     //        log_likelihood = 0
+        int n = 0;                      //        N = 0
+
+        int minSize = Math.min(x_ji.size(), theta.size());
+        for (int i = 0; i < minSize; i++) {                         //        for x_ji, p_jk in zip(self._x_ji, theta):
+            List<Integer> x_ji = this.x_ji.get(i);
+            List<Double> p_jk = theta.get(i);
+            for (Integer v : x_ji) {                                //        for v in x_ji:
+                int minSize2 = Math.min(p_jk.size(), phi.size());
+                double sum = 0.0;
+                for (int j = 0; j < minSize2; j++) {                //        word_prob = sum(p * p_kv[v] for p, p_kv in zip(p_jk, phi))
+                    Double p = p_jk.get(j);
+                    Double p_kv = phi.get(j).get(v);
+                    sum += p * p_kv;
+                }
+                Double wordProb = sum;
+                logLikelihood -= Math.log(wordProb);                //        log_likelihood -= numpy.log(word_prob)
+            }
+            n += x_ji.size();                                       //        N += len(x_ji)
+        }
+        return Math.exp(logLikelihood / n);                                   //        return numpy.exp(log_likelihood / N)
+    }
+
+    private List<List<Double>> documentTopicDistribution() {
+        // am_k = effect from table-dish assignment
+        List<Double> am_k = mK.stream().map(Integer::doubleValue).collect(Collectors.toList()); // am_k = numpy.array(self._m_k, dtype=float)
+        am_k.set(0, gamma); //        am_k[0] = self._gamma
+        double sum = usingK.stream().map(am_k::get).mapToDouble(Double::doubleValue).sum();
+        am_k = am_k.stream().map(d -> d * alpha / sum).collect(Collectors.toList()); //        am_k *= self._alpha / am_k[self._using_k].sum()
+
+        List<List<Double>> theta = new ArrayList<>(); //        theta = []
+
+        for (int j = 0; j < n_jt.size(); j++) {                     //        for j, n_jt in enumerate(self._n_jt):
+            List<Double> p_jk = new ArrayList<>(am_k);         //        p_jk = am_k.copy()
+            List<Integer> n_jt = this.n_jt.get(j);
+            for (Integer t : usingT.get(j)) {                       //        for t in self._using_t[j]:
+                if (t == 0) {
+                    continue;
+                }
+                Integer k = k_jt.get(j).get(t);                     //                k = self._k_jt[j][t]
+                p_jk.set(k, p_jk.get(k) + n_jt.get(t));             //        p_jk[k] += n_jt[t]
+            }
+            p_jk = usingK.stream().map(p_jk::get).collect(Collectors.toList()); //        p_jk = p_jk[self._using_k]
+            double sumPJk = p_jk.stream().reduce((d1, d2) -> d1 + d2).orElse(0.0);
+            p_jk = p_jk.stream().map(p -> p / sumPJk).collect(Collectors.toList());
+            theta.add(p_jk);                                                            //        theta.append(p_jk / p_jk.sum())
+        }
+        return theta; //        return numpy.array(theta)
+    }
+
+    private List<DefaultMap<Integer, Double>> topicWordDistribution() {
+//        return [DefaultDict(self._beta / self._n_k[k]).update(
+//                (v, n_kv / self._n_k[k]) for v, n_kv in self._n_kv[k].items())
+//        for k in self._using_k if k != 0]
+        DefaultMap<Integer, Double> topicWordDistribution = new DefaultMap<>(1.0 / vocabularySize);
+        for (Integer k : usingK) {
+            if (k != 0) {
+                for (Map.Entry<Integer, Double> entry : nKv.get(k).entrySet()) {
+                    Integer v = entry.getKey();
+                    Double n_kv = entry.getValue();
+                    topicWordDistribution.put(v, n_kv / nK.get(k));
+                }
+            }
+        }
+        return Lists.newArrayList(topicWordDistribution);
     }
 
     private void inference() {
@@ -183,12 +258,12 @@ public class HierarchicalDirichletProcess {
 
         // Sampling from posterior p(t_ji = t).
         List<Double> pT = calcTablePosterior(j, fk);            // p_t = self._calc_table_posterior(j, f_k)
-        Multinomial multinomial = new Multinomial(pT);
+        Multinomial multinomial = new MockMultinomial(pT);      // TODO: replace with actual multinomial
         Integer tNew = usingT.get(j).get(multinomial.sample()); // t_new = self._using_t[j][numpy.random.multinomial(1, p_t).argmax()]
 
         if (tNew == 0) {
             List<Double> pK = calcDishPosteriorW(fk);           // p_k = self._calc_dish_posterior_w(f_k)
-            multinomial = new Multinomial(pK);
+            multinomial = new MockMultinomial(pK);
             Integer kNew = usingK.get(multinomial.sample());    // k_new = self._using_k[numpy.random.multinomial(1, p_k).argmax()]
 
             if (kNew == 0) {                                    // if k_new == 0:
@@ -213,7 +288,13 @@ public class HierarchicalDirichletProcess {
 
         // Sampling of k.
         List<Double> pK = calcDishPosteriorT(j, t);//                p_k = self._calc_dish_posterior_t(j, t)
-        Multinomial multinomial = new Multinomial(pK);
+        for (Double p : pK) {
+            if (p < 0) {
+                logger.info(pK.toString());
+                throw new IllegalArgumentException("How?!?");
+            }
+        }
+        Multinomial multinomial = new MockMultinomial(pK);  // TODO: replace with actual multinomial
         Integer kNew = usingK.get(multinomial.sample());    //        k_new = self._using_k[numpy.random.multinomial(1, p_k).argmax()]
         if (kNew == 0) {                                    //        if k_new == 0:
             kNew = addNewDish();                            //              k_new = self._add_new_dish()
@@ -265,7 +346,11 @@ public class HierarchicalDirichletProcess {
         List<Double> nk2 = usingK.stream().map(nk::get).collect(Collectors.toList()); //        n_k = n_k[self._using_k]
 
         List<Integer> tmp = usingK.stream().map(mK::get).collect(Collectors.toList());
-        List<Double> logPK = tmp.stream().map(i -> Math.log(i) + Maths.logGamma(vBeta) - Maths.logGamma(vBeta + n_jt)).collect(Collectors.toList()); //        log_p_k = numpy.log(self._m_k[self._using_k]) + gammaln(n_k) - gammaln(n_k + n_jt)
+        List<Double> logMkUsingK = tmp.stream().map(d -> Math.log(d)).collect(Collectors.toList());
+        List<Double> gammaLnNk = logGamma(nk2);
+        List<Double> gammaLnNkNJt = logGamma(componentWiseSum(nk2, n_jt));
+
+        List<Double> logPK = componentWiseSum(logMkUsingK, componentWiseSub(gammaLnNk, gammaLnNkNJt)); //        log_p_k = numpy.log(self._m_k[self._using_k]) + gammaln(n_k) - gammaln(n_k + n_jt)
 
         double logPKNew = Math.log(gamma) + Maths.logGamma(vBeta) - Maths.logGamma(vBeta + n_jt); //        log_p_k_new = numpy.log(self._gamma) + gammaln(Vbeta) - gammaln(Vbeta + n_jt)
 
@@ -293,9 +378,9 @@ public class HierarchicalDirichletProcess {
 
         logPK.set(0, logPKNew);     //        log_p_k[0] = log_p_k_new
 
-        Double sumLogPk = logPK.stream().reduce(Double::sum).orElse(0.0);
         Double maxLogPk = logPK.stream().reduce(Double::max).orElse(logPK.get(0));
         List<Double> pK = exp(componentWiseSub(logPK, maxLogPk)); //        p_k = numpy.exp(log_p_k - log_p_k.max())
+        Double sumLogPk = pK.stream().reduce(Double::sum).orElse(0.0);
 
         return pK.stream().map(pk -> pk / sumLogPk).collect(Collectors.toList());     //        return p_k / p_k.sum()
     }
@@ -307,6 +392,10 @@ public class HierarchicalDirichletProcess {
             result.add(l1.get(i).doubleValue() + l2.get(i).doubleValue());
         }
         return result;
+    }
+
+    private List<Double> componentWiseSum(List<? extends Number> l1, Number n) {
+        return l1.stream().map(i -> i.doubleValue() + n.doubleValue()).collect(Collectors.toList());
     }
 
     private List<Double> componentWiseSub(List<? extends Number> l1, List<? extends Number> l2) {
@@ -421,7 +510,8 @@ public class HierarchicalDirichletProcess {
         List<Integer> tmp1 = usingT.stream().map(idx -> n_jt.get(j).get(idx)).collect(Collectors.toList());
         List<Integer> tmp2 = usingT.stream().map(idx -> k_jt.get(j).get(idx)).collect(Collectors.toList());
 
-        List<Double> pT = componentWiseMultiplication(tmp1, tmp2);                                          // p_t = self._n_jt[j][using_t] * f_k[self._k_jt[j][using_t]]
+        List<Double> tmp3 = tmp2.stream().map(fk::get).collect(Collectors.toList());
+        List<Double> pT = componentWiseMultiplication(tmp1, tmp3);                                          // p_t = self._n_jt[j][using_t] * f_k[self._k_jt[j][using_t]]
         Double pXJi = innerProduct(mK, fk) + (gamma / vocabularySize);                                      // p_x_ji = numpy.inner(self._m_k, f_k) + self._gamma / self._V
 
         pT.set(0, pXJi * alpha / (gamma + m));                                                              // p_t[0] = p_x_ji * self._alpha / (self._gamma + self._m)
@@ -456,7 +546,7 @@ public class HierarchicalDirichletProcess {
     private List<Double> calcDishPosteriorW(List<Double> fk) {
         List<Double> doubles = componentWiseMultiplication(mK, fk);                         //    p_k = (self._m_k * f_k)[self._using_k]
         List<Double> pK = usingK.stream().map(doubles::get).collect(Collectors.toList());   //    p_k = (self._m_k * f_k)[self._using_k]
-        pK.set(0, gamma * vocabularySize);                                                  //    p_k[0] = self._gamma / self._V
+        pK.set(0, gamma / vocabularySize);                                                  //    p_k[0] = self._gamma / self._V
         double sum = pK.stream().reduce((d1, d2) -> d1 + d2).orElse(0.0);
         for (int i = 0; i < pK.size(); i++) {
             pK.set(i, pK.get(i) / sum);
