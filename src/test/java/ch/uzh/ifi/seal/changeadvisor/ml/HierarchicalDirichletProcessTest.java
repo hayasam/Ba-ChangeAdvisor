@@ -2,7 +2,6 @@ package ch.uzh.ifi.seal.changeadvisor.ml;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.opencsv.CSVReader;
 import org.apache.log4j.Logger;
 import org.junit.Before;
@@ -30,7 +29,7 @@ public class HierarchicalDirichletProcessTest {
         String[] line = reader.readNext();
         while ((line = reader.readNext()) != null) {
             if (line.length == 3 && inputCategories.contains(line[1])) {
-                corpus.addDocument(Sets.newHashSet(Splitter.on(" ").omitEmptyStrings().trimResults().split(line[2])));
+                corpus.addDocument(Lists.newArrayList(Splitter.on(" ").omitEmptyStrings().trimResults().split(line[2])));
             }
         }
         logger.info(corpus.size());
@@ -40,7 +39,7 @@ public class HierarchicalDirichletProcessTest {
     @Test
     public void fit() throws Exception {
         HierarchicalDirichletProcess hdplda = new HierarchicalDirichletProcess(1.0, 0.5, 1.0);
-        hdplda.fit(corpus, 10);
+        hdplda.fit(corpus, 100);
     }
 
 }

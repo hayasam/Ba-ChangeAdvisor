@@ -1,11 +1,12 @@
 package ch.uzh.ifi.seal.changeadvisor.ml.math;
 
-import org.junit.Assert;
-
-import java.util.List;
+import java.util.Collection;
 import java.util.Random;
-import java.util.stream.DoubleStream;
 
+/**
+ * Computes multinomial distribution of probabilities.
+ * Note: probabilities must be normalized (i.e. sum of probabilities eq. 1).
+ */
 public class SimpleMultinomial implements Multinomial {
 
     private Random generator;
@@ -14,24 +15,7 @@ public class SimpleMultinomial implements Multinomial {
 
     private int distributionSize;
 
-    public SimpleMultinomial(double[] probabilities) {
-        assertProbabilitiesAreOne(probabilities);
-        generator = new Random();
-
-        distributionSize = probabilities.length;
-        distribution = new double[distributionSize];
-
-        double position = 0;
-        for (int i = 0; i < distributionSize; ++i) {
-            position += probabilities[i];
-            distribution[i] = position;
-        }
-
-        distribution[distributionSize - 1] = 1.0;
-
-    }
-
-    public SimpleMultinomial(List<Double> probabilities) {
+    public void init(Collection<Double> probabilities) {
         assertProbabilitiesAreOne(probabilities);
         generator = new Random();
 
@@ -39,26 +23,23 @@ public class SimpleMultinomial implements Multinomial {
         distribution = new double[distributionSize];
 
         double position = 0;
-        for (int i = 0; i < distributionSize; ++i) {
-            position += probabilities.get(i);
-            distribution[i] = position;
+        int i = 0;
+        for (Double p : probabilities) {
+            position += p;
+            distribution[i++] = position;
         }
 
         distribution[distributionSize - 1] = 1.0;
-
     }
 
-    private void assertProbabilitiesAreOne(double[] probabilities) {
-        double sum = DoubleStream.of(probabilities).sum();
-        Assert.assertEquals(sum, 1.0, 0.01);
-    }
-
-    private void assertProbabilitiesAreOne(List<Double> probabilities) {
+    private void assertProbabilitiesAreOne(Collection<Double> probabilities) {
         Double sum = probabilities.stream().reduce((d1, d2) -> d1 + d2).orElse(0.0);
         if (sum < 0) {
             throw new IllegalArgumentException("How is this possible!");
         }
-        Assert.assertEquals(sum, 1.0, 0.01);
+        if (!(sum > 0.99 && sum < 1.01)) {
+            throw new IllegalArgumentException("Sum of probabilities should be one. Was: " + sum + "\t" + probabilities.toString());
+        }
     }
 
     public int sample() {

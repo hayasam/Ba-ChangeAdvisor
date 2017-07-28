@@ -1,6 +1,9 @@
 package ch.uzh.ifi.seal.changeadvisor.ml;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by alex on 24.07.2017.
@@ -29,19 +32,19 @@ public class Vocabulary {
     /**
      * @param documents list of document tokens (Tokens by document).
      */
-    public Vocabulary(List<Set<String>> documents) {
+    public Vocabulary(List<List<String>> documents) {
         int initSize = getInitialSize(documents);
         vocabs = new ArrayList<>(initSize);
         tokenIds = new HashMap<>(initSize);
         documentIds = new ArrayList<>(initSize);
 
-        for (Set<String> document : documents) {
+        for (List<String> document : documents) {
             List<Integer> ids = documentToIds(document);
             documentIds.add(ids);
         }
     }
 
-    private int getInitialSize(List<Set<String>> documents) {
+    private int getInitialSize(List<List<String>> documents) {
         int docs = documents.size();
         int size = 0;
         if (!documents.isEmpty()) {
@@ -50,7 +53,7 @@ public class Vocabulary {
         return docs * size;
     }
 
-    private List<Integer> documentToIds(Set<String> document) {
+    private List<Integer> documentToIds(List<String> document) {
         List<Integer> ids = new ArrayList<>();
         for (String token : document) {
             ids.add(vocabToId(token));

@@ -1,8 +1,8 @@
 package ch.uzh.ifi.seal.changeadvisor.ml;
 
 import cc.mallet.util.Maths;
-import ch.uzh.ifi.seal.changeadvisor.ml.math.MockMultinomial;
 import ch.uzh.ifi.seal.changeadvisor.ml.math.Multinomial;
+import ch.uzh.ifi.seal.changeadvisor.ml.math.SimpleMultinomial;
 import ch.uzh.ifi.seal.changeadvisor.ml.util.DefaultMap;
 import com.google.common.collect.Lists;
 import org.apache.log4j.Logger;
@@ -18,11 +18,6 @@ import java.util.stream.Collectors;
 public class HierarchicalDirichletProcess {
 
     private static final Logger logger = Logger.getLogger(HierarchicalDirichletProcess.class);
-
-
-    private Corpus corpus;
-
-    private Vocabulary vocabulary;
 
 
     /**
@@ -90,6 +85,8 @@ public class HierarchicalDirichletProcess {
 
     private double gamma = 1.0;
 
+    private Multinomial multinomial = new SimpleMultinomial();
+
     public HierarchicalDirichletProcess(double alpha, double beta, double gamma) {
         this.alpha = alpha;
         this.beta = beta;
@@ -142,8 +139,7 @@ public class HierarchicalDirichletProcess {
     }
 
     public void fit(Corpus corpus, int maxIterations) {
-        this.corpus = corpus;
-        this.vocabulary = new Vocabulary(corpus);
+        Vocabulary vocabulary = new Vocabulary(corpus);
 
         setup(vocabulary.getDocumentIds(), vocabulary.vocabularySize());
 
@@ -161,7 +157,8 @@ public class HierarchicalDirichletProcess {
 
     private double perplexity() {
         List<DefaultMap<Integer, Double>> phi = Lists.newArrayList(new DefaultMap<>(1.0 / vocabularySize)); //phi = [DefaultDict(1.0 / self._V)] + self.topic_word_distribution()
-        phi.addAll(topicWordDistribution());
+        List<DefaultMap<Integer, Double>> topicsDist = topicWordDistribution();
+        phi.addAll(topicsDist);
         List<List<Double>> theta = documentTopicDistribution(); //        theta = self.document_topic_distribution()
 
         double logLikelihood = 0.0;     //        log_likelihood = 0
@@ -218,17 +215,21 @@ public class HierarchicalDirichletProcess {
 //        return [DefaultDict(self._beta / self._n_k[k]).update(
 //                (v, n_kv / self._n_k[k]) for v, n_kv in self._n_kv[k].items())
 //        for k in self._using_k if k != 0]
-        DefaultMap<Integer, Double> topicWordDistribution = new DefaultMap<>(1.0 / vocabularySize);
+        List<DefaultMap<Integer, Double>> result = new ArrayList<>(usingK.size());
+        DefaultMap<Integer, Double> topicWordDistribution;
         for (Integer k : usingK) {
             if (k != 0) {
+                topicWordDistribution = new DefaultMap<>(1.0 / vocabularySize);
+                result.add(topicWordDistribution);
                 for (Map.Entry<Integer, Double> entry : nKv.get(k).entrySet()) {
                     Integer v = entry.getKey();
                     Double n_kv = entry.getValue();
+
                     topicWordDistribution.put(v, n_kv / nK.get(k));
                 }
             }
         }
-        return Lists.newArrayList(topicWordDistribution);
+        return result;
     }
 
     private void inference() {
@@ -258,16 +259,17 @@ public class HierarchicalDirichletProcess {
 
         // Sampling from posterior p(t_ji = t).
         List<Double> pT = calcTablePosterior(j, fk);            // p_t = self._calc_table_posterior(j, f_k)
-        Multinomial multinomial = new MockMultinomial(pT);      // TODO: replace with actual multinomial
+
+        multinomial.init(pT);
         Integer tNew = usingT.get(j).get(multinomial.sample()); // t_new = self._using_t[j][numpy.random.multinomial(1, p_t).argmax()]
 
         if (tNew == 0) {
             List<Double> pK = calcDishPosteriorW(fk);           // p_k = self._calc_dish_posterior_w(f_k)
-            multinomial = new MockMultinomial(pK);
+            multinomial.init(pK);
             Integer kNew = usingK.get(multinomial.sample());    // k_new = self._using_k[numpy.random.multinomial(1, p_k).argmax()]
 
             if (kNew == 0) {                                    // if k_new == 0:
-                kNew = addNewDish();                            // k_new = self._add_new_dish()
+                kNew = addNewDish();                                // k_new = self._add_new_dish()
             }
             tNew = addNewTable(j, kNew);                        // t_new = self._add_new_table(j, k_new)
         }
@@ -294,7 +296,8 @@ public class HierarchicalDirichletProcess {
                 throw new IllegalArgumentException("How?!?");
             }
         }
-        Multinomial multinomial = new MockMultinomial(pK);  // TODO: replace with actual multinomial
+
+        multinomial.init(pK);
         Integer kNew = usingK.get(multinomial.sample());    //        k_new = self._using_k[numpy.random.multinomial(1, p_k).argmax()]
         if (kNew == 0) {                                    //        if k_new == 0:
             kNew = addNewDish();                            //              k_new = self._add_new_dish()
@@ -358,7 +361,10 @@ public class HierarchicalDirichletProcess {
         for (Map.Entry<Integer, Integer> entry : n_jtv.get(j).get(t).entrySet()) {  //        for w, n_jtw in self._n_jtv[j][t].items():
             Integer w = entry.getKey();
             Integer n_jtw = entry.getValue();
-            assert n_jtw >= 0;                                                      //        assert n_jtw >= 0
+
+            if (n_jtw < 0) {//        assert n_jtw >= 0
+                throw new IllegalArgumentException(String.format("j: %d\tt: %d", j, t));
+            }
             if (n_jtw == 0) {                                                       //        if n_jtw == 0: continue
                 continue;
             }
@@ -382,7 +388,19 @@ public class HierarchicalDirichletProcess {
         List<Double> pK = exp(componentWiseSub(logPK, maxLogPk)); //        p_k = numpy.exp(log_p_k - log_p_k.max())
         Double sumLogPk = pK.stream().reduce(Double::sum).orElse(0.0);
 
-        return pK.stream().map(pk -> pk / sumLogPk).collect(Collectors.toList());     //        return p_k / p_k.sum()
+        List<Double> result = pK.stream().map(pk -> pk / sumLogPk).collect(Collectors.toList());//        return p_k / p_k.sum()
+        boolean isNan = false;
+        for (Double d : result) {
+            if (d.isNaN()) {
+                isNan = true;
+                break;
+            }
+        }
+        if (isNan) {
+            throw new IllegalArgumentException("NAN");
+        }
+
+        return result;     //        return p_k / p_k.sum()
     }
 
     private List<Double> componentWiseSum(List<? extends Number> l1, List<? extends Number> l2) {
@@ -442,7 +460,7 @@ public class HierarchicalDirichletProcess {
         mK.set(k, mK.get(k) - 1);       // self._m_k[k] -= 1
         m -= 1;                         // self._m -= 1
         if (mK.get(k) == 0) {           // if self._m_k[k] == 0:
-            usingK.remove(k);           //      self._using_k.remove(k)
+            assert usingK.remove(k);           //      self._using_k.remove(k)
             k_jt.get(j).set(t, 0);      //      self._k_jt[j][t] = 0
         }
     }
@@ -450,7 +468,7 @@ public class HierarchicalDirichletProcess {
     private void leaveFromTable(int j, int i) {
         Integer t = tJi.get(j).get(i);      // t = self.t_ji[j][i]
         if (t > 0) {                        // if t > 0:
-            Integer k = k_jt.get(j).get(i); //      k = self._k_jt[j][t]
+            Integer k = k_jt.get(j).get(t); //      k = self._k_jt[j][t]
             assert k > 0;
 
             // Decreases counters.
@@ -459,7 +477,7 @@ public class HierarchicalDirichletProcess {
             nK.set(k, nK.get(k) - 1.0);                                 // self._n_k[k] -= 1
             n_jt.get(j).set(t, n_jt.get(j).get(t) - 1);                 // self._n_jt[j][t] -= 1
             n_jtv.get(j).get(t).put(v, n_jtv.get(j).get(t).get(v) - 1); // self._n_jtv[j][t][v] -= 1
-            if (n_jt.get(j).get(t) == 0) {                              // if self._n_jt[j][t] == 0:
+            if (n_jt.get(j).get(t).equals(0)) {                              // if self._n_jt[j][t] == 0:
                 removeTable(j, t);                                      // self._remove_table(j, t)
             }
         }
@@ -469,9 +487,9 @@ public class HierarchicalDirichletProcess {
      * Removes the table where all guests are gone.
      *
      * @param j
-     * @param t
+     * @param t must be integer to remove by object and not by item.
      */
-    private void removeTable(int j, int t) {
+    private void removeTable(int j, Integer t) {
         Integer k = k_jt.get(j).get(t); //    k = self._k_jt[j][t]
         usingT.get(j).remove(t);        //    self._using_t[j].remove(t)
         mK.set(k, mK.get(k) - 1);       //    self._m_k[k] -= 1
@@ -563,17 +581,18 @@ public class HierarchicalDirichletProcess {
         boolean broke = false;
         int kNew;
         for (kNew = 0; kNew < usingK.size(); kNew++) {  // for k_new, k in enumerate(self._using_k):
-            if (kNew != usingK.get(kNew)) {                 // if k_new != k:
+            if (kNew != usingK.get(kNew)) {             // if k_new != k:
                 broke = true;
                 break;                                      // break
             }
         }
 
-        if (!broke) {                                       // else:
+        if (!broke) {                                   // else:
             kNew = usingK.size();                       // k_new = len(self._using_k)
             if (kNew >= nKv.size()) {                       // if k_new >= len(self._n_kv):
-                nK.add(nK.get(0));                          // self._n_k = numpy.resize(self._n_k, k_new + 1) # resize makes a repeated copy!
-                mK.add(mK.get(0));                          // self._m_k = numpy.resize(self._m_k, k_new + 1) # resize makes a repeated copy!
+                int newSize = kNew + 1;
+                resizeDouble(nK, newSize, true);    // self._n_k = numpy.resize(self._n_k, k_new + 1) # resize makes a repeated copy!
+                resizeInteger(mK, newSize, true);   // self._n_k = numpy.resize(self._n_k, k_new + 1) # resize makes a repeated copy!
                 nKv.add(null);                              // self._n_kv.append(None)
             }
 
@@ -587,6 +606,42 @@ public class HierarchicalDirichletProcess {
         nKv.set(kNew, new DefaultMap<>(beta));      //        self._n_kv[k_new] = DefaultDict(self._beta)
 
         return kNew;                                //        return k_new
+    }
+
+    /**
+     * Resizes (only increases) a list.
+     *
+     * @param list       list to increase.
+     * @param newSize    new size.
+     * @param repeatList whether the new values should be filled with a repeated copy of this list or 0.
+     */
+    private void resizeDouble(List<Double> list, int newSize, boolean repeatList) {
+        int difference = newSize - list.size();
+        for (int i = 0; i < difference; i++) {
+            if (repeatList) {
+                list.add(list.get(i));
+            } else {
+                list.add(0.0);
+            }
+        }
+    }
+
+    /**
+     * Resizes (only increases) a list.
+     *
+     * @param list       list to increase.
+     * @param newSize    new size.
+     * @param repeatList whether the new values should be filled with a repeated copy of this list or 0.
+     */
+    private void resizeInteger(List<Integer> list, int newSize, boolean repeatList) {
+        int difference = newSize - list.size();
+        for (int i = 0; i < difference; i++) {
+            if (repeatList) {
+                list.add(list.get(i));
+            } else {
+                list.add(0);
+            }
+        }
     }
 
     /**
@@ -606,20 +661,22 @@ public class HierarchicalDirichletProcess {
                 break;
             }
         }
+
         if (!broke) {                                               //            else:
             tNew = usingT.get(j).size();                            //    t_new = len(self._using_t[j])
-            n_jt.get(j).add(n_jt.get(j).get(0));                    //    self._n_jt[j].resize(t_new + 1) # resize makes a repeated copy!
-            k_jt.get(j).add(k_jt.get(j).get(0));                    //    self._k_jt[j].resize(t_new + 1)
+            int newSize = tNew + 1;
+            resizeInteger(n_jt.get(j), newSize, false); //    self._n_jt[j].resize(t_new + 1)
+            resizeInteger(k_jt.get(j), newSize, false); //    self._n_jt[j].resize(t_new + 1)
             n_jtv.get(j).add(null);                                 //    self._n_jtv[j].append(None)
 
-            usingT.get(j).add(tNew, tNew);                          //    self._using_t[j].insert(t_new, t_new)
-            n_jt.get(j).set(tNew, 0);                               //    self._n_jt[j][t_new] = 0  # to make sure
-            n_jtv.get(j).add(tNew, new DefaultMap<>(0));//    self._n_jtv[j][t_new] = DefaultDict(0)
-
-            k_jt.get(j).set(tNew, kNew);                            //    self._k_jt[j][t_new] = k_new
-            mK.set(kNew, mK.get(kNew) + 1);                         //    self._m_k[k_new] += 1
-            m += 1;
         }
+        usingT.get(j).add(tNew, tNew);                          //    self._using_t[j].insert(t_new, t_new)
+        n_jt.get(j).set(tNew, 0);                               //    self._n_jt[j][t_new] = 0  # to make sure
+        n_jtv.get(j).set(tNew, new DefaultMap<>(0));//    self._n_jtv[j][t_new] = DefaultDict(0)
+
+        k_jt.get(j).set(tNew, kNew);                            //    self._k_jt[j][t_new] = k_new
+        mK.set(kNew, mK.get(kNew) + 1);                         //    self._m_k[k_new] += 1
+        m += 1;
         return tNew;
     }
 

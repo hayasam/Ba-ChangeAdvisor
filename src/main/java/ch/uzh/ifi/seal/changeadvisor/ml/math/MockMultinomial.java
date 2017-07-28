@@ -1,10 +1,11 @@
 package ch.uzh.ifi.seal.changeadvisor.ml.math;
 
-import java.util.List;
+import java.util.Collection;
 
 public class MockMultinomial implements Multinomial {
 
-    public MockMultinomial(List<Double> probabilities) {
+    @Override
+    public void init(Collection<Double> probabilities) {
     }
 
     @Override
