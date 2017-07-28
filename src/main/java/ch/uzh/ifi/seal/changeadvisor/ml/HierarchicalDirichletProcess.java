@@ -349,7 +349,7 @@ public class HierarchicalDirichletProcess {
         List<Double> nk2 = usingK.stream().map(nk::get).collect(Collectors.toList()); //        n_k = n_k[self._using_k]
 
         List<Integer> tmp = usingK.stream().map(mK::get).collect(Collectors.toList());
-        List<Double> logMkUsingK = tmp.stream().map(d -> Math.log(d)).collect(Collectors.toList());
+        List<Double> logMkUsingK = tmp.stream().map(Math::log).collect(Collectors.toList());
         List<Double> gammaLnNk = logGamma(nk2);
         List<Double> gammaLnNkNJt = logGamma(componentWiseSum(nk2, n_jt));
 
@@ -426,11 +426,7 @@ public class HierarchicalDirichletProcess {
     }
 
     private List<Double> componentWiseSub(List<? extends Number> l1, Number value) {
-        List<Double> result = new ArrayList<>(l1.size());
-        for (int i = 0; i < l1.size(); i++) {
-            result.add(l1.get(i).doubleValue() - value.doubleValue());
-        }
-        return result;
+        return l1.stream().map(n -> n.doubleValue() - value.doubleValue()).collect(Collectors.toList());
     }
 
     private List<Double> logGamma(List<Double> doubles) {
@@ -487,7 +483,7 @@ public class HierarchicalDirichletProcess {
      * Removes the table where all guests are gone.
      *
      * @param j
-     * @param t must be integer to remove by object and not by item.
+     * @param t must be integer to remove by object and not by index.
      */
     private void removeTable(int j, Integer t) {
         Integer k = k_jt.get(j).get(t); //    k = self._k_jt[j][t]
