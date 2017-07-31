@@ -3,6 +3,7 @@ package ch.uzh.ifi.seal.changeadvisor.ml;
 import cc.mallet.util.Maths;
 import ch.uzh.ifi.seal.changeadvisor.ml.math.Multinomial;
 import ch.uzh.ifi.seal.changeadvisor.ml.math.SimpleMultinomial;
+import ch.uzh.ifi.seal.changeadvisor.ml.math.Vector;
 import ch.uzh.ifi.seal.changeadvisor.ml.util.DefaultMap;
 import com.google.common.collect.Lists;
 import org.apache.log4j.Logger;
@@ -159,7 +160,7 @@ public class HierarchicalDirichletProcess {
         List<DefaultMap<Integer, Double>> phi = Lists.newArrayList(new DefaultMap<>(1.0 / vocabularySize)); //phi = [DefaultDict(1.0 / self._V)] + self.topic_word_distribution()
         List<DefaultMap<Integer, Double>> topicsDist = topicWordDistribution();
         phi.addAll(topicsDist);
-        List<List<Double>> theta = documentTopicDistribution(); //        theta = self.document_topic_distribution()
+        List<Vector<Double>> theta = documentTopicDistribution(); //        theta = self.document_topic_distribution()
 
         double logLikelihood = 0.0;     //        log_likelihood = 0
         int n = 0;                      //        N = 0
@@ -167,7 +168,7 @@ public class HierarchicalDirichletProcess {
         int minSize = Math.min(x_ji.size(), theta.size());
         for (int i = 0; i < minSize; i++) {                         //        for x_ji, p_jk in zip(self._x_ji, theta):
             List<Integer> x_ji = this.x_ji.get(i);
-            List<Double> p_jk = theta.get(i);
+            Vector<Double> p_jk = theta.get(i);
             for (Integer v : x_ji) {                                //        for v in x_ji:
                 int minSize2 = Math.min(p_jk.size(), phi.size());
                 double sum = 0.0;
@@ -184,17 +185,18 @@ public class HierarchicalDirichletProcess {
         return Math.exp(logLikelihood / n);                                   //        return numpy.exp(log_likelihood / N)
     }
 
-    private List<List<Double>> documentTopicDistribution() {
+    private List<Vector<Double>> documentTopicDistribution() {
         // am_k = effect from table-dish assignment
-        List<Double> am_k = mK.stream().map(Integer::doubleValue).collect(Collectors.toList()); // am_k = numpy.array(self._m_k, dtype=float)
-        am_k.set(0, gamma); //        am_k[0] = self._gamma
-        double sum = usingK.stream().map(am_k::get).mapToDouble(Double::doubleValue).sum();
-        am_k = am_k.stream().map(d -> d * alpha / sum).collect(Collectors.toList()); //        am_k *= self._alpha / am_k[self._using_k].sum()
+        Vector<Double> amK = Vector.toDoubleVector(mK);         // am_k = numpy.array(self._m_k, dtype=float)
+        amK.set(0, gamma);                                      // am_k[0] = self._gamma
 
-        List<List<Double>> theta = new ArrayList<>(); //        theta = []
+        double sum = amK.get(usingK).sum();
+        amK = amK.times(alpha / sum);                           // am_k *= self._alpha / am_k[self._using_k].sum()
+
+        List<Vector<Double>> theta = new ArrayList<>();             //        theta = []
 
         for (int j = 0; j < n_jt.size(); j++) {                     //        for j, n_jt in enumerate(self._n_jt):
-            List<Double> p_jk = new ArrayList<>(am_k);         //        p_jk = am_k.copy()
+            Vector<Double> p_jk = amK.copy();                       //        p_jk = am_k.copy()
             List<Integer> n_jt = this.n_jt.get(j);
             for (Integer t : usingT.get(j)) {                       //        for t in self._using_t[j]:
                 if (t == 0) {
@@ -203,12 +205,10 @@ public class HierarchicalDirichletProcess {
                 Integer k = k_jt.get(j).get(t);                     //                k = self._k_jt[j][t]
                 p_jk.set(k, p_jk.get(k) + n_jt.get(t));             //        p_jk[k] += n_jt[t]
             }
-            p_jk = usingK.stream().map(p_jk::get).collect(Collectors.toList()); //        p_jk = p_jk[self._using_k]
-            double sumPJk = p_jk.stream().reduce((d1, d2) -> d1 + d2).orElse(0.0);
-            p_jk = p_jk.stream().map(p -> p / sumPJk).collect(Collectors.toList());
-            theta.add(p_jk);                                                            //        theta.append(p_jk / p_jk.sum())
+            p_jk = p_jk.get(usingK);                                //        p_jk = p_jk[self._using_k]
+            theta.add(p_jk.dividedBy(p_jk.sum()));                  //        theta.append(p_jk / p_jk.sum())
         }
-        return theta; //        return numpy.array(theta)
+        return theta;           //        return numpy.array(theta)
     }
 
     private List<DefaultMap<Integer, Double>> topicWordDistribution() {
@@ -252,20 +252,20 @@ public class HierarchicalDirichletProcess {
     private void sampling_t(int j, int i) {
         leaveFromTable(j, i);               // self._leave_from_table(j, i)
         Integer v = x_ji.get(j).get(i);     // v = self._x_ji[j][i]
-        List<Double> fk = calcFK(v);        // f_k = self._calc_f_k(v)
+        Vector<Double> fk = calcFK(v);        // f_k = self._calc_f_k(v)
 
         assert fk.get(0) == 0;              // assert f_k[0] == 0  # f_k[0] is a dummy and will be erased
 
 
         // Sampling from posterior p(t_ji = t).
-        List<Double> pT = calcTablePosterior(j, fk);            // p_t = self._calc_table_posterior(j, f_k)
+        Vector<Double> pT = calcTablePosterior(j, fk);            // p_t = self._calc_table_posterior(j, f_k)
 
-        multinomial.init(pT);
+        multinomial.init(pT.get());
         Integer tNew = usingT.get(j).get(multinomial.sample()); // t_new = self._using_t[j][numpy.random.multinomial(1, p_t).argmax()]
 
         if (tNew == 0) {
-            List<Double> pK = calcDishPosteriorW(fk);           // p_k = self._calc_dish_posterior_w(f_k)
-            multinomial.init(pK);
+            Vector<Double> pK = calcDishPosteriorW(fk);           // p_k = self._calc_dish_posterior_w(f_k)
+            multinomial.init(pK.get());
             Integer kNew = usingK.get(multinomial.sample());    // k_new = self._using_k[numpy.random.multinomial(1, p_k).argmax()]
 
             if (kNew == 0) {                                    // if k_new == 0:
@@ -338,26 +338,22 @@ public class HierarchicalDirichletProcess {
      * @param t
      */
     private List<Double> calcDishPosteriorT(int j, Integer t) {
-        Integer kOld = k_jt.get(j).get(t);          // k_old = self._k_jt[j][t]  # it may be zero (means a removed dish)
+        Integer kOld = k_jt.get(j).get(t);                      // k_old = self._k_jt[j][t]  # it may be zero (means a removed dish)
 
-        double vBeta = vocabularySize * beta;       //        Vbeta = self._V * self._beta
-        final List<Double> nk = new ArrayList<>(nK);      //        n_k = self._n_k.copy()
-        Integer n_jt = this.n_jt.get(j).get(t);     //        n_jt = self._n_jt[j][t]
-        nk.set(kOld, nk.get(kOld) - n_jt);          //        n_k[k_old] -= n_jt
+        double vBeta = vocabularySize * beta;                   //        Vbeta = self._V * self._beta
+        Vector<Double> nk = new Vector<>(nK);                   //        n_k = self._n_k.copy()
+        Integer n_jt = this.n_jt.get(j).get(t);                 //        n_jt = self._n_jt[j][t]
+        nk.set(kOld, nk.get(kOld) - n_jt);                      //        n_k[k_old] -= n_jt
 
+        nk = nk.get(usingK);                                    //        n_k = n_k[self._using_k]
 
-        List<Double> nk2 = usingK.stream().map(nk::get).collect(Collectors.toList()); //        n_k = n_k[self._using_k]
+        Vector<Integer> tmp = new Vector<>(mK).get(usingK);
 
-        List<Integer> tmp = usingK.stream().map(mK::get).collect(Collectors.toList());
-        List<Double> logMkUsingK = tmp.stream().map(Math::log).collect(Collectors.toList());
-        List<Double> gammaLnNk = logGamma(nk2);
-        List<Double> gammaLnNkNJt = logGamma(componentWiseSum(nk2, n_jt));
-
-        List<Double> logPK = componentWiseSum(logMkUsingK, componentWiseSub(gammaLnNk, gammaLnNkNJt)); //        log_p_k = numpy.log(self._m_k[self._using_k]) + gammaln(n_k) - gammaln(n_k + n_jt)
+        Vector<Double> logPK = tmp.log().plus(nk.logGamma().minus(nk.plus(n_jt).logGamma())); //logMkUsingK.plus(gammaLnNk.minus(gammaLnNkNJt));                         //        log_p_k = numpy.log(self._m_k[self._using_k]) + gammaln(n_k) - gammaln(n_k + n_jt)
 
         double logPKNew = Math.log(gamma) + Maths.logGamma(vBeta) - Maths.logGamma(vBeta + n_jt); //        log_p_k_new = numpy.log(self._gamma) + gammaln(Vbeta) - gammaln(Vbeta + n_jt)
 
-        double gammaLnBeta = Maths.logGamma(beta); //        gammaln_beta = gammaln(self._beta)
+        double gammaLnBeta = Maths.logGamma(beta);                                                  //        gammaln_beta = gammaln(self._beta)
         for (Map.Entry<Integer, Integer> entry : n_jtv.get(j).get(t).entrySet()) {  //        for w, n_jtw in self._n_jtv[j][t].items():
             Integer w = entry.getKey();
             Integer n_jtw = entry.getValue();
@@ -369,76 +365,25 @@ public class HierarchicalDirichletProcess {
                 continue;
             }
 
-            List<Double> n_kw = nKv.stream().map(n -> n.getOrDefault(w, beta)).collect(Collectors.toList());    //                n_kw = numpy.array([n.get(w, self._beta) for n in self._n_kv])
+            Vector<Double> n_kw = new Vector<>(nKv.stream().map(n -> n.getOrDefault(w, beta)).collect(Collectors.toList()));    //                n_kw = numpy.array([n.get(w, self._beta) for n in self._n_kv])
             n_kw.set(kOld, n_kw.get(kOld) - n_jtw);                                 //        n_kw[k_old] -= n_jtw
-
-            n_kw = usingK.stream().map(n_kw::get).collect(Collectors.toList());     //        n_kw = n_kw[self._using_k]
+            n_kw = n_kw.get(usingK);                                                //        n_kw = n_kw[self._using_k]
             n_kw.set(0, 1.0);                                                       //        n_kw[0] = 1  # dummy for logarithm's warning
 
             // NOT TRANSPILED: if numpy.any(n_kw <= 0): print(n_kw) # for debug
 
-            logPK = componentWiseSum(logPK, componentWiseSub(logGamma(n_kw, n_jtw), logGamma(n_kw))); // log_p_k += gammaln(n_kw + n_jtw) - gammaln(n_kw)
+            logPK = logPK.plus(n_kw.plus(n_jtw).logGamma().minus(n_kw.logGamma())); // log_p_k += gammaln(n_kw + n_jtw) - gammaln(n_kw)
 
             logPKNew += Maths.logGamma(beta + n_jtw) - gammaLnBeta;             //        log_p_k_new += gammaln(self._beta + n_jtw) - gammaln_beta
         }
 
         logPK.set(0, logPKNew);     //        log_p_k[0] = log_p_k_new
 
-        Double maxLogPk = logPK.stream().reduce(Double::max).orElse(logPK.get(0));
-        List<Double> pK = exp(componentWiseSub(logPK, maxLogPk)); //        p_k = numpy.exp(log_p_k - log_p_k.max())
-        Double sumLogPk = pK.stream().reduce(Double::sum).orElse(0.0);
+        Vector<Double> pK = Vector.exp(logPK.plus(-logPK.max())); //        p_k = numpy.exp(log_p_k - log_p_k.max())
 
-        List<Double> result = pK.stream().map(pk -> pk / sumLogPk).collect(Collectors.toList());//        return p_k / p_k.sum()
-        boolean isNan = false;
-        for (Double d : result) {
-            if (d.isNaN()) {
-                isNan = true;
-                break;
-            }
-        }
-        if (isNan) {
-            throw new IllegalArgumentException("NAN");
-        }
+        Vector<Double> result = pK.dividedBy(pK.sum());         //        return p_k / p_k.sum()
 
-        return result;     //        return p_k / p_k.sum()
-    }
-
-    private List<Double> componentWiseSum(List<? extends Number> l1, List<? extends Number> l2) {
-        assert l1.size() == l2.size();
-        List<Double> result = new ArrayList<>(l1.size());
-        for (int i = 0; i < l1.size(); i++) {
-            result.add(l1.get(i).doubleValue() + l2.get(i).doubleValue());
-        }
-        return result;
-    }
-
-    private List<Double> componentWiseSum(List<? extends Number> l1, Number n) {
-        return l1.stream().map(i -> i.doubleValue() + n.doubleValue()).collect(Collectors.toList());
-    }
-
-    private List<Double> componentWiseSub(List<? extends Number> l1, List<? extends Number> l2) {
-        assert l1.size() == l2.size();
-        List<Double> result = new ArrayList<>(l1.size());
-        for (int i = 0; i < l1.size(); i++) {
-            result.add(l1.get(i).doubleValue() - l2.get(i).doubleValue());
-        }
-        return result;
-    }
-
-    private List<Double> componentWiseSub(List<? extends Number> l1, Number value) {
-        return l1.stream().map(n -> n.doubleValue() - value.doubleValue()).collect(Collectors.toList());
-    }
-
-    private List<Double> logGamma(List<Double> doubles) {
-        return doubles.stream().map(Maths::logGamma).collect(Collectors.toList());
-    }
-
-    private List<Double> logGamma(List<Double> doubles, double deviation) {
-        return doubles.stream().map(x -> Maths.logGamma(x + deviation)).collect(Collectors.toList());
-    }
-
-    private List<Double> exp(List<Double> doubles) {
-        return doubles.stream().map(Math::exp).collect(Collectors.toList());
+        return result.get();     //        return p_k / p_k.sum()
     }
 
     /**
@@ -506,50 +451,32 @@ public class HierarchicalDirichletProcess {
      * @param v
      * @return
      */
-    private List<Double> calcFK(int v) {
+    private Vector<Double> calcFK(int v) {
         List<Double> result = new ArrayList<>();
         for (int i = 0; i < nKv.size(); i++) {
             double fk = nKv.get(i).get(v) / nK.get(i);
             result.add(fk);
         }
-        return result;
+        return new Vector<>(result);
     }
 
     /**
      * @param j
      * @param fk
      */
-    private List<Double> calcTablePosterior(int j, List<Double> fk) {
-        List<Integer> usingT = this.usingT.get(j);                                                          // using_t = self._using_t[j]
-        List<Integer> tmp1 = usingT.stream().map(idx -> n_jt.get(j).get(idx)).collect(Collectors.toList());
-        List<Integer> tmp2 = usingT.stream().map(idx -> k_jt.get(j).get(idx)).collect(Collectors.toList());
+    private Vector<Double> calcTablePosterior(int j, Vector<Double> fk) {
+        List<Integer> usingT = this.usingT.get(j);                                  // using_t = self._using_t[j]
 
-        List<Double> tmp3 = tmp2.stream().map(fk::get).collect(Collectors.toList());
-        List<Double> pT = componentWiseMultiplication(tmp1, tmp3);                                          // p_t = self._n_jt[j][using_t] * f_k[self._k_jt[j][using_t]]
-        Double pXJi = innerProduct(mK, fk) + (gamma / vocabularySize);                                      // p_x_ji = numpy.inner(self._m_k, f_k) + self._gamma / self._V
+        Vector<Integer> tmp1V = new Vector<>(n_jt.get(j)).get(usingT);
+        Vector<Integer> tmp2V = new Vector<>(k_jt.get(j)).get(usingT);
 
-        pT.set(0, pXJi * alpha / (gamma + m));                                                              // p_t[0] = p_x_ji * self._alpha / (self._gamma + self._m)
+        Vector<Double> tmp3Vector = fk.get(tmp2V);
 
-        double sum = pT.stream().mapToDouble(p -> p).sum();
-        return pT.stream().map(p -> p / sum).collect(Collectors.toList());                                  // return p_t / p_t.sum()
-    }
+        Vector<Double> pTVector = tmp1V.times(tmp3Vector);                          // p_t = self._n_jt[j][using_t] * f_k[self._k_jt[j][using_t]]
+        Double pXJiAlt = new Vector<>(mK).dot(fk) + (gamma / vocabularySize);       // p_x_ji = numpy.inner(self._m_k, f_k) + self._gamma / self._V
+        pTVector.set(0, pXJiAlt * alpha / (gamma + m));                             // p_t[0] = p_x_ji * self._alpha / (self._gamma + self._m)
 
-    private <T extends Number, S extends Number> List<Double> componentWiseMultiplication(List<T> d1, List<S> d2) {
-        assert d1.size() == d2.size();
-        List<Double> result = new ArrayList<>(d1.size());
-        for (int i = 0; i < d1.size(); i++) {
-            result.add(d1.get(i).doubleValue() * d2.get(i).doubleValue());
-        }
-        return result;
-    }
-
-    private <T extends Number, S extends Number> double innerProduct(List<T> mK, List<S> fK) {
-        double result = 0d;
-        assert mK.size() == fK.size();
-        for (int i = 0; i < mK.size(); i++) {
-            result += mK.get(i).doubleValue() * fK.get(i).doubleValue();
-        }
-        return result;
+        return pTVector.dividedBy(pTVector.sum());                                  // return p_t / p_t.sum()
     }
 
     /**
@@ -557,15 +484,10 @@ public class HierarchicalDirichletProcess {
      *
      * @param fk
      */
-    private List<Double> calcDishPosteriorW(List<Double> fk) {
-        List<Double> doubles = componentWiseMultiplication(mK, fk);                         //    p_k = (self._m_k * f_k)[self._using_k]
-        List<Double> pK = usingK.stream().map(doubles::get).collect(Collectors.toList());   //    p_k = (self._m_k * f_k)[self._using_k]
-        pK.set(0, gamma / vocabularySize);                                                  //    p_k[0] = self._gamma / self._V
-        double sum = pK.stream().reduce((d1, d2) -> d1 + d2).orElse(0.0);
-        for (int i = 0; i < pK.size(); i++) {
-            pK.set(i, pK.get(i) / sum);
-        }
-        return pK;                                                                          //        return p_k / p_k.sum()
+    private Vector<Double> calcDishPosteriorW(Vector<Double> fk) {
+        Vector<Double> pK = new Vector<>(mK).times(fk).get(usingK);                                 //    p_k = (self._m_k * f_k)[self._using_k]
+        pK.set(0, gamma / vocabularySize);                                                        //    p_k[0] = self._gamma / self._V
+        return pK.dividedBy(pK.sum());                                                //        return p_k / p_k.sum()
     }
 
     /**
