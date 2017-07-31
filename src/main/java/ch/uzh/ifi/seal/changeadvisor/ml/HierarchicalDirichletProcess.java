@@ -289,7 +289,7 @@ public class HierarchicalDirichletProcess {
         leaveFromDish(j, t); //        self._leave_from_dish(j, t)
 
         // Sampling of k.
-        List<Double> pK = calcDishPosteriorT(j, t);//                p_k = self._calc_dish_posterior_t(j, t)
+        Vector<Double> pK = calcDishPosteriorT(j, t);//                p_k = self._calc_dish_posterior_t(j, t)
         for (Double p : pK) {
             if (p < 0) {
                 logger.info(pK.toString());
@@ -297,7 +297,7 @@ public class HierarchicalDirichletProcess {
             }
         }
 
-        multinomial.init(pK);
+        multinomial.init(pK.get());
         Integer kNew = usingK.get(multinomial.sample());    //        k_new = self._using_k[numpy.random.multinomial(1, p_k).argmax()]
         if (kNew == 0) {                                    //        if k_new == 0:
             kNew = addNewDish();                            //              k_new = self._add_new_dish()
@@ -337,7 +337,7 @@ public class HierarchicalDirichletProcess {
      * @param j
      * @param t
      */
-    private List<Double> calcDishPosteriorT(int j, Integer t) {
+    private Vector<Double> calcDishPosteriorT(int j, Integer t) {
         Integer kOld = k_jt.get(j).get(t);                      // k_old = self._k_jt[j][t]  # it may be zero (means a removed dish)
 
         double vBeta = vocabularySize * beta;                   //        Vbeta = self._V * self._beta
@@ -381,9 +381,7 @@ public class HierarchicalDirichletProcess {
 
         Vector<Double> pK = Vector.exp(logPK.plus(-logPK.max())); //        p_k = numpy.exp(log_p_k - log_p_k.max())
 
-        Vector<Double> result = pK.dividedBy(pK.sum());         //        return p_k / p_k.sum()
-
-        return result.get();     //        return p_k / p_k.sum()
+        return pK.dividedBy(pK.sum());     //        return p_k / p_k.sum()
     }
 
     /**
