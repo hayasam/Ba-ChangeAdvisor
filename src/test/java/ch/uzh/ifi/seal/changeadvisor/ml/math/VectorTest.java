@@ -9,6 +9,7 @@ import org.junit.Test;
 import java.util.List;
 
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNot.not;
 
 public class VectorTest {
 
@@ -42,6 +43,61 @@ public class VectorTest {
     }
 
     @Test
+    public void get() throws Exception {
+        List<Integer> ints = Lists.newArrayList(1, 2, 3, 4, 5, 6);
+        Vector<Integer> v1 = new Vector<>(ints);
+
+        for (int i = 0; i < ints.size(); i++) {
+            Assert.assertThat(ints.get(i), is(v1.get(i)));
+        }
+
+        List<Integer> indexes = Lists.newArrayList(1, 2, 3);
+        Vector<Integer> slice = v1.get(indexes);
+
+        for (int i = 0; i < indexes.size(); i++) {
+            Assert.assertThat(slice.get(i), is(ints.get(indexes.get(i))));
+        }
+
+        Vector<Integer> vIndexes = new Vector<>(indexes);
+        Vector<Integer> slice2 = v1.get(vIndexes);
+        Assert.assertThat(slice, is(slice2));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void getThrowsNegative() throws Exception {
+        List<Integer> ints = Lists.newArrayList(1, 2, 3, 4, 5, 6);
+        new Vector<>(ints).get(-1);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void getThrowsOutOfBounds() throws Exception {
+        List<Integer> ints = Lists.newArrayList(1, 2, 3, 4, 5, 6);
+        new Vector<>(ints).get(ints.size());
+    }
+
+    @Test
+    public void set() throws Exception {
+        List<Integer> ints = Lists.newArrayList(1, 2, 3, 4, 5, 6);
+        Vector<Integer> v1 = new Vector<>(ints);
+
+        v1.set(0, 10);
+        Assert.assertThat(v1.get(0), is(10));
+        Assert.assertThat(ints.get(0), not(10));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void setThrowsNegative() throws Exception {
+        List<Integer> ints = Lists.newArrayList(1, 2, 3, 4, 5, 6);
+        new Vector<>(ints).set(-1, 1);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void setThrowsOutOfBounds() throws Exception {
+        List<Integer> ints = Lists.newArrayList(1, 2, 3, 4, 5, 6);
+        new Vector<>(ints).set(ints.size(), 1);
+    }
+
+    @Test
     public void dot() throws Exception {
         Vector<Integer> v1 = new Vector<>(-1, 0, 1);
         Vector<Integer> v2 = new Vector<>(1, 0, 1);
@@ -56,7 +112,7 @@ public class VectorTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void dotShouldThrow() throws Exception {
+    public void dotThrows() throws Exception {
         Vector<Integer> v1 = new Vector<>(1);
         Vector<Integer> v2 = new Vector<>(1, 2, 3);
         v1.dot(v2);
@@ -140,10 +196,14 @@ public class VectorTest {
 
         result = Vector.ZEROS_3_F.times(Vector.ZEROS_3_F);
         Assert.assertThat(result, is(Vector.ZEROS_3_F));
+
+
+        result = Vector.ONES_3_F.times(10);
+        Assert.assertThat(result, is(new Vector<>(result.size(), 10d)));
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void timeShouldThrow() throws Exception {
+    public void timesThrows() throws Exception {
         new Vector<>(1, 2, 3).times(new Vector<>(1));
     }
 
@@ -166,8 +226,34 @@ public class VectorTest {
     }
 
     @Test
-    public void logGammaShouldNaN() throws Exception {
+    public void logGammaNaN() throws Exception {
         Vector<Double> result = new Vector<>(3, -1d).logGamma();
+        for (Double val : result) {
+            Assert.assertTrue(val.isNaN());
+        }
+    }
+
+    @Test
+    public void log() throws Exception {
+        Vector<Integer> v = new Vector<>(1, 2, 3);
+        Vector<Double> result = v.log();
+
+        for (int i = 0; i < v.size(); i++) {
+            Assert.assertThat(Math.log(v.get(i)), is(result.get(i)));
+        }
+    }
+
+    @Test
+    public void logThrows() {
+        Vector<Double> result = Vector.ZEROS_3_F.log();
+        for (Double val : result) {
+            Assert.assertTrue(val.isInfinite());
+        }
+    }
+
+    @Test
+    public void logNaN() throws Exception {
+        Vector<Double> result = new Vector<>(3, -1d).log();
         for (Double val : result) {
             Assert.assertTrue(val.isNaN());
         }
@@ -180,11 +266,74 @@ public class VectorTest {
 
         result = Vector.ONES_3_F.exp();
         Assert.assertThat(result, is(new Vector<>(3, Math.exp(1))));
+        Assert.assertThat(result, is(Vector.exp(Vector.ONES_3_F)));
 
 
         result = new Vector<>(1, 2, 3).exp();
         Vector<Double> expectedResult = new Vector<>(Math.exp(1), Math.exp(2), Math.exp(3));
         Assert.assertThat(result, is(expectedResult));
+        Assert.assertThat(result, is(Vector.exp(new Vector<>(1, 2, 3))));
+    }
 
+    @Test
+    public void sum() throws Exception {
+        Vector<Integer> v = new Vector<>(0, 0, 0);
+        double sum = v.sum();
+        Assert.assertThat(sum, is(0d));
+
+        v = new Vector<>(1, 2, 3, 4);
+        sum = v.sum();
+        Assert.assertThat(sum, is(10d));
+
+        v = new Vector<>(-1, 1, -2, 2);
+        sum = v.sum();
+        Assert.assertThat(sum, is(0d));
+    }
+
+    @Test
+    public void max() throws Exception {
+        Vector<Integer> v = new Vector<>(0, 0, 0);
+        int max = v.max();
+        Assert.assertThat(max, is(0));
+
+        v = new Vector<>(0, 1, 2);
+        max = v.max();
+        Assert.assertThat(max, is(2));
+
+        Vector<Double> vd = new Vector<>(0d, 0d, 0d);
+        double dMax = vd.max();
+        Assert.assertThat(dMax, is(0d));
+
+        vd = new Vector<>(0d, 1d, 2d);
+        dMax = vd.max();
+        Assert.assertThat(dMax, is(2d));
+
+        vd = new Vector<>(-2d, -1d);
+        dMax = vd.max();
+        Assert.assertThat(dMax, is(-1d));
+
+        vd = new Vector<>(0d, 1d, Double.NaN);
+        dMax = vd.max();
+        Assert.assertThat(dMax, is(Double.NaN));
+
+        vd = new Vector<>(0d, 1d, Double.POSITIVE_INFINITY);
+        dMax = vd.max();
+        Assert.assertThat(dMax, is(Double.POSITIVE_INFINITY));
+
+        vd = new Vector<>(0d, 1d, Double.NEGATIVE_INFINITY);
+        dMax = vd.max();
+        Assert.assertThat(dMax, is(1d));
+    }
+
+    @Test
+    public void asList() throws Exception {
+        Vector<Double> v = new Vector<>(0d, 1d, 2d);
+        List<Double> doubles = v.asList();
+        for (int i = 0; i < v.size(); i++) {
+            Assert.assertThat(v.get(i), is(doubles.get(i)));
+        }
+
+        v.set(0, 10d);
+        Assert.assertThat(v.get(0), not(doubles.get(0)));
     }
 }
