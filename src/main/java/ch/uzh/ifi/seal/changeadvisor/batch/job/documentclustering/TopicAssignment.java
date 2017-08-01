@@ -30,6 +30,13 @@ public class TopicAssignment {
         timestamp = LocalDateTime.now();
     }
 
+    public TopicAssignment(Set<String> bag, int topic) {
+        this.originalSentence = "";
+        this.bag = bag;
+        this.topic = topic;
+        timestamp = LocalDateTime.now();
+    }
+
     public String getId() {
         return id;
     }

@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.changeadvisor.ml;
 
+import ch.uzh.ifi.seal.changeadvisor.batch.job.documentclustering.TopicAssignment;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.opencsv.CSVReader;
@@ -39,7 +40,9 @@ public class HierarchicalDirichletProcessTest {
     @Test
     public void fit() throws Exception {
         HierarchicalDirichletProcess hdplda = new HierarchicalDirichletProcess(1.0, 0.5, 1.0);
-        hdplda.fit(corpus, 100);
+        hdplda.fit(corpus, 10);
+        List<TopicAssignment> topics = hdplda.topics();
+        logger.info(topics);
     }
 
 }

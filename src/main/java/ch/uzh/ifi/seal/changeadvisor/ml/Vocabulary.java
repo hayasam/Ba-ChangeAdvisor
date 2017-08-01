@@ -87,4 +87,8 @@ public class Vocabulary {
     public int vocabularySize() {
         return vocabs.size();
     }
+
+    public String getVocab(int i) {
+        return vocabs.get(i);
+    }
 }

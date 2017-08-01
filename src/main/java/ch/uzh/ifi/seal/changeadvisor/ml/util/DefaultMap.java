@@ -2,10 +2,7 @@ package ch.uzh.ifi.seal.changeadvisor.ml.util;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class DefaultMap<K, V> implements Map<K, V> {
 
@@ -89,5 +86,21 @@ public class DefaultMap<K, V> implements Map<K, V> {
         }
 
         return sb.append("}").toString();
+    }
+
+    public List<Integer> getIndexOfTopNValues(int n) {
+        if (n > 0) {
+            n = n > map.size() ? map.size() : n;
+            Comparator<Integer> valueComparator = new MapValueComparator((Map<Integer, Double>) map);
+            TreeMap<Integer, Double> orderedMap = new TreeMap<>(valueComparator);
+
+            orderedMap.putAll((Map<? extends Integer, ? extends Double>) map);
+
+
+            List<Integer> keys = new ArrayList<>(orderedMap.keySet());
+            List<Double> values = new ArrayList<>(orderedMap.values());
+            return keys.subList(0, n);
+        }
+        return new ArrayList<>();
     }
 }

@@ -1,6 +1,7 @@
 package ch.uzh.ifi.seal.changeadvisor.ml;
 
 import cc.mallet.util.Maths;
+import ch.uzh.ifi.seal.changeadvisor.batch.job.documentclustering.TopicAssignment;
 import ch.uzh.ifi.seal.changeadvisor.ml.math.Multinomial;
 import ch.uzh.ifi.seal.changeadvisor.ml.math.SimpleMultinomial;
 import ch.uzh.ifi.seal.changeadvisor.ml.math.Vector;
@@ -9,6 +10,7 @@ import com.google.common.collect.Lists;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -19,6 +21,8 @@ import java.util.stream.Collectors;
 public class HierarchicalDirichletProcess {
 
     private static final Logger logger = Logger.getLogger(HierarchicalDirichletProcess.class);
+
+    private Vocabulary vocabulary;
 
     /**
      * Number of tokens in corpus. self._V in hdplda.py
@@ -138,7 +142,8 @@ public class HierarchicalDirichletProcess {
     }
 
     public void fit(Corpus corpus, int maxIterations) {
-        Vocabulary vocabulary = new Vocabulary(corpus);
+        vocabulary = new Vocabulary(corpus);
+
 
         setup(vocabulary.getDocumentIds(), vocabulary.vocabularySize());
 
@@ -152,6 +157,22 @@ public class HierarchicalDirichletProcess {
             logger.info(String.format("%-15d %-15d %-15f", i + 1, usingK.size() - 1, perplexity()));
             logger.info("=============== =============== ===============");
         }
+    }
+
+    public List<TopicAssignment> topics() {
+        List<TopicAssignment> topics = new ArrayList<>(); //        topics = list()
+
+        int topicNumber = 0;                //        topic_number = 0
+        List<DefaultMap<Integer, Double>> phi = topicWordDistribution(); //        phi = self.topic_word_distribution()
+
+        for (int k = 0; k < phi.size(); k++) {          //        for k, phi_k in enumerate(phi):
+            DefaultMap<Integer, Double> phiK = phi.get(k);
+
+            List<Integer> indexes = phiK.getIndexOfTopNValues(20);
+            List<String> words = indexes.stream().map(idx -> vocabulary.getVocab(idx)).collect(Collectors.toList());    //        words = [self._vocabulary[w] for w in sorted(phi_k, key=lambda w: -phi_k[w])[:20]]
+            topics.add(new TopicAssignment(new HashSet<>(words), topicNumber++)); //        topics.append([topic_number, words])
+        }
+        return topics;//        return topics
     }
 
     private double perplexity() {
