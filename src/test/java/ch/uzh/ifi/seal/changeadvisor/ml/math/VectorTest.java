@@ -336,4 +336,37 @@ public class VectorTest {
         v.set(0, 10d);
         Assert.assertThat(v.get(0), not(doubles.get(0)));
     }
+
+    @Test
+    public void subVector() throws Exception {
+        Vector<Integer> v = new Vector<>(1, 2, 3, 4);
+        Vector<Integer> result = v.subVector(2);
+        Vector<Integer> expected = new Vector<>(Lists.newArrayList(3, 4));
+        Assert.assertThat(result, is(expected));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void subVectorThrowsNegative() throws Exception {
+        new Vector<>(1, 2, 3, 4).subVector(-1);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void subVectorThrowsOutOfBounds() throws Exception {
+        new Vector<>(1, 2, 3, 4).subVector(10);
+    }
+
+    @Test
+    public void argmax() throws Exception {
+        Vector<Integer> v = new Vector<>(1, 2, 3, 4, 5);
+        int argmax = v.argmax();
+        Assert.assertThat(argmax, is(4));
+
+        v = new Vector<>(5, 4, 3, 2, 1);
+        argmax = v.argmax();
+        Assert.assertThat(argmax, is(0));
+
+        v = new Vector<>(1, 4, 5, 2, 1);
+        argmax = v.argmax();
+        Assert.assertThat(argmax, is(2));
+    }
 }

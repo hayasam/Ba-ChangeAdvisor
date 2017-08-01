@@ -1,6 +1,7 @@
 package ch.uzh.ifi.seal.changeadvisor.ml;
 
 import cc.mallet.util.Maths;
+import ch.uzh.ifi.seal.changeadvisor.batch.job.documentclustering.Topic;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.documentclustering.TopicAssignment;
 import ch.uzh.ifi.seal.changeadvisor.ml.math.Multinomial;
 import ch.uzh.ifi.seal.changeadvisor.ml.math.SimpleMultinomial;
@@ -21,6 +22,8 @@ import java.util.stream.Collectors;
 public class HierarchicalDirichletProcess {
 
     private static final Logger logger = Logger.getLogger(HierarchicalDirichletProcess.class);
+
+    private Corpus corpus;
 
     private Vocabulary vocabulary;
 
@@ -142,6 +145,7 @@ public class HierarchicalDirichletProcess {
     }
 
     public void fit(Corpus corpus, int maxIterations) {
+        this.corpus = corpus;
         vocabulary = new Vocabulary(corpus);
 
 
@@ -173,6 +177,33 @@ public class HierarchicalDirichletProcess {
             topics.add(new TopicAssignment(new HashSet<>(words), topicNumber++)); //        topics.append([topic_number, words])
         }
         return topics;//        return topics
+    }
+
+    public List<Topic> assignments() {
+        List<Vector<Double>> documentTopicDistribution = documentTopicDistribution();   //        document_topic_distribution = self.document_topic_distribution()
+        List<Topic> assignments = new ArrayList<>();            //        assignments = list()
+
+        List<List<String>> documents = corpus.getDocuments();       //        documents = self._corpus.tokens()
+        for (int i = 0; i < documentTopicDistribution.size(); i++) {
+            Vector<Double> distribution = documentTopicDistribution.get(i).subVector(1);
+            List<String> document = documents.get(i);
+            int assignment = distribution.argmax();
+            assignments.add(new Topic(new HashSet<>(document), assignment));
+        }
+        return assignments;
+
+//
+//        assignments = list()
+//
+//        documents = self._corpus.tokens()
+//
+//        for i, distribution in enumerate(document_topic_distribution):
+//        distribution = distribution[1:]
+//        document = documents[i]
+//        assignment = max(enumerate(distribution), key=lambda x: x[1])[0]
+//        assignments.append([document, assignment])
+//
+//        return assignments
     }
 
     private double perplexity() {

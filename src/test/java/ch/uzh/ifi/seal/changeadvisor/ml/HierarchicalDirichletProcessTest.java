@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.changeadvisor.ml;
 
+import ch.uzh.ifi.seal.changeadvisor.batch.job.documentclustering.Topic;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.documentclustering.TopicAssignment;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
@@ -42,7 +43,7 @@ public class HierarchicalDirichletProcessTest {
         HierarchicalDirichletProcess hdplda = new HierarchicalDirichletProcess(1.0, 0.5, 1.0);
         hdplda.fit(corpus, 10);
         List<TopicAssignment> topics = hdplda.topics();
-        logger.info(topics);
+        List<Topic> assignments = hdplda.assignments();
     }
 
 }

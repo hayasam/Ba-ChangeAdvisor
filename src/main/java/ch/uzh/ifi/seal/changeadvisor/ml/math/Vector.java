@@ -319,6 +319,16 @@ public class Vector<T extends Number> implements Iterable<T> {
         return n;
     }
 
+    public int argmax() {
+        T max = max();
+        return v.indexOf(max);
+    }
+
+    public Vector<T> subVector(int fromIndex) {
+        assertDimension(fromIndex);
+        return new Vector<>(v.subList(fromIndex, v.size()));
+    }
+
     /**
      * Returns a copy of this vector as list.
      * The returned list is a deep copy and is safe for continued use.
