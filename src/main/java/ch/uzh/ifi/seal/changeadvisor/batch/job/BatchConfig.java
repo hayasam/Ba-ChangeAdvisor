@@ -26,29 +26,28 @@ public class BatchConfig {
 
     private final FeedbackTransformationStepConfig transformationStepConfig;
 
-    private final HdpStepConfig hdpStepConfig;
+    private final DocumentClusteringStepConfig documentClusteringStepConfig;
 
     @Autowired
-    public BatchConfig(JobBuilderFactory jobBuilderFactory, SourceComponentsTransformationStepConfig bagOfWordsStepConfig, ArdocStepConfig ardocStepConfig, FeedbackTransformationStepConfig transformationStepConfig, HdpStepConfig hdpStepConfig) {
+    public BatchConfig(JobBuilderFactory jobBuilderFactory, SourceComponentsTransformationStepConfig bagOfWordsStepConfig, ArdocStepConfig ardocStepConfig, FeedbackTransformationStepConfig transformationStepConfig, DocumentClusteringStepConfig documentClusteringStepConfig) {
         this.jobBuilderFactory = jobBuilderFactory;
         this.bagOfWordsStepConfig = bagOfWordsStepConfig;
         this.ardocStepConfig = ardocStepConfig;
         this.transformationStepConfig = transformationStepConfig;
-        this.hdpStepConfig = hdpStepConfig;
+        this.documentClusteringStepConfig = documentClusteringStepConfig;
     }
 
     @Bean
     public Job changeAdvisor(JobCompletionNotificationListener listener) {
+        documentClusteringStepConfig.setMaxIterations(50);
         return jobBuilderFactory.get(JOB_NAME)
                 .incrementer(new RunIdIncrementer())
                 .listener(listener)
                 .flow(bagOfWordsStepConfig.extractBagOfWords())
                 .next(ardocStepConfig.ardocAnalysis())
                 .next(transformationStepConfig.transformFeedback())
-                .next(hdpStepConfig.documentsClustering())
-//                .flow(hdpStepConfig.documentsClustering())
+                .next(documentClusteringStepConfig.documentsClustering())
                 .end()
                 .build();
     }
-
 }

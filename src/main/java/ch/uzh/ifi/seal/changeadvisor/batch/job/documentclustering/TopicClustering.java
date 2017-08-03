@@ -4,6 +4,7 @@ import ch.uzh.ifi.seal.changeadvisor.batch.job.feedbackprocessing.TransformedFee
 import ch.uzh.ifi.seal.changeadvisor.ml.Corpus;
 import ch.uzh.ifi.seal.changeadvisor.ml.DocumentClusterer;
 import ch.uzh.ifi.seal.changeadvisor.ml.DocumentClustererAdapter;
+import org.apache.log4j.Logger;
 import org.springframework.batch.item.ItemProcessor;
 
 import java.util.ArrayList;
@@ -14,6 +15,8 @@ import java.util.stream.Collectors;
  * Created by alex on 24.07.2017.
  */
 public class TopicClustering implements ItemProcessor<List<TransformedFeedback>, TopicClusteringResult> {
+
+    private static final Logger logger = Logger.getLogger(TopicClustering.class);
 
     private DocumentClusterer documentClusterer;
 
@@ -26,13 +29,27 @@ public class TopicClustering implements ItemProcessor<List<TransformedFeedback>,
 
     @Override
     public TopicClusteringResult process(List<TransformedFeedback> items) throws Exception {
-        List<List<String>> documents = items.stream().map(f -> new ArrayList<>(f.getBagOfWords())).collect(Collectors.toList());
-        List<String> originalSentences = items.stream().map(TransformedFeedback::getSentence).collect(Collectors.toList());
-        Corpus corpus = new Corpus(originalSentences, documents);
+        Corpus corpus = toCorpus(items);
+
+        logger.info(String.format("Starting clustering of (%d) documents", corpus.size()));
+        long start = System.currentTimeMillis();
+
         documentClusterer.fit(corpus, maxIterations);
 
-        List<TopicAssignment> topics = documentClusterer.assignments();
-        List<Topic> assignments = documentClusterer.topics();
-        return new TopicClusteringResult(assignments, topics);
+        long end = System.currentTimeMillis();
+        logger.info(String.format("Finished clustering, time elapsed: %.2f", (end - start) / 1000.));
+
+        List<TopicAssignment> assignments = documentClusterer.assignments();
+        List<Topic> topics = documentClusterer.topics();
+
+        logger.info(String.format("Topics: %d", topics.size()));
+        logger.info(String.format("Topic Assignments: %d", assignments.size()));
+        return new TopicClusteringResult(topics, assignments);
+    }
+
+    Corpus toCorpus(List<TransformedFeedback> feedback) {
+        List<List<String>> documents = feedback.stream().map(f -> new ArrayList<>(f.getBagOfWords())).collect(Collectors.toList());
+        List<String> originalSentences = feedback.stream().map(TransformedFeedback::getSentence).collect(Collectors.toList());
+        return new Corpus(originalSentences, documents);
     }
 }

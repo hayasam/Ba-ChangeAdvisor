@@ -141,13 +141,11 @@ public class HierarchicalDirichletProcess implements TopicInferencer, TopicAssig
             }
             tJi.add(zeros);
         }
-        logger.info(tJi.size());
     }
 
     public void fit(Corpus corpus, int maxIterations) {
         this.corpus = corpus;
         vocabulary = new Vocabulary(corpus);
-
 
         setup(vocabulary.getDocumentIds(), vocabulary.vocabularySize());
 
@@ -289,8 +287,9 @@ public class HierarchicalDirichletProcess implements TopicInferencer, TopicAssig
         Integer v = xJi.get(j).get(i);     // v = self._x_ji[j][i]
         Vector<Double> fk = calcFK(v);        // f_k = self._calc_f_k(v)
 
-        assert fk.get(0) == 0;              // assert f_k[0] == 0  # f_k[0] is a dummy and will be erased
-
+        if (fk.get(0) != 0) {   // assert f_k[0] == 0  # f_k[0] is a dummy and will be erased
+            throw new IllegalArgumentException(String.format("j: %d, i: %d, fk.get(0): %f", j, i, fk.get(0)));
+        }
 
         // Sampling from posterior p(t_ji = t).
         Vector<Double> pT = calcTablePosterior(j, fk);            // p_t = self._calc_table_posterior(j, f_k)
@@ -394,7 +393,7 @@ public class HierarchicalDirichletProcess implements TopicInferencer, TopicAssig
             Integer nJtw = entry.getValue();
 
             if (nJtw < 0) {//        assert n_jtw >= 0
-                throw new IllegalArgumentException(String.format("j: %d\tt: %d", j, t));
+                throw new IllegalArgumentException(String.format("j: %d\tt: %d,\tnJtw: %d", j, t, nJtw));
             }
             if (nJtw == 0) {                                                       //        if n_jtw == 0: continue
                 continue;
@@ -428,13 +427,19 @@ public class HierarchicalDirichletProcess implements TopicInferencer, TopicAssig
      */
     private void leaveFromDish(int j, Integer t) {
         Integer k = kJt.get(j).get(t); // k = self._k_jt[j][t]
-        assert k > 0;                   // assert k > 0
+        if (k <= 0) {                                           // assert k > 0
+            throw new IllegalArgumentException(String.format("k <= 0;\tk: %d", k));
+        }
         assert mK.get(k) > 0;           // assert self._m_k[k] > 0
+        if (mK.get(k) <= 0) {
+            throw new IllegalArgumentException(String.format("mK.get(k) <= 0;\tmK.get(k): %d", mK.get(k)));
+        }
 
         mK.set(k, mK.get(k) - 1);       // self._m_k[k] -= 1
         m -= 1;                         // self._m -= 1
         if (mK.get(k) == 0) {           // if self._m_k[k] == 0:
-            assert usingK.remove(k);           //      self._using_k.remove(k)
+            boolean removed = usingK.remove(k);  //      self._using_k.remove(k)
+            assert removed;
             kJt.get(j).set(t, 0);      //      self._k_jt[j][t] = 0
         }
     }
@@ -443,7 +448,10 @@ public class HierarchicalDirichletProcess implements TopicInferencer, TopicAssig
         Integer t = tJi.get(j).get(i);      // t = self.t_ji[j][i]
         if (t > 0) {                        // if t > 0:
             Integer k = kJt.get(j).get(t); //      k = self._k_jt[j][t]
-            assert k > 0;
+
+            if (k <= 0) {
+                throw new IllegalArgumentException("4: k <= 0");
+            }
 
             // Decreases counters.
             Integer v = xJi.get(j).get(i);                             // v = self._x_ji[j][i]
@@ -469,7 +477,9 @@ public class HierarchicalDirichletProcess implements TopicInferencer, TopicAssig
         mK.set(k, mK.get(k) - 1);       //    self._m_k[k] -= 1
         m -= 1;                         //    self._m -= 1
 
-        assert mK.get(k) >= 0;          //    assert self._m_k[k] >= 0
+        if (mK.get(k) < 0) {            //    assert self._m_k[k] >= 0
+            throw new IllegalArgumentException(String.format("mK.get(k) < 0;\tmK.get(k): %d", mK.get(k)));
+        }
         if (mK.get(k) == 0) {           //    if self._m_k[k] == 0:
             // Removes topic (dish) where all tables are gone.
             usingK.remove(k);           //    self._using_k.remove(k)
@@ -547,8 +557,12 @@ public class HierarchicalDirichletProcess implements TopicInferencer, TopicAssig
                 nKv.add(null);                              // self._n_kv.append(None)
             }
 
-            assert kNew == usingK.get(usingK.size() - 1) + 1; // assert k_new == self._using_k[-1] + 1
-            assert kNew < nKv.size();                         //assert k_new < len(self._n_kv)
+            if (kNew != usingK.get(usingK.size() - 1) + 1) {
+                throw new IllegalArgumentException(String.format("kNew: %d;\tusingK.get(usingK.size() - 1) + 1: %d", kNew, usingK.get(usingK.size() - 1) + 1));
+            }
+            if (kNew >= nKv.size()) {
+                throw new IllegalArgumentException(String.format("kNew: %d;\tnKv.size(): %d", kNew, nKv.size()));       //assert k_new < len(self._n_kv)
+            }
         }
 
         usingK.add(kNew, kNew);                     //        self._using_k.insert(k_new, k_new)
@@ -604,6 +618,9 @@ public class HierarchicalDirichletProcess implements TopicInferencer, TopicAssig
      */
     private Integer addNewTable(int j, Integer kNew) {
         assert usingK.contains(kNew);   //    assert k_new in self._using_k
+        if (!usingK.contains(kNew)) {
+            throw new IllegalArgumentException("8: usingK not contains kNew");
+        }
         boolean broke = false;
         int tNew;
         for (tNew = 0; tNew < usingT.get(j).size(); tNew++) {      //        for t_new, t in enumerate(self._using_t[j]):
@@ -632,7 +649,9 @@ public class HierarchicalDirichletProcess implements TopicInferencer, TopicAssig
     }
 
     private void seatAtTable(int j, int i, Integer tNew) {
-        assert usingT.get(j).contains(tNew);                        //    assert t_new in self._using_t[j]
+        if (!usingT.get(j).contains(tNew)) {
+            throw new IllegalArgumentException(String.format("usingT.get(j): %s;\ttNew: %d", usingT.get(j), tNew)); //    assert t_new in self._using_t[j]
+        }
         tJi.get(j).set(i, tNew);                                    //    self.t_ji[j][i] = t_new
         nJt.get(j).set(tNew, nJt.get(j).get(tNew) + 1);           //    self._n_jt[j][t_new] += 1
 

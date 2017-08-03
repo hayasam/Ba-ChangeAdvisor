@@ -1,17 +1,17 @@
 package ch.uzh.ifi.seal.changeadvisor.ml;
 
+import ch.uzh.ifi.seal.changeadvisor.batch.job.documentclustering.FlatFileTransformedFeedbackReader;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.documentclustering.Topic;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.documentclustering.TopicAssignment;
-import com.google.common.base.Splitter;
-import com.google.common.collect.Lists;
-import com.opencsv.CSVReader;
+import ch.uzh.ifi.seal.changeadvisor.batch.job.feedbackprocessing.TransformedFeedback;
+import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
-import org.junit.Before;
 import org.junit.Test;
 
-import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class HierarchicalDirichletProcessTest {
 
@@ -19,29 +19,17 @@ public class HierarchicalDirichletProcessTest {
 
     private static final Logger logger = Logger.getLogger(HierarchicalDirichletProcessTest.class);
 
-    private List<String> inputCategories = Lists.newArrayList("FEATURE REQUEST", "PROBLEM DISCOVERY");
-
-    private Corpus corpus;
-
-    @Before
-    public void setUp() throws Exception {
-        CSVReader reader = new CSVReader(new FileReader(FILE_PATH));
-
-        corpus = new Corpus(new ArrayList<>(), new ArrayList<>());
-        String[] line = reader.readNext();
-        while ((line = reader.readNext()) != null) {
-            if (line.length == 3 && inputCategories.contains(line[1])) {
-                corpus.addDocument(line[0], Lists.newArrayList(Splitter.on(" ").omitEmptyStrings().trimResults().split(line[2])));
-            }
-        }
-        logger.info(corpus.size());
-
-    }
+    private static Set<String> inputCategories = Sets.newHashSet("FEATURE REQUEST", "PROBLEM DISCOVERY");
 
     @Test
     public void fit() throws Exception {
         HierarchicalDirichletProcess hdplda = new HierarchicalDirichletProcess(1.0, 0.5, 1.0);
-        hdplda.fit(corpus, 100);
+        FlatFileTransformedFeedbackReader reader = new FlatFileTransformedFeedbackReader(FILE_PATH, inputCategories);
+        List<TransformedFeedback> read = reader.read();
+        List<List<String>> documents = read.stream().map(f -> new ArrayList<>(f.getBagOfWords())).collect(Collectors.toList());
+        List<String> originalSentences = read.stream().map(TransformedFeedback::getSentence).collect(Collectors.toList());
+        Corpus corpus = new Corpus(originalSentences, documents);
+        hdplda.fit(corpus, 50);
         List<Topic> topics = hdplda.topics();
         List<TopicAssignment> assignments = hdplda.assignments();
 
