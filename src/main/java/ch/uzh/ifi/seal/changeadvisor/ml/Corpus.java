@@ -7,18 +7,26 @@ import java.util.List;
 
 public class Corpus implements Iterable<List<String>> {
 
+    private List<String> originalSentences;
+
     private List<List<String>> documents;
 
-    public Corpus(List<List<String>> documents) {
+    public Corpus(List<String> originalSentences, List<List<String>> documents) {
+        this.originalSentences = originalSentences;
         this.documents = documents;
     }
 
-    public void addDocument(List<String> tokens) {
+    public void addDocument(String sentence, List<String> tokens) {
+        originalSentences.add(sentence);
         documents.add(tokens);
     }
 
     public List<List<String>> getDocuments() {
         return documents;
+    }
+
+    public String getSentence(int i) {
+        return originalSentences.get(i);
     }
 
     public int size() {

@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.changeadvisor.batch.job.documentclustering;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -10,9 +11,9 @@ public class TopicClusteringResult {
 
     private List<Topic> topics;
 
-    private Set<TopicAssignment> assignments;
+    private Collection<TopicAssignment> assignments;
 
-    public TopicClusteringResult(List<Topic> topics, Set<TopicAssignment> assignments) {
+    public TopicClusteringResult(List<Topic> topics, Collection<TopicAssignment> assignments) {
         this.topics = topics;
         this.assignments = assignments;
     }
@@ -25,7 +26,7 @@ public class TopicClusteringResult {
         this.topics = topics;
     }
 
-    public Set<TopicAssignment> getAssignments() {
+    public Collection<TopicAssignment> getAssignments() {
         return assignments;
     }
 

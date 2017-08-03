@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 /**
  * Created by alex on 24.07.2017.
  */
-public class HierarchicalDirichletProcess {
+public class HierarchicalDirichletProcess implements TopicInferencer, TopicAssigner {
 
     private static final Logger logger = Logger.getLogger(HierarchicalDirichletProcess.class);
 
@@ -163,47 +163,32 @@ public class HierarchicalDirichletProcess {
         }
     }
 
-    public List<TopicAssignment> topics() {
-        List<TopicAssignment> topics = new ArrayList<>(); //        topics = list()
+    public List<Topic> topics() {
+        List<Topic> topics = new ArrayList<>(); //        topics = list()
 
         int topicNumber = 0;                //        topic_number = 0
         List<DefaultMap<Integer, Double>> phi = topicWordDistribution(); //        phi = self.topic_word_distribution()
 
-        for (int k = 0; k < phi.size(); k++) {          //        for k, phi_k in enumerate(phi):
-            DefaultMap<Integer, Double> phiK = phi.get(k);
-
+        for (DefaultMap<Integer, Double> phiK : phi) {          //        for k, phi_k in enumerate(phi):
             List<Integer> indexes = phiK.getIndexOfTopNValues(20);
             List<String> words = indexes.stream().map(idx -> vocabulary.getVocab(idx)).collect(Collectors.toList());    //        words = [self._vocabulary[w] for w in sorted(phi_k, key=lambda w: -phi_k[w])[:20]]
-            topics.add(new TopicAssignment(new HashSet<>(words), topicNumber++)); //        topics.append([topic_number, words])
+            topics.add(new Topic(new HashSet<>(words), topicNumber++)); //        topics.append([topic_number, words])
         }
         return topics;//        return topics
     }
 
-    public List<Topic> assignments() {
+    public List<TopicAssignment> assignments() {
         List<Vector<Double>> documentTopicDistribution = documentTopicDistribution();   //        document_topic_distribution = self.document_topic_distribution()
-        List<Topic> assignments = new ArrayList<>();            //        assignments = list()
+        List<TopicAssignment> assignments = new ArrayList<>();            //        assignments = list()
 
         List<List<String>> documents = corpus.getDocuments();       //        documents = self._corpus.tokens()
         for (int i = 0; i < documentTopicDistribution.size(); i++) {
             Vector<Double> distribution = documentTopicDistribution.get(i).subVector(1);
             List<String> document = documents.get(i);
             int assignment = distribution.argmax();
-            assignments.add(new Topic(new HashSet<>(document), assignment));
+            assignments.add(new TopicAssignment(corpus.getSentence(i), new HashSet<>(document), assignment));
         }
         return assignments;
-
-//
-//        assignments = list()
-//
-//        documents = self._corpus.tokens()
-//
-//        for i, distribution in enumerate(document_topic_distribution):
-//        distribution = distribution[1:]
-//        document = documents[i]
-//        assignment = max(enumerate(distribution), key=lambda x: x[1])[0]
-//        assignments.append([document, assignment])
-//
-//        return assignments
     }
 
     private double perplexity() {

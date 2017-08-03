@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Created by alex on 24.07.2017.
@@ -38,7 +38,7 @@ public class TopicWriter implements ItemWriter<TopicClusteringResult> {
             return;
         }
         TopicClusteringResult topicClusteringResult = items.get(0);
-        Set<TopicAssignment> assignments = topicClusteringResult.getAssignments();
+        Collection<TopicAssignment> assignments = topicClusteringResult.getAssignments();
         List<Topic> topics = topicClusteringResult.getTopics();
         assignmentRepository.save(assignments);
         topicRepository.save(topics);

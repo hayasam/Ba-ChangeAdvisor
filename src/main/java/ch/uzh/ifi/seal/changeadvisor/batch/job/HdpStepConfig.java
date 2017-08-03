@@ -50,6 +50,6 @@ public class HdpStepConfig {
 
     @Bean
     public TopicClustering topicClustering() {
-        return new TopicClustering();
+        return new TopicClustering(100);
     }
 }

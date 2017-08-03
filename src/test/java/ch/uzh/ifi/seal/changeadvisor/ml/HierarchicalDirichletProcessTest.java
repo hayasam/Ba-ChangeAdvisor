@@ -27,11 +27,11 @@ public class HierarchicalDirichletProcessTest {
     public void setUp() throws Exception {
         CSVReader reader = new CSVReader(new FileReader(FILE_PATH));
 
-        corpus = new Corpus(new ArrayList<>());
+        corpus = new Corpus(new ArrayList<>(), new ArrayList<>());
         String[] line = reader.readNext();
         while ((line = reader.readNext()) != null) {
             if (line.length == 3 && inputCategories.contains(line[1])) {
-                corpus.addDocument(Lists.newArrayList(Splitter.on(" ").omitEmptyStrings().trimResults().split(line[2])));
+                corpus.addDocument(line[0], Lists.newArrayList(Splitter.on(" ").omitEmptyStrings().trimResults().split(line[2])));
             }
         }
         logger.info(corpus.size());
@@ -41,9 +41,13 @@ public class HierarchicalDirichletProcessTest {
     @Test
     public void fit() throws Exception {
         HierarchicalDirichletProcess hdplda = new HierarchicalDirichletProcess(1.0, 0.5, 1.0);
-        hdplda.fit(corpus, 10);
-        List<TopicAssignment> topics = hdplda.topics();
-        List<Topic> assignments = hdplda.assignments();
+        hdplda.fit(corpus, 100);
+        List<Topic> topics = hdplda.topics();
+        List<TopicAssignment> assignments = hdplda.assignments();
+
+        logger.info(String.format("Corpus size: %d", corpus.size()));
+        logger.info(String.format("Topics: %d", topics.size()));
+        logger.info(String.format("Topic Assignments: %d", assignments.size()));
     }
 
 }
