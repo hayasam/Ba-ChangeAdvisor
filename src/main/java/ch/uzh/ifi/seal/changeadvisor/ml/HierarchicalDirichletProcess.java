@@ -215,6 +215,11 @@ public class HierarchicalDirichletProcess implements TopicInferencer, TopicAssig
             }
             n += x_ji.size();                                       //        N += len(xJi)
         }
+
+        if (n == 0) {
+            throw new IllegalArgumentException(
+                    String.format("Something went wrong..can't divide by 0 in the next statement. MinSize: %d", minSize));
+        }
         return Math.exp(logLikelihood / n);                                   //        return numpy.exp(log_likelihood / N)
     }
 

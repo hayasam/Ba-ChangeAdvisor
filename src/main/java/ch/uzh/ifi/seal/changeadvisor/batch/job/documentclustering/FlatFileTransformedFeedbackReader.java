@@ -12,6 +12,7 @@ import org.springframework.batch.item.ItemReader;
 
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -51,16 +52,20 @@ public class FlatFileTransformedFeedbackReader implements ItemReader<List<Transf
         return feedbacks;
     }
 
-    private List<TransformedFeedback> readFromFile(String filePath, Set<String> inputCategories) throws IOException {
-        CSVReader reader = new CSVReader(new FileReader(this.filePath), ',', '"', '\\', 1);
-        return reader.readAll().stream()
-                .filter(line -> line.length == 3 && inputCategories.contains(line[1]))
-                .map(line -> {
-                    Result result = new MockResult(line[0], line[1]);
-                    ArdocResult ardocResult = new ArdocResult(result);
-                    LinkedHashSet<String> tokens = Sets.newLinkedHashSet(Splitter.on(" ").omitEmptyStrings().trimResults().split(line[2]));
-                    return new TransformedFeedback(ardocResult, tokens);
-                })
-                .collect(Collectors.toList());
+    private List<TransformedFeedback> readFromFile(String filePath, Set<String> inputCategories) {
+        try (CSVReader reader = new CSVReader(new FileReader(this.filePath), ',', '"', '\\', 1)) {
+            return reader.readAll().stream()
+                    .filter(line -> line.length == 3 && inputCategories.contains(line[1]))
+                    .map(line -> {
+                        Result result = new MockResult(line[0], line[1]);
+                        ArdocResult ardocResult = new ArdocResult(result);
+                        LinkedHashSet<String> tokens = Sets.newLinkedHashSet(Splitter.on(" ").omitEmptyStrings().trimResults().split(line[2]));
+                        return new TransformedFeedback(ardocResult, tokens);
+                    })
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            logger.error(String.format("Failed to read csv file @ %s. Returning empty list.", filePath));
+            return new ArrayList<>();
+        }
     }
 }

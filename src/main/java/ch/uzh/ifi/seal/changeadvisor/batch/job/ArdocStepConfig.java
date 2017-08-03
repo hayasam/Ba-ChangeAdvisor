@@ -25,7 +25,7 @@ public class ArdocStepConfig {
 
     private static final String TEST_DIRECTORY = "test_files_parser";
 
-    private static final String FROSTWIRE_REVIEW = "com.frostwire.android.200subset.txt";
+    private static final String FROSTWIRE_REVIEW = "com.frostwire.android.20subset.txt";
 
     private static final String STEP_NAME = "ardoc";
 

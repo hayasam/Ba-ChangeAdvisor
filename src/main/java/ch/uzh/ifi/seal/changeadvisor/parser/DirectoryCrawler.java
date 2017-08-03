@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Crawls through directories in order to find all java files.
@@ -32,8 +33,8 @@ public class DirectoryCrawler {
     }
 
     private void exploreDirectory(Path directory, int depth) {
-        try {
-            Files.list(directory).forEach(filePath -> explore(filePath, depth + 1));
+        try (Stream<Path> stream = Files.list(directory)) {
+            stream.forEach(filePath -> explore(filePath, depth + 1));
         } catch (IOException e) {
             logger.error("IOException while parsing directory: " + directory.getFileName(), e);
         }
