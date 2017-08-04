@@ -43,10 +43,11 @@ public class BatchConfig {
         return jobBuilderFactory.get(JOB_NAME)
                 .incrementer(new RunIdIncrementer())
                 .listener(listener)
-                .flow(bagOfWordsStepConfig.extractBagOfWords())
-                .next(ardocStepConfig.ardocAnalysis())
-                .next(transformationStepConfig.transformFeedback())
-                .next(documentClusteringStepConfig.documentsClustering())
+//                .flow(bagOfWordsStepConfig.extractBagOfWords())
+//                .next(ardocStepConfig.ardocAnalysis())
+//                .next(transformationStepConfig.transformFeedback())
+//                .next(documentClusteringStepConfig.documentsClustering())
+                .flow(documentClusteringStepConfig.documentsClustering())
                 .end()
                 .build();
     }

@@ -15,13 +15,16 @@ public class TopicAssignment {
     @Id
     private String id;
 
-    private final String originalSentence;
+    private String originalSentence;
 
-    private final Set<String> bag;
+    private Set<String> bag;
 
-    private final int topic;
+    private int topic;
 
     private LocalDateTime timestamp;
+
+    TopicAssignment() {
+    }
 
     public TopicAssignment(String originalSentence, Set<String> bag, int topic) {
         this.originalSentence = originalSentence;
