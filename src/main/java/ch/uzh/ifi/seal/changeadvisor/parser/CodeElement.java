@@ -2,6 +2,8 @@ package ch.uzh.ifi.seal.changeadvisor.parser;
 
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.io.FileUtils;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -10,10 +12,14 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Represents a Bag-of-Words. A set of words essentially.
+ * Represents a code component. A set of words and the code component they are derived from.
  * Created by alex on 14.07.2017.
  */
-public class BagOfWords implements Comparable<BagOfWords> {
+@Document
+public class CodeElement implements Comparable<CodeElement> {
+
+    @Id
+    private String id;
 
     private String fullyQualifiedClassName;
 
@@ -21,9 +27,16 @@ public class BagOfWords implements Comparable<BagOfWords> {
 
     private LocalDateTime timestamp = LocalDateTime.now();
 
-    public BagOfWords(String fullyQualifiedClassName, Set<String> bag) {
+    CodeElement() {
+    }
+
+    public CodeElement(String fullyQualifiedClassName, Set<String> bag) {
         this.fullyQualifiedClassName = fullyQualifiedClassName;
         this.bag = bag;
+    }
+
+    public String getId() {
+        return id;
     }
 
     public Set<String> getBag() {
@@ -84,7 +97,30 @@ public class BagOfWords implements Comparable<BagOfWords> {
      * @see String#compareTo(String)
      */
     @Override
-    public int compareTo(BagOfWords o) {
+    public int compareTo(CodeElement o) {
         return fullyQualifiedClassName.compareTo(o.fullyQualifiedClassName);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        CodeElement that = (CodeElement) o;
+
+        if (id != null ? !id.equals(that.id) : that.id != null) return false;
+        if (fullyQualifiedClassName != null ? !fullyQualifiedClassName.equals(that.fullyQualifiedClassName) : that.fullyQualifiedClassName != null)
+            return false;
+        if (bag != null ? !bag.equals(that.bag) : that.bag != null) return false;
+        return timestamp != null ? timestamp.equals(that.timestamp) : that.timestamp == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (fullyQualifiedClassName != null ? fullyQualifiedClassName.hashCode() : 0);
+        result = 31 * result + (bag != null ? bag.hashCode() : 0);
+        result = 31 * result + (timestamp != null ? timestamp.hashCode() : 0);
+        return result;
     }
 }

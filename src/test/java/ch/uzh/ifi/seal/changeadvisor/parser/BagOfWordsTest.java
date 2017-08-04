@@ -47,7 +47,7 @@ public class BagOfWordsTest {
                 .removeTokensShorterThan(3)
                 .build();
         Set<String> bag = processor.transform(corpus);
-        BagOfWords bagOfWords = new BagOfWords(packageName + "." + path.getFileName().toString(), bag);
+        CodeElement bagOfWords = new CodeElement(packageName + "." + path.getFileName().toString(), bag);
 
         bagOfWords.writeToFile(Paths.get(TEST_DIRECTORY + "/test_generated/processed_source_components.csv"), false);
 

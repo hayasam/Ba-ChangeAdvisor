@@ -20,7 +20,7 @@ public class BatchConfig {
 
     private final JobBuilderFactory jobBuilderFactory;
 
-    private final SourceComponentsTransformationStepConfig bagOfWordsStepConfig;
+    private final SourceComponentsTransformationStepConfig sourceComponentStepConfig;
 
     private final ArdocStepConfig ardocStepConfig;
 
@@ -29,9 +29,9 @@ public class BatchConfig {
     private final DocumentClusteringStepConfig documentClusteringStepConfig;
 
     @Autowired
-    public BatchConfig(JobBuilderFactory jobBuilderFactory, SourceComponentsTransformationStepConfig bagOfWordsStepConfig, ArdocStepConfig ardocStepConfig, FeedbackTransformationStepConfig transformationStepConfig, DocumentClusteringStepConfig documentClusteringStepConfig) {
+    public BatchConfig(JobBuilderFactory jobBuilderFactory, SourceComponentsTransformationStepConfig sourceComponentStepConfig, ArdocStepConfig ardocStepConfig, FeedbackTransformationStepConfig transformationStepConfig, DocumentClusteringStepConfig documentClusteringStepConfig) {
         this.jobBuilderFactory = jobBuilderFactory;
-        this.bagOfWordsStepConfig = bagOfWordsStepConfig;
+        this.sourceComponentStepConfig = sourceComponentStepConfig;
         this.ardocStepConfig = ardocStepConfig;
         this.transformationStepConfig = transformationStepConfig;
         this.documentClusteringStepConfig = documentClusteringStepConfig;
@@ -43,11 +43,10 @@ public class BatchConfig {
         return jobBuilderFactory.get(JOB_NAME)
                 .incrementer(new RunIdIncrementer())
                 .listener(listener)
-//                .flow(bagOfWordsStepConfig.extractBagOfWords())
-//                .next(ardocStepConfig.ardocAnalysis())
-//                .next(transformationStepConfig.transformFeedback())
-//                .next(documentClusteringStepConfig.documentsClustering())
-                .flow(documentClusteringStepConfig.documentsClustering())
+                .flow(sourceComponentStepConfig.extractBagOfWords())
+                .next(ardocStepConfig.ardocAnalysis())
+                .next(transformationStepConfig.transformFeedback())
+                .next(documentClusteringStepConfig.documentsClustering())
                 .end()
                 .build();
     }
