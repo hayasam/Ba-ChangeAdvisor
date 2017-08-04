@@ -4,7 +4,6 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
-import org.apache.log4j.Logger;
 
 /**
  * Visitor for methods belonging to a Compilation Unit.
@@ -14,8 +13,6 @@ import org.apache.log4j.Logger;
  * Created by alexanderhofmann on 14.07.17.
  */
 public class MethodVisitor extends VoidVisitorAdapter<Void> {
-
-    private static final Logger logger = Logger.getLogger(MethodVisitor.class);
 
     private StringBuilder sb = new StringBuilder();
 

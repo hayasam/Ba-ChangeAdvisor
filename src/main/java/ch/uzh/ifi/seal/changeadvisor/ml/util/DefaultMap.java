@@ -1,8 +1,11 @@
 package ch.uzh.ifi.seal.changeadvisor.ml.util;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSortedMap;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class DefaultMap<K, V> implements Map<K, V> {
 
@@ -82,7 +85,7 @@ public class DefaultMap<K, V> implements Map<K, V> {
     public String toString() {
         StringBuilder sb = new StringBuilder("{");
         for (Entry<K, V> entry : map.entrySet()) {
-            sb.append(entry.getKey() + ": " + entry.getValue());
+            sb.append(String.format("%s: %s", entry.getKey(), entry.getValue()));
         }
 
         return sb.append("}").toString();
@@ -91,16 +94,16 @@ public class DefaultMap<K, V> implements Map<K, V> {
     public List<Integer> getIndexOfTopNValues(int n) {
         if (n > 0) {
             n = n > map.size() ? map.size() : n;
-            Comparator<Integer> valueComparator = new MapValueComparator((Map<Integer, Double>) map);
-            TreeMap<Integer, Double> orderedMap = new TreeMap<>(valueComparator);
 
-            orderedMap.putAll((Map<? extends Integer, ? extends Double>) map);
+            Map<Integer, Double> mapToSort = (Map<Integer, Double>) map;
 
+            Map<Integer, Double> orderedMap = ImmutableSortedMap
+                    .<Integer, Double>orderedBy(new MapValueComparator(mapToSort))
+                    .putAll(mapToSort)
+                    .build();
 
-            List<Integer> keys = new ArrayList<>(orderedMap.keySet());
-            List<Double> values = new ArrayList<>(orderedMap.values());
-            return keys.subList(0, n);
+            return orderedMap.keySet().stream().limit(n).collect(Collectors.toList());
         }
-        return new ArrayList<>();
+        return ImmutableList.of();
     }
 }
