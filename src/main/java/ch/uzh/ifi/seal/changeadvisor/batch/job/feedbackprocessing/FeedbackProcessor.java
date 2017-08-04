@@ -9,7 +9,7 @@ import java.util.Set;
 /**
  * Created by alex on 20.07.2017.
  */
-public class FeedbackProcessor<T> implements ItemProcessor<ArdocResult, TransformedFeedback> {
+public class FeedbackProcessor implements ItemProcessor<ArdocResult, TransformedFeedback> {
 
     private CorpusProcessor corpusProcessor;
 
