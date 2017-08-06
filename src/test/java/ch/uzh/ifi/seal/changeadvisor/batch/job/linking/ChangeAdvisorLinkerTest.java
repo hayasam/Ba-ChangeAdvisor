@@ -2,7 +2,10 @@ package ch.uzh.ifi.seal.changeadvisor.batch.job.linking;
 
 import ch.uzh.ifi.seal.changeadvisor.batch.job.documentclustering.Topic;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.documentclustering.TopicAssignment;
+import ch.uzh.ifi.seal.changeadvisor.parser.CodeElement;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -10,6 +13,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.hamcrest.core.Is.is;
 
@@ -29,7 +33,7 @@ public class ChangeAdvisorLinkerTest {
         List<Topic> topics = createTopics(TOPIC_SIZE);
         List<TopicAssignment> assignments = createAssignments(ASSIGNMENT_SIZE);
 
-        List<LinkingResult> results = linker.process(topics, assignments);
+        List<LinkingResult> results = linker.process(topics, assignments, new ArrayList<>());
     }
 
     @Test
@@ -61,5 +65,24 @@ public class ChangeAdvisorLinkerTest {
             assignments.add(new TopicAssignment(Character.valueOf((char) ((i + 65) % 127)).toString(), ImmutableSet.of(), i % TOPIC_SIZE));
         }
         return assignments;
+    }
+
+    @Test
+    public void codeComponentWordMap() throws Exception {
+        CodeElement c1 = new CodeElement("HelloWorld", Sets.newHashSet("hello", "world"));
+        CodeElement c2 = new CodeElement("HelloWorld2", Sets.newHashSet("System", "out"));
+        CodeElement c3 = new CodeElement(null, null);
+        ArrayList<CodeElement> codeElements = Lists.newArrayList(c1, c2, c3);
+
+        Map<CodeElement, Set<String>> codeElementSetMap = linker.codeComponentWordMap(codeElements);
+        Assert.assertThat(codeElementSetMap.size(), is(2));
+        Assert.assertTrue(codeElementSetMap.containsKey(c1));
+        Assert.assertTrue(codeElementSetMap.containsKey(c2));
+        Assert.assertThat(codeElementSetMap.get(c1), is(c1.getBag()));
+        Assert.assertThat(codeElementSetMap.get(c2), is(c2.getBag()));
+        Assert.assertFalse(codeElementSetMap.containsKey(c3));
+
+        codeElementSetMap = linker.codeComponentWordMap(new ArrayList<>());
+        Assert.assertThat(codeElementSetMap.size(), is(0));
     }
 }

@@ -1,7 +1,6 @@
 package ch.uzh.ifi.seal.changeadvisor.batch.job;
 
 import ch.uzh.ifi.seal.changeadvisor.batch.job.documentclustering.TopicClusteringResult;
-import ch.uzh.ifi.seal.changeadvisor.batch.job.linking.ChangeAdvisorLinker;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.linking.LinkingProcessor;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.linking.LinkingResult;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.linking.LinkingStepReader;
@@ -22,24 +21,21 @@ public class LinkingStepConfig {
 
     private final LinkingStepReader linkingStepReader;
 
+    private final LinkingProcessor linkingProcessor;
+
     @Autowired
-    public LinkingStepConfig(StepBuilderFactory stepBuilderFactory, LinkingStepReader linkingStepReader) {
+    public LinkingStepConfig(StepBuilderFactory stepBuilderFactory, LinkingStepReader linkingStepReader, LinkingProcessor linkingProcessor) {
         this.stepBuilderFactory = stepBuilderFactory;
         this.linkingStepReader = linkingStepReader;
+        this.linkingProcessor = linkingProcessor;
     }
 
     @Bean
     public Step transformFeedback() {
-
         return stepBuilderFactory.get(STEP_NAME)
                 .<TopicClusteringResult, List<LinkingResult>>chunk(1)
                 .reader(linkingStepReader)
-                .processor(processor())
+                .processor(linkingProcessor)
                 .build();
-    }
-
-    @Bean
-    public LinkingProcessor processor() {
-        return new LinkingProcessor(new ChangeAdvisorLinker());
     }
 }

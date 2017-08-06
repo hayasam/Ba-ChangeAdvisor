@@ -72,6 +72,7 @@ public class SourceComponentsTransformationStepConfig {
                 .withContractionExpander(new ContractionsExpander())
                 .singularize()
                 .removeStopWords()
+                .lowerCase()
                 .stem()
                 .removeTokensShorterThan(3)
                 .build();
