@@ -2,7 +2,7 @@ package ch.uzh.ifi.seal.changeadvisor.batch.job;
 
 import ch.uzh.ifi.seal.changeadvisor.batch.job.bagofwords.FSProjectReader;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.bagofwords.SourceCodeProcessor;
-import ch.uzh.ifi.seal.changeadvisor.parser.BagOfWords;
+import ch.uzh.ifi.seal.changeadvisor.parser.CodeElement;
 import ch.uzh.ifi.seal.changeadvisor.parser.FSProjectParser;
 import ch.uzh.ifi.seal.changeadvisor.parser.bean.ClassBean;
 import ch.uzh.ifi.seal.changeadvisor.parser.preprocessing.*;
@@ -48,7 +48,7 @@ public class SourceComponentsTransformationStepConfig {
     @Bean
     public Step extractBagOfWords() {
         return stepBuilderFactory.get(STEP_NAME)
-                .<ClassBean, BagOfWords>chunk(10)
+                .<ClassBean, CodeElement>chunk(10)
                 .reader(reader())
                 .processor(processor())
                 .writer(mongoWriter())
@@ -72,6 +72,7 @@ public class SourceComponentsTransformationStepConfig {
                 .withContractionExpander(new ContractionsExpander())
                 .singularize()
                 .removeStopWords()
+                .lowerCase()
                 .stem()
                 .removeTokensShorterThan(3)
                 .build();
@@ -99,17 +100,17 @@ public class SourceComponentsTransformationStepConfig {
     }
 
     @Bean
-    public FlatFileItemWriter<BagOfWords> fileWriter() {
-        FlatFileItemWriter<BagOfWords> writer = new FlatFileItemWriter<>();
+    public FlatFileItemWriter<CodeElement> fileWriter() {
+        FlatFileItemWriter<CodeElement> writer = new FlatFileItemWriter<>();
         writer.setResource(new FileSystemResource(TEST_DIRECTORY + "/batch_test.csv"));
         writer.setHeaderCallback(headerWriter -> headerWriter.write("component,bag"));
-        writer.setLineAggregator(BagOfWords::asCsv);
+        writer.setLineAggregator(CodeElement::asCsv);
         return writer;
     }
 
     @Bean
-    public ItemWriter<BagOfWords> mongoWriter() {
-        MongoItemWriter<BagOfWords> mongoItemWriter = new MongoItemWriter<>();
+    public ItemWriter<CodeElement> mongoWriter() {
+        MongoItemWriter<CodeElement> mongoItemWriter = new MongoItemWriter<>();
         mongoItemWriter.setTemplate(mongoTemplate);
         return mongoItemWriter;
     }

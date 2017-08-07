@@ -1,7 +1,6 @@
 package ch.uzh.ifi.seal.changeadvisor.ml.util;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSortedMap;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -94,13 +93,10 @@ public class DefaultMap<K, V> implements Map<K, V> {
     public List<Integer> getIndexOfTopNValues(int n) {
         if (n > 0) {
             n = n > map.size() ? map.size() : n;
-
             Map<Integer, Double> mapToSort = (Map<Integer, Double>) map;
-
-            Map<Integer, Double> orderedMap = ImmutableSortedMap
-                    .<Integer, Double>orderedBy(new MapValueComparator(mapToSort))
-                    .putAll(mapToSort)
-                    .build();
+            Comparator<Integer> valueComparator = new MapValueComparator(mapToSort);
+            TreeMap<Integer, Double> orderedMap = new TreeMap<>(valueComparator);
+            orderedMap.putAll(mapToSort);
 
             return orderedMap.keySet().stream().limit(n).collect(Collectors.toList());
         }

@@ -2,6 +2,7 @@ package ch.uzh.ifi.seal.changeadvisor.parser.preprocessing;
 
 import org.apache.log4j.Logger;
 
+import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -41,6 +42,10 @@ public class CorpusProcessor {
     private Annotator annotator = new Annotator();
 
     private CorpusProcessor() {
+    }
+
+    public Set<String> transform(Collection<String> bag) {
+        return transform(String.join(" ", bag));
     }
 
     public Set<String> transform(String text) {
