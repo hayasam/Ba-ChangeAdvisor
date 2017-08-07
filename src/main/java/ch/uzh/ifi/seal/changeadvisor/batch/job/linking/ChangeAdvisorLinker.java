@@ -2,12 +2,13 @@ package ch.uzh.ifi.seal.changeadvisor.batch.job.linking;
 
 import ch.uzh.ifi.seal.changeadvisor.batch.job.documentclustering.Topic;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.documentclustering.TopicAssignment;
+import ch.uzh.ifi.seal.changeadvisor.batch.job.linking.metrics.SimilarityMetric;
 import ch.uzh.ifi.seal.changeadvisor.parser.CodeElement;
 import ch.uzh.ifi.seal.changeadvisor.parser.preprocessing.ComposedIdentifierSplitter;
 import ch.uzh.ifi.seal.changeadvisor.parser.preprocessing.CorpusProcessor;
-import com.google.common.collect.ImmutableList;
 import edu.stanford.nlp.util.Sets;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
 
 import java.util.*;
 import java.util.function.Function;
@@ -15,6 +16,8 @@ import java.util.stream.Collectors;
 
 @Component
 public class ChangeAdvisorLinker implements Linker {
+
+    private SimilarityMetric similarityMetric;
 
     private CorpusProcessor corpusProcessor = new CorpusProcessor.Builder()
             .escapeSpecialChars()
@@ -24,9 +27,12 @@ public class ChangeAdvisorLinker implements Linker {
 
     @Override
     public List<LinkingResult> process(Collection<Topic> topics, Collection<TopicAssignment> assignments, Collection<CodeElement> codeElements) {
+        Assert.notNull(similarityMetric, "No similarity metric set!");
+
         Map<Integer, List<TopicAssignment>> clusters = groupByTopic(assignments);
         Map<CodeElement, Set<String>> codeComponentWords = codeComponentWordMap(codeElements);
 
+        List<LinkingResult> results = new ArrayList<>(assignments.size());
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<Integer, List<TopicAssignment>> cluster : clusters.entrySet()) {
             if (!cluster.getKey().equals(0)) {
@@ -58,12 +64,20 @@ public class ChangeAdvisorLinker implements Linker {
                         final String codeElementText = String.join(" ", codeElementBag);
 
                         // Compute asymmetric dice index.
+                        double similarity = similarityMetric.similarity(clusterText, codeElementText);
+
+                        if (similarity >= 0.5) {
+                            LinkingResult result = new LinkingResult(
+                                    cluster.getKey(), clusterCleanedBag, codeElementBag,
+                                    codeElement.getFullyQualifiedClassName(), similarity);
+                            results.add(result);
+                        }
                     }
                 }
 
             }
         }
-        return ImmutableList.of();
+        return results;
     }
 
     Map<Integer, List<TopicAssignment>> groupByTopic(Collection<TopicAssignment> assignments) {

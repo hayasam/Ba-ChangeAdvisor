@@ -21,6 +21,17 @@ public class LinkingResult {
 
     private Double similarity;
 
+    public LinkingResult() {
+    }
+
+    public LinkingResult(int clusterId, Set<String> clusterBag, Set<String> codeComponentBag, String codeComponentName, Double similarity) {
+        this.clusterId = clusterId;
+        this.clusterBag = clusterBag;
+        this.codeComponentBag = codeComponentBag;
+        this.codeComponentName = codeComponentName;
+        this.similarity = similarity;
+    }
+
     public String getId() {
         return id;
     }
