@@ -12,6 +12,32 @@ import static org.hamcrest.core.Is.is;
 public class AsymmetricDiceIndexTest {
 
     @Test
+    public void similarity() throws Exception {
+        Set<String> doc1 = Sets.newHashSet("foo", "bar", "baz", "hello", "world");
+        Set<String> doc2 = Sets.newHashSet("foo", "bar", "zzz", "www", "11");
+
+        double similarity = new AsymmetricDiceIndex().similarity(doc1, doc2);
+        Assert.assertThat(similarity, is(0.8));
+    }
+
+    @Test
+    public void similaritySameDocs() throws Exception {
+        Set<String> doc1 = Sets.newHashSet("foo", "bar", "baz", "hello", "world");
+
+        double similarity = new AsymmetricDiceIndex().similarity(doc1, doc1);
+        Assert.assertThat(similarity, is(1.0));
+    }
+
+    @Test
+    public void similarityNoSimilarity() throws Exception {
+        Set<String> doc1 = Sets.newHashSet("foo", "bar", "baz", "hello", "world");
+        Set<String> doc2 = Sets.newHashSet("aa", "bb", "zzz", "www", "cc");
+
+        double similarity = new AsymmetricDiceIndex().similarity(doc1, doc2);
+        Assert.assertThat(similarity, is(0.0));
+    }
+
+    @Test
     public void countOverlappingWords() throws Exception {
         Set<String> doc1 = Sets.newHashSet("foo", "bar", "baz", "hello", "world");
         Set<String> doc2 = Sets.newHashSet("foo", "bar", "zzz", "www", "world");
