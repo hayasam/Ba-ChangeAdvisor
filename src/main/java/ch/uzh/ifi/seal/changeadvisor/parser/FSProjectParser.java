@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 
 /**
  * File System parser for java projects.
@@ -27,19 +29,28 @@ public class FSProjectParser {
      * @param projectRoot {@link Path} to project root.
      * @return list of package beans {@link PackageBean}.
      */
-    public List<PackageBean> parse(Path projectRoot) {
+    public List<PackageBean> parse(Path projectRoot, boolean parallel) {
         DirectoryCrawler crawler = new DirectoryCrawler();
         List<Path> projectFiles = crawler.explore(projectRoot);
-        Map<String, PackageBean> packageMap = new HashMap<>();
 
-        projectFiles.forEach(file -> {
+        Map<String, PackageBean> packageMap;
+        Stream<Path> pathStream;
+
+        if (parallel) {
+            packageMap = new ConcurrentHashMap<>();
+            pathStream = projectFiles.parallelStream();
+        } else {
+            packageMap = new HashMap<>();
+            pathStream = projectFiles.stream();
+        }
+
+        pathStream.forEach(file -> {
             try {
                 CompilationUnitBean compilationUnit = CompilationUnitBean.fromPath(file);
                 final String packageName = compilationUnit.getPackageName();
 
-                PackageBean packageBean = packageMap.getOrDefault(packageName, new PackageBean(packageName));
+                PackageBean packageBean = packageMap.computeIfAbsent(packageName, PackageBean::new);
                 packageBean.addCompilationUnit(compilationUnit);
-                packageMap.putIfAbsent(packageName, packageBean);
 
             } catch (IOException e) {
                 logger.error(String.format("Failed to parse file at path: %s", file.toString()), e);
@@ -48,5 +59,4 @@ public class FSProjectParser {
 
         return new ArrayList<>(packageMap.values());
     }
-
 }

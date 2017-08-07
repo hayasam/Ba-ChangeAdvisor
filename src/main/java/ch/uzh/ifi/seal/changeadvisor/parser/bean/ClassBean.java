@@ -14,13 +14,13 @@ public class ClassBean implements Comparable<ClassBean> {
 
     private final String fullyQualifiedClassName;
 
-    private final ClassOrInterfaceDeclaration classOrInterfaceDeclaration;
+    private final String publicCorpus;
 
     public ClassBean(String className, String packageName, ClassOrInterfaceDeclaration classOrInterfaceDeclaration) {
         this.className = className;
         this.packageName = packageName;
-        fullyQualifiedClassName = packageName + "." + className;
-        this.classOrInterfaceDeclaration = classOrInterfaceDeclaration;
+        this.fullyQualifiedClassName = packageName + "." + className;
+        this.publicCorpus = getPublicCorpus(classOrInterfaceDeclaration);
     }
 
     public String getClassName() {
@@ -36,6 +36,10 @@ public class ClassBean implements Comparable<ClassBean> {
     }
 
     public String getPublicCorpus() {
+        return publicCorpus;
+    }
+
+    private String getPublicCorpus(ClassOrInterfaceDeclaration classOrInterfaceDeclaration) {
         return MethodVisitor.getCorpus(classOrInterfaceDeclaration);
     }
 
@@ -50,5 +54,10 @@ public class ClassBean implements Comparable<ClassBean> {
     @Override
     public int compareTo(ClassBean o) {
         return className.compareTo(o.className);
+    }
+
+    @Override
+    public String toString() {
+        return fullyQualifiedClassName;
     }
 }

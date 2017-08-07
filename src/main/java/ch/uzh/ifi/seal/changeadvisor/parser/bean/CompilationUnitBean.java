@@ -1,7 +1,6 @@
 package ch.uzh.ifi.seal.changeadvisor.parser.bean;
 
 import ch.uzh.ifi.seal.changeadvisor.parser.visitor.ClassVisitor;
-import ch.uzh.ifi.seal.changeadvisor.parser.visitor.MethodVisitor;
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.PackageDeclaration;
@@ -18,13 +17,13 @@ import java.util.Optional;
  */
 public final class CompilationUnitBean {
 
-    private CompilationUnit compilationUnit;
+    private String packageName;
 
     private List<ClassBean> classes;
 
     private CompilationUnitBean(CompilationUnit compilationUnit) {
-        this.compilationUnit = compilationUnit;
-        classes = parseCompilationUnitForClasses();
+        this.packageName = getPackageName(compilationUnit);
+        this.classes = parseCompilationUnitForClasses(compilationUnit);
     }
 
     public static CompilationUnitBean fromPath(Path path) throws IOException {
@@ -32,24 +31,20 @@ public final class CompilationUnitBean {
         return new CompilationUnitBean(cu);
     }
 
-    public CompilationUnit getCompilationUnit() {
-        return compilationUnit;
+    public String getPackageName() {
+        return packageName;
     }
 
-    public String getPackageName() {
+    private String getPackageName(CompilationUnit compilationUnit) {
         Optional<PackageDeclaration> packageDeclaration = compilationUnit.getPackageDeclaration();
         return packageDeclaration.map(NodeWithName::getNameAsString).orElse("default");
-    }
-
-    public String getPublicCorpus() {
-        return MethodVisitor.getCorpus(compilationUnit);
     }
 
     public List<ClassBean> getClasses() {
         return classes;
     }
 
-    private List<ClassBean> parseCompilationUnitForClasses() {
-        return ClassVisitor.getClasses(getPackageName(), compilationUnit);
+    private List<ClassBean> parseCompilationUnitForClasses(CompilationUnit compilationUnit) {
+        return ClassVisitor.getClasses(packageName, compilationUnit);
     }
 }

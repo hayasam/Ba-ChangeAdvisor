@@ -72,7 +72,7 @@ public class FSProjectReader implements ItemReader<ClassBean> {
     }
 
     private List<PackageBean> parse() {
-        List<PackageBean> projectPackages = projectParser.parse(projectRootPath);
+        List<PackageBean> projectPackages = projectParser.parse(projectRootPath, false);
 
         if (isSortedRead) {
             Collections.sort(projectPackages);

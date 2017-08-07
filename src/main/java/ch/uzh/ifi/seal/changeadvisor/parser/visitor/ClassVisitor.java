@@ -19,6 +19,12 @@ public class ClassVisitor extends VoidVisitorAdapter<String> {
 
     private List<ClassBean> classes = new LinkedList<>();
 
+    private ClassVisitor() {
+        /*
+        Avoids instantiation. Use static method instead.
+         */
+    }
+
     /**
      * Returns the public corpus for a given {@link CompilationUnit}.
      *
