@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import static org.hamcrest.core.Is.is;
@@ -19,8 +20,44 @@ public class AsymmetricDiceIndexTest {
         int i = new AsymmetricDiceIndex().countOverlappingWords(doc1, doc2);
         Assert.assertThat(i, is(3));
 
-        i = new AsymmetricDiceIndex().countOverlappingWords(doc1, doc3);
+        i = new AsymmetricDiceIndex().countOverlappingWords(doc2, doc1);
+        Assert.assertThat(i, is(3));
+
+        i = new AsymmetricDiceIndex().countOverlappingWords(doc2, doc3);
+        Assert.assertThat(i, is(2));
+    }
+
+    @Test
+    public void countOverlappingWordsEmptyDocuments() throws Exception {
+        int i = new AsymmetricDiceIndex().countOverlappingWords(new HashSet<>(), new HashSet<>());
         Assert.assertThat(i, is(0));
     }
 
+    @Test
+    public void countOverlappingWordsEmptyDocument() throws Exception {
+        Set<String> doc1 = Sets.newHashSet("foo", "bar", "baz", "hello", "world");
+        int i = new AsymmetricDiceIndex().countOverlappingWords(new HashSet<>(), doc1);
+        Assert.assertThat(i, is(0));
+
+        i = new AsymmetricDiceIndex().countOverlappingWords(doc1, new HashSet<>());
+        Assert.assertThat(i, is(0));
+    }
+
+    @Test
+    public void countOverlappingWordsNotOverlapping() throws Exception {
+        Set<String> doc1 = Sets.newHashSet("foo", "bar", "zzz", "www", "world");
+        Set<String> doc2 = Sets.newHashSet("aa", "bb", "xxx", "sss", "cc");
+        int i = new AsymmetricDiceIndex().countOverlappingWords(doc2, doc1);
+        Assert.assertThat(i, is(0));
+
+        i = new AsymmetricDiceIndex().countOverlappingWords(doc1, doc2);
+        Assert.assertThat(i, is(0));
+    }
+
+    @Test
+    public void countOverlappingWordsSameDocument() throws Exception {
+        Set<String> doc1 = Sets.newHashSet("foo", "bar", "zzz", "www", "world");
+        int i = new AsymmetricDiceIndex().countOverlappingWords(doc1, doc1);
+        Assert.assertThat(i, is(doc1.size()));
+    }
 }

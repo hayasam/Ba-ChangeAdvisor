@@ -2,6 +2,7 @@ package ch.uzh.ifi.seal.changeadvisor.batch.job.linking;
 
 import ch.uzh.ifi.seal.changeadvisor.batch.job.documentclustering.Topic;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.documentclustering.TopicAssignment;
+import ch.uzh.ifi.seal.changeadvisor.batch.job.linking.metrics.AsymmetricDiceIndex;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.linking.metrics.SimilarityMetric;
 import ch.uzh.ifi.seal.changeadvisor.parser.CodeElement;
 import ch.uzh.ifi.seal.changeadvisor.parser.preprocessing.ComposedIdentifierSplitter;
@@ -17,7 +18,7 @@ import java.util.stream.Collectors;
 @Component
 public class ChangeAdvisorLinker implements Linker {
 
-    private SimilarityMetric similarityMetric;
+    private SimilarityMetric similarityMetric = new AsymmetricDiceIndex();
 
     private CorpusProcessor corpusProcessor = new CorpusProcessor.Builder()
             .escapeSpecialChars()
