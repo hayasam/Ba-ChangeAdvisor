@@ -55,11 +55,13 @@ public class ChangeAdvisorLinkerTest {
 
         List<LinkingResult> results = linker.process(assignments, codeElements);
 
+        logger.info(String.format("Results found: %d.", results.size()));
         writeResultsToCsv(results);
         Assert.assertThat(results.size(), greaterThan(280)); // Results should be in the ~300 range.
         Assert.assertThat(results.size(), lessThan(310)); // Results should be in the ~300 range.
     }
 
+    @SuppressWarnings("unused")
     private void writeResultsToCsv(List<LinkingResult> results) throws IOException {
         CSVWriter writer = new CSVWriter(new FileWriter(new File("test_files_parser/linking/output.csv")));
         Collections.sort(results);
