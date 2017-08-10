@@ -3,21 +3,36 @@ package ch.uzh.ifi.seal.changeadvisor.batch.job.linking;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.documentclustering.Topic;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.documentclustering.TopicAssignment;
 import ch.uzh.ifi.seal.changeadvisor.parser.CodeElement;
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.opencsv.CSVReader;
+import com.opencsv.CSVWriter;
+import edu.emory.mathcs.backport.java.util.Collections;
+import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.core.Is.is;
 
 public class ChangeAdvisorLinkerTest {
+
+    private static final Logger logger = Logger.getLogger(ChangeAdvisorLinkerTest.class);
 
     private ChangeAdvisorLinker linker = new ChangeAdvisorLinker();
 
@@ -30,10 +45,57 @@ public class ChangeAdvisorLinkerTest {
 
     @Test
     public void process() throws Exception {
-        List<Topic> topics = createTopics(TOPIC_SIZE);
-        List<TopicAssignment> assignments = createAssignments(ASSIGNMENT_SIZE);
+        List<TopicAssignment> assignments = readAssignments(Paths.get("test_files_parser/linking/com.frostwire.android_assignments.csv"));
+        List<CodeElement> codeElements = readSourceComponents(Paths.get("test_files_parser/linking/source_components_frostwire.csv"));
 
-        List<LinkingResult> results = linker.process(topics, assignments, new ArrayList<>());
+        Assert.assertThat(assignments.size(), is(1375));
+        Assert.assertThat(codeElements.size(), is(1359));
+
+        logger.info("Finished reading, starting linking.");
+
+        List<LinkingResult> results = linker.process(assignments, codeElements);
+
+        writeResultsToCsv(results);
+        Assert.assertThat(results.size(), greaterThan(280)); // Results should be in the ~300 range.
+        Assert.assertThat(results.size(), lessThan(310)); // Results should be in the ~300 range.
+    }
+
+    private void writeResultsToCsv(List<LinkingResult> results) throws IOException {
+        CSVWriter writer = new CSVWriter(new FileWriter(new File("test_files_parser/linking/output.csv")));
+        Collections.sort(results);
+        for (LinkingResult result : results) {
+            writer.writeNext(new String[]{
+                    Integer.toString(result.getClusterId()),
+                    Joiner.on(" ").join(result.getClusterBag()),
+                    result.getCodeComponentName(),
+                    result.getSimilarity().toString(),
+                    Joiner.on(" ").join(result.getCodeComponentBag())
+            });
+        }
+    }
+
+    private List<CodeElement> readSourceComponents(Path path) throws IOException {
+        CSVReader reader = new CSVReader(new FileReader(path.toFile()));
+        String[] line = reader.readNext();
+
+        List<CodeElement> elements = new ArrayList<>();
+        while ((line = reader.readNext()) != null) {
+            if (!line[2].isEmpty()) {
+                elements.add(new CodeElement(line[0], Sets.newHashSet(line[2].split(" "))));
+            }
+        }
+        return elements;
+    }
+
+    private List<TopicAssignment> readAssignments(Path path) throws IOException {
+        CSVReader reader = new CSVReader(new FileReader(path.toFile()));
+        String[] line = reader.readNext();
+
+        List<TopicAssignment> assignments = new ArrayList<>();
+        while ((line = reader.readNext()) != null) {
+            assignments.add(new TopicAssignment(Sets.newHashSet(line[1].split(" ")), Integer.valueOf(line[2])));
+        }
+        return assignments;
     }
 
     @Test

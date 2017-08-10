@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.changeadvisor.batch.job.linking.metrics;
 
+import com.google.common.base.Splitter;
 import com.google.common.collect.Sets;
 import org.junit.Assert;
 import org.junit.Test;
@@ -55,5 +56,15 @@ public class AsymmetricDiceIndexTest {
 
         similarity = asymmetricDiceIndex.similarity(doc3, doc4);
         Assert.assertThat(similarity, is(0.0));
+    }
+
+    @Test
+    public void test() throws Exception {
+        Set<String> doc5 = Sets.newHashSet(Splitter.on(" ").omitEmptyStrings().trimResults().splitToList("play parent disconnect select prefix mime visibl type compon music context action text soft creat posit item method scroll index manag click input system util reset notifi subtitl artist icon overrid search default interfac audio close connect resourc break restart column store menu cach token filter fanci hide inflat throw grid paus return loader project extern fling listen view stub finish titl binder info void profil swap adapt count touch list fals servic disk null true name final option datum cursor string submit pars android focu medium content pollo switch total public queri bundl move album encod home equal super boolean chang inherit window base empti"));
+        Set<String> doc6 = Sets.newHashSet(Splitter.on(" ").omitEmptyStrings().trimResults().splitToList("allow play minut datum instal rerout quick wait loader pleas screen polici mobil download search onald farm freez connect song coupl wife night fault click lack home market exit phone chang reset time page"));
+        Set<String> doc7 = Sets.newHashSet(Splitter.on(" ").omitEmptyStrings().trimResults().splitToList("datum lack connect wife mobil home rerout page click wait freez phone exit minut screen search reset time instal farm onald night play quick song coupl download polici allow chang pleas fault loader market "));
+
+        double similarity = asymmetricDiceIndex.similarity(doc5, doc7);
+        Assert.assertEquals(similarity, 0.529411765, 0.001);
     }
 }

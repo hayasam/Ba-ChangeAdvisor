@@ -31,6 +31,6 @@ public class LinkingProcessor implements ItemProcessor<TopicClusteringResult, Li
 
     @Override
     public List<LinkingResult> process(TopicClusteringResult item) throws Exception {
-        return linker.process(item.getTopics(), item.getAssignments(), codeElements);
+        return linker.process(item.getAssignments(), codeElements);
     }
 }
