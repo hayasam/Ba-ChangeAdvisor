@@ -40,11 +40,11 @@ public class ChangeAdvisorLinker implements Linker {
             if (!cluster.getKey().equals(0)) {
 
                 Collection<CodeElement> candidates = new HashSet<>();
-
                 Set<String> clusterBag = new HashSet<>();
+                Set<String> originalReviews = new HashSet<>();
 
                 // Find candidates
-                findCandidates(cluster.getValue(), codeComponentWords, candidates, clusterBag);
+                findCandidates(cluster.getValue(), codeComponentWords, candidates, clusterBag, originalReviews);
 
                 final Set<String> clusterCleanedBag = corpusProcessor.transform(clusterBag);
 
@@ -61,7 +61,7 @@ public class ChangeAdvisorLinker implements Linker {
 
                         if (similarity >= 0.5) {
                             LinkingResult result = new LinkingResult(
-                                    cluster.getKey(), clusterCleanedBag, codeElementBag,
+                                    cluster.getKey(), originalReviews, clusterCleanedBag, codeElementBag,
                                     codeElement.getFullyQualifiedClassName(), similarity);
                             results.add(result);
                         }
@@ -84,16 +84,17 @@ public class ChangeAdvisorLinker implements Linker {
 
             Collection<CodeElement> candidates = new HashSet<>();
             Set<String> clusterBag = new HashSet<>();
+            Set<String> originalReviews = new HashSet<>();
 
             // Find candidates
-            findCandidates(assignments, codeElements, candidates, clusterBag);
+            findCandidates(assignments, codeElements, candidates, clusterBag, originalReviews);
 
             final Set<String> clusterCleanedBag = corpusProcessor.transform(clusterBag);
 
             logger.debug(String.format("Cluster: %d, size: %d", topicId, assignments.size()));
             logger.debug(String.format("Candidates size: %d", candidates.size()));
 
-            List<LinkingResult> similarityResults = checkSimilarity(topicId, candidates, clusterCleanedBag);
+            List<LinkingResult> similarityResults = checkSimilarity(topicId, candidates, clusterCleanedBag, originalReviews);
             results.addAll(similarityResults);
 
             logger.info(String.format("Finished running topic: %d", topicId));
@@ -101,17 +102,17 @@ public class ChangeAdvisorLinker implements Linker {
         return results;
     }
 
-    private List<LinkingResult> checkSimilarity(int topicId, Collection<CodeElement> candidates, Set<String> clusterBag) {
+    private List<LinkingResult> checkSimilarity(int topicId, Collection<CodeElement> candidates, Set<String> clusterBag, Set<String> reviews) {
         List<LinkingResult> results = new ArrayList<>();
 
         for (CodeElement candidate : candidates) {
-            Optional<LinkingResult> result = checkSimilarity(topicId, candidate, clusterBag);
+            Optional<LinkingResult> result = checkSimilarity(topicId, candidate, clusterBag, reviews);
             result.ifPresent(results::add);
         }
         return results;
     }
 
-    private Optional<LinkingResult> checkSimilarity(int topicId, CodeElement candidate, Set<String> clusterBag) {
+    private Optional<LinkingResult> checkSimilarity(int topicId, CodeElement candidate, Set<String> clusterBag, Set<String> reviews) {
         final Set<String> codeElementBag = corpusProcessor.transform(candidate.getBag());
 
         if (!clusterBag.isEmpty() && !codeElementBag.isEmpty()) {
@@ -121,7 +122,7 @@ public class ChangeAdvisorLinker implements Linker {
 
             if (similarity >= 0.5) {
                 LinkingResult result = new LinkingResult(
-                        topicId, clusterBag, codeElementBag,
+                        topicId, reviews, clusterBag, codeElementBag,
                         candidate.getFullyQualifiedClassName(), similarity);
                 return Optional.of(result);
             }
@@ -129,7 +130,7 @@ public class ChangeAdvisorLinker implements Linker {
         return Optional.empty();
     }
 
-    private void findCandidates(Collection<TopicAssignment> assignments, Collection<CodeElement> elements, Collection<CodeElement> candidates, Set<String> clusterBag) {
+    private void findCandidates(Collection<TopicAssignment> assignments, Collection<CodeElement> elements, Collection<CodeElement> candidates, Set<String> clusterBag, Set<String> originalReviews) {
         for (TopicAssignment review : assignments) {
             Set<String> reviewWords = review.getBag();
 
@@ -139,12 +140,13 @@ public class ChangeAdvisorLinker implements Linker {
                 if (!intersection.isEmpty()) {
                     clusterBag.addAll(review.getBag());
                     candidates.add(codeElement);
+                    originalReviews.add(review.getOriginalSentence());
                 }
             }
         }
     }
 
-    private void findCandidates(Collection<TopicAssignment> assignments, Map<CodeElement, Set<String>> codeComponentWords, Collection<CodeElement> candidates, Set<String> clusterBag) {
+    private void findCandidates(Collection<TopicAssignment> assignments, Map<CodeElement, Set<String>> codeComponentWords, Collection<CodeElement> candidates, Set<String> clusterBag, Set<String> originalReviews) {
         for (TopicAssignment review : assignments) {
             Set<String> reviewWords = review.getBag();
 
@@ -154,6 +156,7 @@ public class ChangeAdvisorLinker implements Linker {
                 if (!intersection.isEmpty()) {
                     clusterBag.addAll(review.getBag());
                     candidates.add(codeElement.getKey());
+                    originalReviews.add(review.getOriginalSentence());
                 }
             }
         }

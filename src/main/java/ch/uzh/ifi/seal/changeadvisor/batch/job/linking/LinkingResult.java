@@ -14,6 +14,8 @@ public class LinkingResult implements Comparable<LinkingResult> {
 
     private int clusterId;
 
+    private Set<String> reviews;
+
     private Set<String> clusterBag;
 
     private Set<String> codeComponentBag;
@@ -25,8 +27,9 @@ public class LinkingResult implements Comparable<LinkingResult> {
     public LinkingResult() {
     }
 
-    public LinkingResult(int clusterId, Set<String> clusterBag, Set<String> codeComponentBag, String codeComponentName, Double similarity) {
+    public LinkingResult(int clusterId, Set<String> reviews, Set<String> clusterBag, Set<String> codeComponentBag, String codeComponentName, Double similarity) {
         this.clusterId = clusterId;
+        this.reviews = reviews;
         this.clusterBag = clusterBag;
         this.codeComponentBag = codeComponentBag;
         this.codeComponentName = codeComponentName;
@@ -47,6 +50,14 @@ public class LinkingResult implements Comparable<LinkingResult> {
 
     public void setClusterId(int clusterId) {
         this.clusterId = clusterId;
+    }
+
+    public Set<String> getReviews() {
+        return reviews;
+    }
+
+    public void setReviews(Set<String> reviews) {
+        this.reviews = reviews;
     }
 
     public Set<String> getClusterBag() {
