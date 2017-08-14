@@ -61,6 +61,29 @@ public class ChangeAdvisorLinkerTest {
         Assert.assertThat(results.size(), lessThan(310)); // Results should be in the ~300 range.
     }
 
+    @Test
+    public void processIteratively() throws Exception {
+        List<TopicAssignment> assignments = readAssignments(Paths.get("test_files_parser/linking/com.frostwire.android_assignments.csv"));
+        List<CodeElement> codeElements = readSourceComponents(Paths.get("test_files_parser/linking/source_components_frostwire.csv"));
+
+        Assert.assertThat(assignments.size(), is(1375));
+        Assert.assertThat(codeElements.size(), is(1359));
+
+        logger.info("Finished reading, starting linking.");
+
+        List<LinkingResult> results = new ArrayList<>(300);
+
+        Map<Integer, List<TopicAssignment>> clusters = linker.groupByTopic(assignments);
+
+        for (Map.Entry<Integer, List<TopicAssignment>> entry : clusters.entrySet()) {
+            List<LinkingResult> clusterResults = linker.process(entry.getKey(), entry.getValue(), codeElements);
+            results.addAll(clusterResults);
+        }
+
+        logger.info(String.format("Results found: %d.", results.size()));
+        Assert.assertThat(results.size(), is(290)); // Results should be in the ~300 range.
+    }
+
     @SuppressWarnings("unused")
     private void writeResultsToCsv(List<LinkingResult> results) throws IOException {
         CSVWriter writer = new CSVWriter(new FileWriter(new File("test_files_parser/linking/output.csv")));

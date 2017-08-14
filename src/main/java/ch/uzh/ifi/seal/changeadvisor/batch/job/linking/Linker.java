@@ -9,4 +9,6 @@ import java.util.List;
 public interface Linker {
 
     List<LinkingResult> process(Collection<TopicAssignment> assignments, Collection<CodeElement> codeElements);
+
+    List<LinkingResult> process(int topicId, Collection<TopicAssignment> assignments, Collection<CodeElement> codeElements);
 }
