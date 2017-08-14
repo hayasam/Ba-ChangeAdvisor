@@ -28,13 +28,16 @@ public class BatchConfig {
 
     private final DocumentClusteringStepConfig documentClusteringStepConfig;
 
+    private final LinkingStepConfig linkingStepConfig;
+
     @Autowired
-    public BatchConfig(JobBuilderFactory jobBuilderFactory, SourceComponentsTransformationStepConfig sourceComponentStepConfig, ArdocStepConfig ardocStepConfig, FeedbackTransformationStepConfig transformationStepConfig, DocumentClusteringStepConfig documentClusteringStepConfig) {
+    public BatchConfig(JobBuilderFactory jobBuilderFactory, SourceComponentsTransformationStepConfig sourceComponentStepConfig, ArdocStepConfig ardocStepConfig, FeedbackTransformationStepConfig transformationStepConfig, DocumentClusteringStepConfig documentClusteringStepConfig, LinkingStepConfig linkingStepConfig) {
         this.jobBuilderFactory = jobBuilderFactory;
         this.sourceComponentStepConfig = sourceComponentStepConfig;
         this.ardocStepConfig = ardocStepConfig;
         this.transformationStepConfig = transformationStepConfig;
         this.documentClusteringStepConfig = documentClusteringStepConfig;
+        this.linkingStepConfig = linkingStepConfig;
     }
 
     @Bean
@@ -47,6 +50,7 @@ public class BatchConfig {
                 .next(ardocStepConfig.ardocAnalysis())
                 .next(transformationStepConfig.transformFeedback())
                 .next(documentClusteringStepConfig.documentsClustering())
+                .next(linkingStepConfig.clusterLinking())
                 .end()
                 .build();
     }

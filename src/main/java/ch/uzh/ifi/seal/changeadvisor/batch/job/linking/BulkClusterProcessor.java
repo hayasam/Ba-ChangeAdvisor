@@ -9,8 +9,12 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+/**
+ * Processes documents clusters and processed code components to find similarities.
+ * Works in bulk by operating on all clusters.
+ */
 @Component
-public class LinkingProcessor implements ItemProcessor<TopicClusteringResult, List<LinkingResult>> {
+public class BulkClusterProcessor implements ItemProcessor<TopicClusteringResult, List<LinkingResult>> {
 
     private Linker linker;
 
@@ -19,7 +23,7 @@ public class LinkingProcessor implements ItemProcessor<TopicClusteringResult, Li
     private List<CodeElement> codeElements;
 
     @Autowired
-    public LinkingProcessor(Linker changeAdvisorLinker, CodeElementRepository codeElementRepository) {
+    public BulkClusterProcessor(Linker changeAdvisorLinker, CodeElementRepository codeElementRepository) {
         this.linker = changeAdvisorLinker;
         this.codeElementRepository = codeElementRepository;
         codeElements = getCodeElements();

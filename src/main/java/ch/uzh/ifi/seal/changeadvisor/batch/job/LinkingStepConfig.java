@@ -1,9 +1,8 @@
 package ch.uzh.ifi.seal.changeadvisor.batch.job;
 
+import ch.uzh.ifi.seal.changeadvisor.batch.job.documentclustering.Cluster;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.documentclustering.TopicClusteringResult;
-import ch.uzh.ifi.seal.changeadvisor.batch.job.linking.LinkingProcessor;
-import ch.uzh.ifi.seal.changeadvisor.batch.job.linking.LinkingResult;
-import ch.uzh.ifi.seal.changeadvisor.batch.job.linking.LinkingStepReader;
+import ch.uzh.ifi.seal.changeadvisor.batch.job.linking.*;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,23 +18,44 @@ public class LinkingStepConfig {
 
     private final StepBuilderFactory stepBuilderFactory;
 
-    private final LinkingStepReader linkingStepReader;
+    private final BulkClusterReader bulkClusterReader;
 
-    private final LinkingProcessor linkingProcessor;
+    private final BulkClusterProcessor bulkClusterProcessor;
+
+    private final ClusterReader clusterReader;
+
+    private final ClusterProcessor clusterProcessor;
+
+    private final ClusterWriter clusterWriter;
+
 
     @Autowired
-    public LinkingStepConfig(StepBuilderFactory stepBuilderFactory, LinkingStepReader linkingStepReader, LinkingProcessor linkingProcessor) {
+    public LinkingStepConfig(StepBuilderFactory stepBuilderFactory, BulkClusterReader bulkClusterReader, BulkClusterProcessor bulkClusterProcessor, ClusterReader clusterReader, ClusterProcessor clusterProcessor, ClusterWriter clusterWriter) {
         this.stepBuilderFactory = stepBuilderFactory;
-        this.linkingStepReader = linkingStepReader;
-        this.linkingProcessor = linkingProcessor;
+        this.bulkClusterReader = bulkClusterReader;
+        this.bulkClusterProcessor = bulkClusterProcessor;
+        this.clusterReader = clusterReader;
+        this.clusterProcessor = clusterProcessor;
+        this.clusterWriter = clusterWriter;
     }
 
     @Bean
-    public Step transformFeedback() {
+    public Step bulkClusterLinking() {
         return stepBuilderFactory.get(STEP_NAME)
                 .<TopicClusteringResult, List<LinkingResult>>chunk(1)
-                .reader(linkingStepReader)
-                .processor(linkingProcessor)
+                .reader(bulkClusterReader)
+                .processor(bulkClusterProcessor)
+                .writer(clusterWriter)
+                .build();
+    }
+
+    @Bean
+    public Step clusterLinking() {
+        return stepBuilderFactory.get(STEP_NAME)
+                .<Cluster, List<LinkingResult>>chunk(1)
+                .reader(clusterReader)
+                .processor(clusterProcessor)
+                .writer(clusterWriter)
                 .build();
     }
 }

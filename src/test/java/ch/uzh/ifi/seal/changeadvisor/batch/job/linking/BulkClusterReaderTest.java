@@ -20,7 +20,7 @@ import static org.hamcrest.core.Is.is;
 @SpringBootTest(classes = {ChangeadvisorApplication.class, MongoTestConfig.class},
         properties = {"spring.batch.job.enabled=false"})
 @ActiveProfiles("test")
-public class LinkingStepReaderTest {
+public class BulkClusterReaderTest {
 
     @Autowired
     private TopicRepository topicRepository;
@@ -29,7 +29,7 @@ public class LinkingStepReaderTest {
     private TopicAssignmentRepository assignmentRepository;
 
     @Autowired
-    private LinkingStepReader linkingReader;
+    private BulkClusterReader linkingReader;
 
     @Before
     public void setUp() throws Exception {
