@@ -1,12 +1,13 @@
 package ch.uzh.ifi.seal.changeadvisor.batch.job.linking;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Set;
 
 @Document
-public class LinkingResult {
+public class LinkingResult implements Comparable<LinkingResult> {
 
     @Id
     private String id;
@@ -78,6 +79,11 @@ public class LinkingResult {
 
     public void setSimilarity(Double similarity) {
         this.similarity = similarity;
+    }
+
+    @Override
+    public int compareTo(@NotNull LinkingResult o) {
+        return codeComponentName.compareTo(o.codeComponentName);
     }
 
     @Override

@@ -1,7 +1,5 @@
 package ch.uzh.ifi.seal.changeadvisor.parser.preprocessing;
 
-import org.apache.log4j.Logger;
-
 import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -10,8 +8,6 @@ import java.util.stream.Collectors;
  * Created by alex on 20.07.2017.
  */
 public class CorpusProcessor {
-
-    private static final Logger logger = Logger.getLogger(CorpusProcessor.class);
 
     private String text;
 
@@ -39,6 +35,8 @@ public class CorpusProcessor {
 
     private ComposedIdentifierSplitter composedIdentifierSplitter;
 
+    private EscapeSpecialCharacters escapeSpecialCharacters;
+
     private Annotator annotator = new Annotator();
 
     private CorpusProcessor() {
@@ -50,13 +48,12 @@ public class CorpusProcessor {
 
     public Set<String> transform(String text) {
 
-
         if (composedIdentifierSplitter != null) {
             text = composedIdentifierSplitter.split(text);
         }
 
         if (shouldEscapeCharacters) {
-            text = new EscapeSpecialCharacters().escape(text);
+            text = escapeSpecialCharacters.escape(text);
         }
 
         if (shouldLowerCase) {
@@ -72,6 +69,8 @@ public class CorpusProcessor {
         expandContractions();
 
         tokenize(posFilter);
+
+        tokenAutoCorrect();
 
         if (shouldSingularize) {
             singularize();
@@ -95,8 +94,6 @@ public class CorpusProcessor {
     public void autoCorrect() {
         if (spellChecker != null) {
             text = spellChecker.correct(text);
-        } else {
-            logger.warn("Trying to correct spelling, but no spellChecker set!");
         }
     }
 
@@ -109,8 +106,6 @@ public class CorpusProcessor {
     public void expandContractions() {
         if (contractionsExpander != null) {
             text = contractionsExpander.expand(text);
-        } else {
-            logger.warn("Trying to expand contractions, but no expander set!");
         }
     }
 
@@ -149,6 +144,7 @@ public class CorpusProcessor {
 
         public Builder escapeSpecialChars() {
             corpusProcessor.shouldEscapeCharacters = true;
+            corpusProcessor.escapeSpecialCharacters = new EscapeSpecialCharacters();
             return this;
         }
 

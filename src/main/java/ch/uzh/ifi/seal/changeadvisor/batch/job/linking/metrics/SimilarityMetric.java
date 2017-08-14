@@ -1,5 +1,7 @@
 package ch.uzh.ifi.seal.changeadvisor.batch.job.linking.metrics;
 
+import java.util.Collection;
+
 public interface SimilarityMetric {
 
     /**
@@ -10,4 +12,13 @@ public interface SimilarityMetric {
      * @return
      */
     double similarity(String document1, String document2);
+
+    /**
+     * Compute similarity between two corpuses.
+     *
+     * @param document1 review text tokens.
+     * @param document2 code element text tokens.
+     * @return
+     */
+    double similarity(Collection<String> document1, Collection<String> document2);
 }

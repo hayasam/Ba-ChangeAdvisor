@@ -8,10 +8,14 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+/**
+ * Reader for document clusters.
+ * Reads all clusters in one go.
+ */
 @Component
-public class LinkingStepReader implements ItemReader<TopicClusteringResult> {
+public class BulkClusterReader implements ItemReader<TopicClusteringResult> {
 
-    private static final Logger logger = Logger.getLogger(LinkingStepReader.class);
+    private static final Logger logger = Logger.getLogger(BulkClusterReader.class);
 
     private final TopicRepository topicRepository;
 
@@ -20,7 +24,7 @@ public class LinkingStepReader implements ItemReader<TopicClusteringResult> {
     private boolean hasRead = false;
 
     @Autowired
-    public LinkingStepReader(TopicRepository topicRepository, TopicAssignmentRepository topicAssignmentRepository) {
+    public BulkClusterReader(TopicRepository topicRepository, TopicAssignmentRepository topicAssignmentRepository) {
         this.topicRepository = topicRepository;
         this.topicAssignmentRepository = topicAssignmentRepository;
     }
