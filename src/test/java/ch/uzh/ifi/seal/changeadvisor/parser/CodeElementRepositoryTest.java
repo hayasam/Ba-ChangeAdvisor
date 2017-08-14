@@ -3,7 +3,9 @@ package ch.uzh.ifi.seal.changeadvisor.parser;
 import ch.uzh.ifi.seal.changeadvisor.ChangeadvisorApplication;
 import ch.uzh.ifi.seal.changeadvisor.MongoTestConfig;
 import com.google.common.collect.Sets;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,9 +24,18 @@ public class CodeElementRepositoryTest {
     @Autowired
     private CodeElementRepository repository;
 
+    @Before
+    public void setUp() throws Exception {
+        repository.deleteAll();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        repository.deleteAll();
+    }
+
     @Test
     public void test() throws Exception {
-        repository.deleteAll();
         CodeElement codeElement = new CodeElement("HelloWorld", Sets.newHashSet("hello", "world"));
         codeElement = repository.save(codeElement);
 

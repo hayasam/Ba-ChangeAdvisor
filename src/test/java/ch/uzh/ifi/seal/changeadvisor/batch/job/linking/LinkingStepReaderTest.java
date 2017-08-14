@@ -4,6 +4,7 @@ import ch.uzh.ifi.seal.changeadvisor.ChangeadvisorApplication;
 import ch.uzh.ifi.seal.changeadvisor.MongoTestConfig;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.documentclustering.*;
 import com.google.common.collect.ImmutableSet;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -32,6 +33,12 @@ public class LinkingStepReaderTest {
 
     @Before
     public void setUp() throws Exception {
+        topicRepository.deleteAll();
+        assignmentRepository.deleteAll();
+    }
+
+    @After
+    public void tearDown() throws Exception {
         topicRepository.deleteAll();
         assignmentRepository.deleteAll();
     }
