@@ -1,18 +1,36 @@
 package ch.uzh.ifi.seal.changeadvisor;
 
-import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.batch.core.launch.support.SimpleJobLauncher;
-import org.springframework.batch.core.repository.JobRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.context.annotation.Bean;
-import org.springframework.core.task.TaskExecutor;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 @SpringBootApplication
-public class ChangeadvisorApplication {
+public class ChangeadvisorApplication implements CommandLineRunner {
 
+    @Autowired
+    private CodeElementRepository codeElementRepository;
+
+    @Autowired
+    private TopicRepository topicRepository;
+
+    @Autowired
+    private TopicAssignmentRepository topicAssignmentRepository;
+
+    @Autowired
+    private TransformedFeedbackRepository transformedFeedbackRepository;
+
+    @Autowired
+    private ArdocResultRepository ardocResultRepository;
+
+    @Override
+    public void run(String... args) throws Exception {
+        codeElementRepository.deleteAll();
+        topicAssignmentRepository.deleteAll();
+        topicRepository.deleteAll();
+        transformedFeedbackRepository.deleteAll();
+        ardocResultRepository.deleteAll();
+
+
+    }
     public static void main(String[] args) {
         new SpringApplicationBuilder(ChangeadvisorApplication.class).web(true).run(args);
 //        SpringApplication.run(ChangeadvisorApplication.class, args);
