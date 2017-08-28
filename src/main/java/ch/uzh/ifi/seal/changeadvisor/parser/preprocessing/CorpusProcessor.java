@@ -91,25 +91,19 @@ public class CorpusProcessor {
         return this.tokens.stream().map(AnnotatedToken::getToken).collect(Collectors.toSet());
     }
 
-    public void autoCorrect() {
-        if (spellChecker != null) {
-            text = spellChecker.correct(text);
-        }
-    }
-
     private void tokenAutoCorrect() {
         if (spellChecker != null) {
             tokens.forEach(token -> token.setToken(spellChecker.correct(token.getToken())));
         }
     }
 
-    public void expandContractions() {
+    private void expandContractions() {
         if (contractionsExpander != null) {
             text = contractionsExpander.expand(text);
         }
     }
 
-    public void tokenize(boolean shouldFilterPos) {
+    private void tokenize(boolean shouldFilterPos) {
         tokens = annotator.annotate(text, shouldFilterPos);
     }
 
@@ -126,7 +120,11 @@ public class CorpusProcessor {
     }
 
     private void removeShortTokens() {
-        tokens.removeIf(token -> token.length() < minLength);
+        tokens.removeIf(this::isTooShort);
+    }
+
+    private boolean isTooShort(AnnotatedToken token) {
+        return token.length() < minLength;
     }
 
     public static class Builder {
