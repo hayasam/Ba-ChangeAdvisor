@@ -1,6 +1,5 @@
 package ch.uzh.ifi.seal.changeadvisor.parser;
 
-import ch.uzh.ifi.seal.changeadvisor.parser.preprocessing.ComposedIdentifierSplitter;
 import ch.uzh.ifi.seal.changeadvisor.parser.preprocessing.CorpusProcessor;
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
@@ -38,7 +37,7 @@ public class BagOfWordsTest {
 
         CorpusProcessor processor = new CorpusProcessor.Builder()
                 .escapeSpecialChars()
-                .withComposedIdentifierSplit(new ComposedIdentifierSplitter())
+                .withComposedIdentifierSplit()
 //                .withAutoCorrect(new EnglishSpellChecker()) // Warning huge performance impact
                 .singularize()
                 .lowerCase()
@@ -53,6 +52,6 @@ public class BagOfWordsTest {
 
         List<String> orderedBagOfWords = bagOfWords.getSortedBag();
 
-        Assert.assertEquals(138, orderedBagOfWords.size());
+        Assert.assertEquals(137, orderedBagOfWords.size());
     }
 }

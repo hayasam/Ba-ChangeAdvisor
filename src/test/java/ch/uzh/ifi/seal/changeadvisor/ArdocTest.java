@@ -16,17 +16,13 @@ public class ArdocTest {
     private static final Logger logger = Logger.getLogger(ArdocTest.class);
 
     @Test
-    public void ardocTest() {
+    public void ardocTest() throws UnknownCombinationException {
         String example = "You should add new levels for the game. " +
                 "These annoying ads block the whole au, please fix. ";
         Parser p = Parser.getInstance();
-        try {
-            ArrayList<Result> res = p.extract("NLP+SA", example);
-            for (Result r : res) {
-                logger.info(r.getSentence() + "-" + r.getSentenceClass() + "-" + r.getSentimentClass());
-            }
-        } catch(UnknownCombinationException ex){
-            ex.printStackTrace();
+        ArrayList<Result> res = p.extract("NLP+SA", example);
+        for (Result r : res) {
+            logger.info(r.getSentence() + "-" + r.getSentenceClass() + "-" + r.getSentimentClass());
         }
     }
 }

@@ -1,10 +1,13 @@
 package ch.uzh.ifi.seal.changeadvisor.parser.preprocessing;
 
+import org.springframework.util.Assert;
+
 import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
+ * NLP processor for text. Use builder {@link CorpusProcessor.Builder} to configure its steps.
  * Created by alex on 20.07.2017.
  */
 public class CorpusProcessor {
@@ -42,31 +45,46 @@ public class CorpusProcessor {
     private CorpusProcessor() {
     }
 
+    /**
+     * Takes text as a bag of words and processes it based on the steps defined during construction.
+     *
+     * @param bag bag of words.
+     * @return transformed bag of words.
+     */
     public Set<String> transform(Collection<String> bag) {
         return transform(String.join(" ", bag));
     }
 
+    /**
+     * Takes text as a string and processes it based on the steps defined during construction.
+     *
+     * @param text text as string.
+     * @return transformed bag of words.
+     */
     public Set<String> transform(String text) {
 
         if (composedIdentifierSplitter != null) {
             text = composedIdentifierSplitter.split(text);
         }
 
-        if (shouldEscapeCharacters) {
-            text = escapeSpecialCharacters.escape(text);
+        if (contractionsExpander != null) {
+            text = contractionsExpander.expand(text);
         }
 
-        if (shouldLowerCase) {
-            text = text.toLowerCase();
+        if (shouldEscapeCharacters) {
+            text = escapeSpecialCharacters.escape(text);
         }
 
         if (spellChecker != null) {
             text = spellChecker.correct(text);
         }
 
-        this.text = text;
 
-        expandContractions();
+        if (shouldLowerCase) {
+            text = text.toLowerCase();
+        }
+
+        this.text = text;
 
         tokenize(posFilter);
 
@@ -85,7 +103,7 @@ public class CorpusProcessor {
         }
 
         if (shouldRemoveShortTokens) {
-            removeShortTokens();
+            tokens = tokens.stream().filter(this::isLongEnough).collect(Collectors.toSet());
         }
 
         return this.tokens.stream().map(AnnotatedToken::getToken).collect(Collectors.toSet());
@@ -119,14 +137,13 @@ public class CorpusProcessor {
         tokens.forEach(AnnotatedToken::stem);
     }
 
-    private void removeShortTokens() {
-        tokens.removeIf(this::isTooShort);
+    private boolean isLongEnough(AnnotatedToken token) {
+        return token.length() >= minLength;
     }
 
-    private boolean isTooShort(AnnotatedToken token) {
-        return token.length() < minLength;
-    }
-
+    /**
+     * Builder class for {@link CorpusProcessor}.
+     */
     public static class Builder {
 
         private CorpusProcessor corpusProcessor;
@@ -135,58 +152,120 @@ public class CorpusProcessor {
             corpusProcessor = new CorpusProcessor();
         }
 
+        /**
+         * Will lower case.
+         *
+         * @return this builder for chaining.
+         */
         public Builder lowerCase() {
             corpusProcessor.shouldLowerCase = true;
             return this;
         }
 
+        /**
+         * Will escape special chars.
+         *
+         * @return this builder for chaining.
+         * @see EscapeSpecialCharacters
+         */
         public Builder escapeSpecialChars() {
             corpusProcessor.shouldEscapeCharacters = true;
             corpusProcessor.escapeSpecialCharacters = new EscapeSpecialCharacters();
             return this;
         }
 
-        public Builder withComposedIdentifierSplit(ComposedIdentifierSplitter splitter) {
-            corpusProcessor.composedIdentifierSplitter = splitter;
+        /**
+         * Will split composed identifiers (camel case, snake case, ...)
+         *
+         * @return this builder for chaining.
+         * @see ComposedIdentifierSplitter
+         */
+        public Builder withComposedIdentifierSplit() {
+            corpusProcessor.composedIdentifierSplitter = new ComposedIdentifierSplitter();
             return this;
         }
 
+        /**
+         * Will run spell checking with provided SpellChecker.
+         *
+         * @param spellChecker spellchecker to use.
+         * @return this builder for chaining.
+         * @see SpellChecker
+         */
         public Builder withAutoCorrect(SpellChecker spellChecker) {
+            Assert.notNull(spellChecker, "Spell checker must not be null.");
             corpusProcessor.spellChecker = spellChecker;
             return this;
         }
 
-        public Builder withContractionExpander(ContractionsExpander contractionExpander) {
-            corpusProcessor.contractionsExpander = contractionExpander;
+        /**
+         * Will expand contractions (It's -> It is, etc.).
+         *
+         * @return this builder for chaining.
+         * @see ContractionsExpander
+         */
+        public Builder withContractionExpander() {
+            corpusProcessor.contractionsExpander = new ContractionsExpander();
             return this;
         }
 
+        /**
+         * Will singularize each token. Each token will be transformed to its singular form e.g. (cars -> car).
+         *
+         * @return this builder for chaining.
+         */
         public Builder singularize() {
             corpusProcessor.shouldSingularize = true;
             return this;
         }
 
+        /**
+         * Will remove stop words.
+         *
+         * @return this builder for chaining.
+         */
         public Builder removeStopWords() {
             corpusProcessor.shouldRemoveStopWords = true;
             return this;
         }
 
+        /**
+         * Will stem each token.
+         *
+         * @return this builder for chaining.
+         */
         public Builder stem() {
             corpusProcessor.shouldStem = true;
             return this;
         }
 
+        /**
+         * Will remove tokens shorter than minLength.
+         *
+         * @param minLength minimum length of a token in order for this to be kept.
+         * @return this builder for chaining.
+         */
         public Builder removeTokensShorterThan(int minLength) {
             corpusProcessor.shouldRemoveShortTokens = true;
             corpusProcessor.minLength = minLength;
             return this;
         }
 
+        /**
+         * Will filter tokens based on their Part-Of-Speech tag.
+         *
+         * @return this builder for chaining.
+         */
         public Builder posFilter() {
             corpusProcessor.posFilter = true;
             return this;
         }
 
+        /**
+         * Builds processor.
+         *
+         * @return the built processor.
+         */
         public CorpusProcessor build() {
             return corpusProcessor;
         }
