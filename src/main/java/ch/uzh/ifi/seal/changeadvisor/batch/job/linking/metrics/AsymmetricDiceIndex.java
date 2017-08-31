@@ -1,18 +1,19 @@
 package ch.uzh.ifi.seal.changeadvisor.batch.job.linking.metrics;
 
 import com.google.common.base.Splitter;
-import com.google.common.collect.Sets;
 
 import java.util.Collection;
-import java.util.Set;
+import java.util.List;
 
-public class AsymmetricDiceIndex implements SimilarityMetric {
+public final class AsymmetricDiceIndex implements SimilarityMetric {
+
+    private final MetricUtils metricUtils = new MetricUtils();
 
     @Override
     public double similarity(String document1, String document2) {
-        Set<String> doc1 = Sets.newHashSet(Splitter.on(" ").omitEmptyStrings().trimResults().split(document1));
-        Set<String> doc2 = Sets.newHashSet(Splitter.on(" ").omitEmptyStrings().trimResults().split(document2));
-        return similarity(doc1, doc2);
+        List<String> docTokens1 = Splitter.on(" ").splitToList(document1);
+        List<String> docTokens2 = Splitter.on(" ").splitToList(document2);
+        return similarity(docTokens1, docTokens2);
     }
 
     @Override
@@ -21,13 +22,13 @@ public class AsymmetricDiceIndex implements SimilarityMetric {
             return 0.0;
         }
 
-        final int overlap = countOverlappingWords(document1, document2);
-        Double result = (double) (2 * overlap);
+        Double overlap = (double) metricUtils.countOverlappingWords(document1, document2);
+        Double result = 2 * overlap;
 
-        if (document2.size() < document1.size()) {
-            result = result / (double) document2.size();
+        if (document1.size() < document2.size()) {
+            result = result / document1.size();
         } else {
-            result = result / (double) document1.size();
+            result = result / document2.size();
         }
 
         if (result > 1.0) {
@@ -39,15 +40,5 @@ public class AsymmetricDiceIndex implements SimilarityMetric {
         }
 
         return result;
-    }
-
-    int countOverlappingWords(Collection<String> doc1, Collection<String> doc2) {
-        int counter = 0;
-        for (String s1 : doc1) {
-            if (doc2.contains(s1)) {
-                counter++;
-            }
-        }
-        return counter;
     }
 }

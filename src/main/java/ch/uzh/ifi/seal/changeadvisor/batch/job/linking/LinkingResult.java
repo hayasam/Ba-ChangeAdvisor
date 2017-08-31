@@ -1,17 +1,20 @@
 package ch.uzh.ifi.seal.changeadvisor.batch.job.linking;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Set;
 
 @Document
-public class LinkingResult {
+public class LinkingResult implements Comparable<LinkingResult> {
 
     @Id
     private String id;
 
     private int clusterId;
+
+    private Set<String> reviews;
 
     private Set<String> clusterBag;
 
@@ -24,8 +27,9 @@ public class LinkingResult {
     public LinkingResult() {
     }
 
-    public LinkingResult(int clusterId, Set<String> clusterBag, Set<String> codeComponentBag, String codeComponentName, Double similarity) {
+    public LinkingResult(int clusterId, Set<String> reviews, Set<String> clusterBag, Set<String> codeComponentBag, String codeComponentName, Double similarity) {
         this.clusterId = clusterId;
+        this.reviews = reviews;
         this.clusterBag = clusterBag;
         this.codeComponentBag = codeComponentBag;
         this.codeComponentName = codeComponentName;
@@ -46,6 +50,14 @@ public class LinkingResult {
 
     public void setClusterId(int clusterId) {
         this.clusterId = clusterId;
+    }
+
+    public Set<String> getReviews() {
+        return reviews;
+    }
+
+    public void setReviews(Set<String> reviews) {
+        this.reviews = reviews;
     }
 
     public Set<String> getClusterBag() {
@@ -78,6 +90,11 @@ public class LinkingResult {
 
     public void setSimilarity(Double similarity) {
         this.similarity = similarity;
+    }
+
+    @Override
+    public int compareTo(@NotNull LinkingResult o) {
+        return codeComponentName.compareTo(o.codeComponentName);
     }
 
     @Override

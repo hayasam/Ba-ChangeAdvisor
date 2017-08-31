@@ -14,10 +14,10 @@ public interface SimilarityMetric {
     double similarity(String document1, String document2);
 
     /**
-     * Compute similarity between two corpuses as bags.
+     * Compute similarity between two corpuses.
      *
-     * @param document1 review text.
-     * @param document2 code element text.
+     * @param document1 review text tokens.
+     * @param document2 code element text tokens.
      * @return
      */
     double similarity(Collection<String> document1, Collection<String> document2);
