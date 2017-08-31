@@ -13,10 +13,6 @@ import java.util.stream.Collectors;
  */
 public class CorpusProcessor {
 
-    private String text;
-
-    private Set<AnnotatedToken> tokens;
-
     private SpellChecker spellChecker;
 
     private ContractionsExpander contractionsExpander;
@@ -91,61 +87,53 @@ public class CorpusProcessor {
             text = text.toLowerCase();
         }
 
-        this.text = text;
+        Set<AnnotatedToken> tokens = tokenize(text, posFilter);
 
-        tokenize(posFilter);
-
-        tokenAutoCorrect();
+        tokenAutoCorrect(tokens);
 
         if (shouldSingularize) {
-            singularize();
+            singularize(tokens);
         }
 
         if (shouldRemoveStopWords) {
-            removeStopWords();
+            removeStopWords(tokens);
         }
 
         if (shouldStem) {
-            stem();
+            stem(tokens);
         }
 
         if (shouldRemoveShortTokens) {
-            tokens = tokens.stream().filter(this::isLongEnough).collect(Collectors.toSet());
+            tokens.removeIf(this::isTooShort);
         }
 
-        return this.tokens.stream().map(AnnotatedToken::getToken).collect(Collectors.toSet());
+        return tokens.stream().map(AnnotatedToken::getToken).collect(Collectors.toSet());
     }
 
-    private void tokenAutoCorrect() {
+    private void tokenAutoCorrect(Set<AnnotatedToken> tokens) {
         if (spellChecker != null) {
             tokens.forEach(token -> token.setToken(spellChecker.correct(token.getToken())));
         }
     }
 
-    private void expandContractions() {
-        if (contractionsExpander != null) {
-            text = contractionsExpander.expand(text);
-        }
+    private Set<AnnotatedToken> tokenize(String text, boolean shouldFilterPos) {
+        return annotator.annotate(text, shouldFilterPos);
     }
 
-    private void tokenize(boolean shouldFilterPos) {
-        tokens = annotator.annotate(text, shouldFilterPos);
-    }
-
-    private void singularize() {
+    private void singularize(Set<AnnotatedToken> tokens) {
         tokens.forEach(AnnotatedToken::singularize);
     }
 
-    private void removeStopWords() {
+    private void removeStopWords(Set<AnnotatedToken> tokens) {
         tokens.removeIf(AnnotatedToken::isStopWord);
     }
 
-    private void stem() {
+    private void stem(Set<AnnotatedToken> tokens) {
         tokens.forEach(AnnotatedToken::stem);
     }
 
-    private boolean isLongEnough(AnnotatedToken token) {
-        return token.length() >= minLength;
+    private boolean isTooShort(AnnotatedToken token) {
+        return token.length() < minLength;
     }
 
     /**
