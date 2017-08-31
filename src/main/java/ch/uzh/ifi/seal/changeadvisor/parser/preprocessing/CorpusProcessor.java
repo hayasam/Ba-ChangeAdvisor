@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.changeadvisor.parser.preprocessing;
 
+import com.google.common.collect.Sets;
 import org.springframework.util.Assert;
 
 import java.util.Collection;
@@ -52,6 +53,7 @@ public class CorpusProcessor {
      * @return transformed bag of words.
      */
     public Set<String> transform(Collection<String> bag) {
+        Assert.notNull(bag, "Text to transform must not be null.");
         return transform(String.join(" ", bag));
     }
 
@@ -62,6 +64,11 @@ public class CorpusProcessor {
      * @return transformed bag of words.
      */
     public Set<String> transform(String text) {
+        Assert.notNull(text, "Text to transform must not be null.");
+
+        if (text.isEmpty()) {
+            return Sets.newHashSet(text);
+        }
 
         if (composedIdentifierSplitter != null) {
             text = composedIdentifierSplitter.split(text);
@@ -243,9 +250,13 @@ public class CorpusProcessor {
          * Will remove tokens shorter than minLength.
          *
          * @param minLength minimum length of a token in order for this to be kept.
+         *                  If minLength < 1 will throw {@link IllegalArgumentException}.
          * @return this builder for chaining.
          */
         public Builder removeTokensShorterThan(int minLength) {
+            if (minLength < 1) {
+                throw new IllegalArgumentException(String.format("Min length must be > 1. Was %d", minLength));
+            }
             corpusProcessor.shouldRemoveShortTokens = true;
             corpusProcessor.minLength = minLength;
             return this;
