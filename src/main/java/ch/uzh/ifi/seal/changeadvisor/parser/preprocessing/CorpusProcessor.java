@@ -1,17 +1,17 @@
 package ch.uzh.ifi.seal.changeadvisor.parser.preprocessing;
 
+import com.google.common.collect.Sets;
+import org.springframework.util.Assert;
+
 import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
+ * NLP processor for text. Use builder {@link CorpusProcessor.Builder} to configure its steps.
  * Created by alex on 20.07.2017.
  */
 public class CorpusProcessor {
-
-    private String text;
-
-    private Set<AnnotatedToken> tokens;
 
     private SpellChecker spellChecker;
 
@@ -42,91 +42,103 @@ public class CorpusProcessor {
     private CorpusProcessor() {
     }
 
+    /**
+     * Takes text as a bag of words and processes it based on the steps defined during construction.
+     *
+     * @param bag bag of words.
+     * @return transformed bag of words.
+     */
     public Set<String> transform(Collection<String> bag) {
+        Assert.notNull(bag, "Text to transform must not be null.");
         return transform(String.join(" ", bag));
     }
 
+    /**
+     * Takes text as a string and processes it based on the steps defined during construction.
+     *
+     * @param text text as string.
+     * @return transformed bag of words.
+     */
     public Set<String> transform(String text) {
+        Assert.notNull(text, "Text to transform must not be null.");
+
+        if (text.isEmpty()) {
+            return Sets.newHashSet(text);
+        }
 
         if (composedIdentifierSplitter != null) {
             text = composedIdentifierSplitter.split(text);
+        }
+
+        if (contractionsExpander != null) {
+            text = contractionsExpander.expand(text);
         }
 
         if (shouldEscapeCharacters) {
             text = escapeSpecialCharacters.escape(text);
         }
 
-        if (shouldLowerCase) {
-            text = text.toLowerCase();
-        }
-
         if (spellChecker != null) {
             text = spellChecker.correct(text);
         }
 
-        this.text = text;
 
-        expandContractions();
+        if (shouldLowerCase) {
+            text = text.toLowerCase();
+        }
 
-        tokenize(posFilter);
+        Set<AnnotatedToken> tokens = tokenize(text, posFilter);
 
-        tokenAutoCorrect();
+        tokenAutoCorrect(tokens);
 
         if (shouldSingularize) {
-            singularize();
+            singularize(tokens);
         }
 
         if (shouldRemoveStopWords) {
-            removeStopWords();
+            removeStopWords(tokens);
         }
 
         if (shouldStem) {
-            stem();
+            stem(tokens);
         }
 
         if (shouldRemoveShortTokens) {
-            removeShortTokens();
+            tokens.removeIf(this::isTooShort);
         }
 
-        return this.tokens.stream().map(AnnotatedToken::getToken).collect(Collectors.toSet());
+        return tokens.stream().map(AnnotatedToken::getToken).collect(Collectors.toSet());
     }
 
-    private void tokenAutoCorrect() {
+    private void tokenAutoCorrect(Set<AnnotatedToken> tokens) {
         if (spellChecker != null) {
             tokens.forEach(token -> token.setToken(spellChecker.correct(token.getToken())));
         }
     }
 
-    private void expandContractions() {
-        if (contractionsExpander != null) {
-            text = contractionsExpander.expand(text);
-        }
+    private Set<AnnotatedToken> tokenize(String text, boolean shouldFilterPos) {
+        return annotator.annotate(text, shouldFilterPos);
     }
 
-    private void tokenize(boolean shouldFilterPos) {
-        tokens = annotator.annotate(text, shouldFilterPos);
-    }
-
-    private void singularize() {
+    private void singularize(Set<AnnotatedToken> tokens) {
         tokens.forEach(AnnotatedToken::singularize);
     }
 
-    private void removeStopWords() {
+    private void removeStopWords(Set<AnnotatedToken> tokens) {
         tokens.removeIf(AnnotatedToken::isStopWord);
     }
 
-    private void stem() {
+    private void stem(Set<AnnotatedToken> tokens) {
         tokens.forEach(AnnotatedToken::stem);
-    }
-
-    private void removeShortTokens() {
-        tokens.removeIf(this::isTooShort);
     }
 
     private boolean isTooShort(AnnotatedToken token) {
         return token.length() < minLength;
     }
 
+    /**
+     * Builder class for {@link CorpusProcessor}.
+     */
     public static class Builder {
 
         private CorpusProcessor corpusProcessor;
@@ -135,58 +147,124 @@ public class CorpusProcessor {
             corpusProcessor = new CorpusProcessor();
         }
 
+        /**
+         * Will lower case.
+         *
+         * @return this builder for chaining.
+         */
         public Builder lowerCase() {
             corpusProcessor.shouldLowerCase = true;
             return this;
         }
 
+        /**
+         * Will escape special chars.
+         *
+         * @return this builder for chaining.
+         * @see EscapeSpecialCharacters
+         */
         public Builder escapeSpecialChars() {
             corpusProcessor.shouldEscapeCharacters = true;
             corpusProcessor.escapeSpecialCharacters = new EscapeSpecialCharacters();
             return this;
         }
 
-        public Builder withComposedIdentifierSplit(ComposedIdentifierSplitter splitter) {
-            corpusProcessor.composedIdentifierSplitter = splitter;
+        /**
+         * Will split composed identifiers (camel case, snake case, ...)
+         *
+         * @return this builder for chaining.
+         * @see ComposedIdentifierSplitter
+         */
+        public Builder withComposedIdentifierSplit() {
+            corpusProcessor.composedIdentifierSplitter = new ComposedIdentifierSplitter();
             return this;
         }
 
+        /**
+         * Will run spell checking with provided SpellChecker.
+         *
+         * @param spellChecker spellchecker to use.
+         * @return this builder for chaining.
+         * @see SpellChecker
+         */
         public Builder withAutoCorrect(SpellChecker spellChecker) {
+            Assert.notNull(spellChecker, "Spell checker must not be null.");
             corpusProcessor.spellChecker = spellChecker;
             return this;
         }
 
-        public Builder withContractionExpander(ContractionsExpander contractionExpander) {
-            corpusProcessor.contractionsExpander = contractionExpander;
+        /**
+         * Will expand contractions (It's -> It is, etc.).
+         *
+         * @return this builder for chaining.
+         * @see ContractionsExpander
+         */
+        public Builder withContractionExpander() {
+            corpusProcessor.contractionsExpander = new ContractionsExpander();
             return this;
         }
 
+        /**
+         * Will singularize each token. Each token will be transformed to its singular form e.g. (cars -> car).
+         *
+         * @return this builder for chaining.
+         */
         public Builder singularize() {
             corpusProcessor.shouldSingularize = true;
             return this;
         }
 
+        /**
+         * Will remove stop words.
+         *
+         * @return this builder for chaining.
+         */
         public Builder removeStopWords() {
             corpusProcessor.shouldRemoveStopWords = true;
             return this;
         }
 
+        /**
+         * Will stem each token.
+         *
+         * @return this builder for chaining.
+         */
         public Builder stem() {
             corpusProcessor.shouldStem = true;
             return this;
         }
 
+        /**
+         * Will remove tokens shorter than minLength.
+         *
+         * @param minLength minimum length of a token in order for this to be kept.
+         *                  If minLength < 1 will throw {@link IllegalArgumentException}.
+         * @return this builder for chaining.
+         */
         public Builder removeTokensShorterThan(int minLength) {
+            if (minLength < 1) {
+                throw new IllegalArgumentException(String.format("Min length must be > 1. Was %d", minLength));
+            }
             corpusProcessor.shouldRemoveShortTokens = true;
             corpusProcessor.minLength = minLength;
             return this;
         }
 
+        /**
+         * Will filter tokens based on their Part-Of-Speech tag.
+         *
+         * @return this builder for chaining.
+         */
         public Builder posFilter() {
             corpusProcessor.posFilter = true;
             return this;
         }
 
+        /**
+         * Builds processor.
+         *
+         * @return the built processor.
+         */
         public CorpusProcessor build() {
             return corpusProcessor;
         }

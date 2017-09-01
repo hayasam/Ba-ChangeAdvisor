@@ -5,7 +5,7 @@ import ch.uzh.ifi.seal.changeadvisor.batch.job.bagofwords.SourceCodeProcessor;
 import ch.uzh.ifi.seal.changeadvisor.parser.CodeElement;
 import ch.uzh.ifi.seal.changeadvisor.parser.FSProjectParser;
 import ch.uzh.ifi.seal.changeadvisor.parser.bean.ClassBean;
-import ch.uzh.ifi.seal.changeadvisor.parser.preprocessing.*;
+import ch.uzh.ifi.seal.changeadvisor.parser.preprocessing.CorpusProcessor;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.item.ItemWriter;
@@ -16,8 +16,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
-
-import java.util.function.Predicate;
 
 /**
  * Configuration of "Extract Bag of words" step of ChangeAdvisor.
@@ -67,9 +65,9 @@ public class SourceComponentsTransformationStepConfig {
     public SourceCodeProcessor processor() {
         CorpusProcessor processor = new CorpusProcessor.Builder()
                 .escapeSpecialChars()
-                .withComposedIdentifierSplit(composedIdentifierSplitter())
+                .withComposedIdentifierSplit()
 //                .withAutoCorrect(new EnglishSpellChecker()) // Warning huge performance impact!
-                .withContractionExpander(new ContractionsExpander())
+                .withContractionExpander()
                 .singularize()
                 .removeStopWords()
                 .lowerCase()
@@ -77,26 +75,6 @@ public class SourceComponentsTransformationStepConfig {
                 .removeTokensShorterThan(3)
                 .build();
         return new SourceCodeProcessor(processor);
-    }
-
-    @Bean
-    public ComposedIdentifierSplitter composedIdentifierSplitter() {
-        return new ComposedIdentifierSplitter();
-    }
-
-    @Bean
-    public EscapeSpecialCharacters escapeSpecialCharacters() {
-        return new EscapeSpecialCharacters();
-    }
-
-    @Bean
-    public SpellChecker spellChecker() {
-        return new EnglishSpellChecker();
-    }
-
-    @Bean
-    public Predicate<String> stopWordFilter() {
-        return StopWordFilter::isNotStopWord;
     }
 
     @Bean

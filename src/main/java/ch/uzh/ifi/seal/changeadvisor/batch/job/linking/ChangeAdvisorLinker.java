@@ -4,7 +4,6 @@ import ch.uzh.ifi.seal.changeadvisor.batch.job.documentclustering.TopicAssignmen
 import ch.uzh.ifi.seal.changeadvisor.batch.job.linking.metrics.AsymmetricDiceIndex;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.linking.metrics.SimilarityMetric;
 import ch.uzh.ifi.seal.changeadvisor.parser.CodeElement;
-import ch.uzh.ifi.seal.changeadvisor.parser.preprocessing.ComposedIdentifierSplitter;
 import ch.uzh.ifi.seal.changeadvisor.parser.preprocessing.CorpusProcessor;
 import edu.stanford.nlp.util.Sets;
 import org.apache.log4j.Logger;
@@ -24,7 +23,7 @@ public class ChangeAdvisorLinker implements Linker {
 
     private CorpusProcessor corpusProcessor = new CorpusProcessor.Builder()
             .escapeSpecialChars()
-            .withComposedIdentifierSplit(new ComposedIdentifierSplitter())
+            .withComposedIdentifierSplit()
             .removeTokensShorterThan(4)
             .build();
 

@@ -1,9 +1,7 @@
 package ch.uzh.ifi.seal.changeadvisor.batch.job.feedbackprocessing;
 
 import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResult;
-import ch.uzh.ifi.seal.changeadvisor.parser.preprocessing.ContractionsExpander;
 import ch.uzh.ifi.seal.changeadvisor.parser.preprocessing.CorpusProcessor;
-import ch.uzh.ifi.seal.changeadvisor.parser.preprocessing.EnglishSpellChecker;
 import com.google.common.collect.Sets;
 import org.ardoc.Result;
 import org.junit.Assert;
@@ -32,8 +30,8 @@ public class FeedbackProcessorTest {
         FeedbackProcessor processor = new FeedbackProcessor(
                 new CorpusProcessor.Builder()
                         .escapeSpecialChars()
-                        .withAutoCorrect(new EnglishSpellChecker())
-                        .withContractionExpander(new ContractionsExpander())
+                        .lowerCase()
+                        .withContractionExpander()
                         .singularize()
                         .removeStopWords()
                         .stem()
@@ -46,9 +44,9 @@ public class FeedbackProcessorTest {
         final Set<String> expectedResults = Sets.newHashSet("add rearrang complaint album etc organ remov pic".split(" "));
         final Set<String> results = transformedFeedback.getBagOfWords();
 
-        List<String> pocSorted = new ArrayList<>(pocResults);
+        List<String> expectedResultsSorted = new ArrayList<>(expectedResults);
         List<String> resultsSorted = new ArrayList<>(results);
-        Collections.sort(pocSorted);
+        Collections.sort(expectedResultsSorted);
         Collections.sort(resultsSorted);
 
         Assert.assertThat(expectedResults.size(), is(results.size()));

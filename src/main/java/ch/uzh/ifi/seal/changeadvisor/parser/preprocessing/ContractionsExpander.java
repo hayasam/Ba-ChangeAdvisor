@@ -175,7 +175,7 @@ public class ContractionsExpander {
 
     private String replaceMatches(String corpus, List<String> matches) {
         for (String match : matches) {
-            corpus = corpus.replace(match, contractions.getOrDefault(match, match));
+            corpus = corpus.replace(match, contractions.getOrDefault(match.toLowerCase(), match));
         }
         return corpus;
     }
