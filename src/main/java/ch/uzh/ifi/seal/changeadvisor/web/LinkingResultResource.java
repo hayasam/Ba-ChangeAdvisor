@@ -3,7 +3,6 @@ package ch.uzh.ifi.seal.changeadvisor.web;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.linking.LinkingResult;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.linking.LinkingResultRepository;
 import org.springframework.batch.core.Job;
-import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
@@ -11,9 +10,12 @@ import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteExcep
 import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 public class LinkingResultResource {
@@ -36,9 +38,10 @@ public class LinkingResultResource {
         return repository.findAll();
     }
 
-    @GetMapping(path = "/job")
-    public void startJob() throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException {
-        jobLauncher.run(changeAdvisor, new JobParameters());
+    @PostMapping(path = "/job")
+    public void startJob(@RequestBody Map<String, String> params) throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException {
+//        jobLauncher.run(changeAdvisor, new JobParameters());
+        System.out.println(params);
     }
 
 }
