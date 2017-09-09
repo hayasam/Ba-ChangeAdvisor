@@ -1,7 +1,7 @@
 package ch.uzh.ifi.seal.changeadvisor.batch.job;
 
-import ch.uzh.ifi.seal.changeadvisor.batch.job.bagofwords.FSProjectReader;
-import ch.uzh.ifi.seal.changeadvisor.batch.job.bagofwords.SourceCodeProcessor;
+import ch.uzh.ifi.seal.changeadvisor.batch.job.sourcecode.FSProjectReader;
+import ch.uzh.ifi.seal.changeadvisor.batch.job.sourcecode.SourceCodeProcessor;
 import ch.uzh.ifi.seal.changeadvisor.parser.CodeElement;
 import ch.uzh.ifi.seal.changeadvisor.parser.FSProjectParser;
 import ch.uzh.ifi.seal.changeadvisor.parser.bean.ClassBean;
