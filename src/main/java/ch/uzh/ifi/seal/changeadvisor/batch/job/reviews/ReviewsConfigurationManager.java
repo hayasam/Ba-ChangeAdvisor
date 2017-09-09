@@ -53,6 +53,7 @@ public class ReviewsConfigurationManager {
         ConfigurationManager config = ConfigurationManager.getInstance();
         Properties properties = configToProperties(config);
         properties.putAll(params);
+        properties.put(AllowedKeyword.PHANTOM_JS, config.getPathForPhantomJSDriver());
         loadConfigFromProperties(config, properties);
 
         return config;
@@ -83,6 +84,7 @@ public class ReviewsConfigurationManager {
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
             properties.store(bout, "");
             config.directLoadContent("byteConfig", bout.toString());
+            ConfigurationManager.setDirectContent(bout.toString());
         } catch (IOException e) {
             throw new IllegalStateException("This should not have happened on write using ByteArrayOutputStream.", e);
         }
