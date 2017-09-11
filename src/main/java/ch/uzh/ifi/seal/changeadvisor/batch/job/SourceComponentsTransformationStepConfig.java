@@ -46,6 +46,7 @@ public class SourceComponentsTransformationStepConfig {
     @Bean
     public Step extractBagOfWords() {
         return stepBuilderFactory.get(STEP_NAME)
+                .allowStartIfComplete(true)
                 .<ClassBean, CodeElement>chunk(10)
                 .reader(reader())
                 .processor(processor())

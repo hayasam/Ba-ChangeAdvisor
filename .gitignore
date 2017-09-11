@@ -162,3 +162,5 @@ Temporary Items
 /test_files_parser/com.frostwire.android/
 /test_files_parser/test_generated/
 /test_files_parser/batch_test.csv
+
+/imported_code
