@@ -7,7 +7,7 @@ import java.util.Date;
 
 public class ExecutionReport {
 
-    private static final SimpleDateFormat FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     private String stepName;
 
@@ -42,7 +42,7 @@ public class ExecutionReport {
     }
 
     public String getStartTime() {
-        return FORMAT.format(startTime);
+        return format.format(startTime);
     }
 
     public void setStartTime(Date startTime) {
@@ -53,7 +53,7 @@ public class ExecutionReport {
         if (endTime == null) {
             return "Pending";
         }
-        return FORMAT.format(endTime);
+        return format.format(endTime);
     }
 
     public void setEndTime(Date endTime) {
@@ -64,7 +64,7 @@ public class ExecutionReport {
         if (lastUpdated == null) {
             return "Pending";
         }
-        return FORMAT.format(lastUpdated);
+        return format.format(lastUpdated);
     }
 
     public void setLastUpdated(Date lastUpdated) {

@@ -15,6 +15,10 @@ public class SourceCodeDirectoryDto {
 
     private String password;
 
+    public SourceCodeDirectoryDto(String path) {
+        this.path = path;
+    }
+
     public String getProjectName() {
         return projectName;
     }

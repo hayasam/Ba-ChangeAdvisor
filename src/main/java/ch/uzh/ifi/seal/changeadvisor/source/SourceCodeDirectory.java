@@ -2,20 +2,13 @@ package ch.uzh.ifi.seal.changeadvisor.source;
 
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
 @Document
 public class SourceCodeDirectory {
 
     private String id;
 
-    @NotNull(message = "Project name may not be null")
-    @Size(min = 1, message = "Project name may not be empty")
     private String projectName;
 
-    @NotNull(message = "Path may not be null")
-    @Size(min = 1, message = "Path may not be empty")
     private String path;
 
     public SourceCodeDirectory() {

@@ -49,7 +49,7 @@ public class SourceCodeController {
 
     @GetMapping(path = "source/status/{jobId}")
     @ResponseBody
-    public Collection<ExecutionReport> test(@PathVariable("jobId") Long jobId) {
+    public Collection<ExecutionReport> status(@PathVariable("jobId") Long jobId) {
         if (sessionUtil.hasJob(jobId)) {
             JobExecution job = sessionUtil.getJob(jobId);
             Collection<StepExecution> stepExecutions = job.getStepExecutions();
