@@ -17,6 +17,10 @@ import org.springframework.context.annotation.Configuration;
 @EnableBatchProcessing
 public class BatchConfig {
 
+    private static final String TEST_DIRECTORY = "test_files_parser";
+
+    private static final String FROSTWIRE_DIRECTORY = "/com.frostwire.android";
+
     private static final String JOB_NAME = "changeAdvisor";
 
     private static final String SOURCE_CODE_JOB = "sourceCodeImport";
@@ -49,7 +53,7 @@ public class BatchConfig {
     public Job sourceCodeImport() {
         return jobBuilderFactory.get(SOURCE_CODE_JOB)
                 .incrementer(new RunIdIncrementer())
-                .flow(sourceComponentStepConfig.extractBagOfWords())
+                .flow(sourceComponentStepConfig.extractBagOfWords(TEST_DIRECTORY + FROSTWIRE_DIRECTORY))
                 .end()
                 .build();
     }
@@ -66,7 +70,7 @@ public class BatchConfig {
         return jobBuilderFactory.get(JOB_NAME)
                 .incrementer(new RunIdIncrementer())
                 .listener(listener)
-                .flow(sourceComponentStepConfig.extractBagOfWords())
+                .flow(sourceComponentStepConfig.extractBagOfWords(TEST_DIRECTORY + FROSTWIRE_DIRECTORY))
                 .next(ardocStepConfig.ardocAnalysis())
                 .next(transformationStepConfig.transformFeedback())
                 .next(documentClusteringStepConfig.documentsClustering())

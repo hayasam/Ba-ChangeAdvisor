@@ -21,14 +21,21 @@ public class SourceImportTasklet implements Tasklet {
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
-        SourceCodeImporter importer = SourceCodeImporterFactory.getImporter(dto.getPath());
-        importer.setCredentials(dto.getUsername(), dto.getPassword());
+        SourceCodeImporter importer = SourceCodeImporterFactory.getImporter(dto);
         SourceCodeDirectory sourceCodeDirectory = importer.importSource();
+        SourceCodeDirectory persistedDirectory = saveOrUpdateDirectory(sourceCodeDirectory);
 
-        Optional<SourceCodeDirectory> byProjectName = repository.findByProjectName(sourceCodeDirectory.getProjectName());
-        byProjectName.ifPresent(persistedDirectory -> sourceCodeDirectory.setId(persistedDirectory.getId()));
-        repository.save(sourceCodeDirectory);
+        writeIntoExecutionContext(chunkContext, persistedDirectory);
+        return RepeatStatus.FINISHED;
+    }
 
-        return null;
+    private SourceCodeDirectory saveOrUpdateDirectory(SourceCodeDirectory directory) {
+        Optional<SourceCodeDirectory> byProjectName = repository.findByProjectName(directory.getProjectName());
+        byProjectName.ifPresent(persistedDirectory -> directory.setId(persistedDirectory.getId()));
+        return repository.save(directory);
+    }
+
+    private <T> void writeIntoExecutionContext(ChunkContext context, T directory) {
+        context.getStepContext().getStepExecution().getExecutionContext().put("directory", directory);
     }
 }

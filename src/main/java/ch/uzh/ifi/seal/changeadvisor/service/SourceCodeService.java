@@ -29,6 +29,11 @@ public class SourceCodeService {
         this.sourceImportJobFactory = sourceImportJobFactory;
     }
 
+    /**
+     * @param dto
+     * @return
+     * @deprecated Prefer using {{@link #startSourceCodeDownload(SourceCodeDirectoryDto)}}.
+     */
     public SourceCodeDirectory addSourceDirectory(SourceCodeDirectoryDto dto) {
         SourceCodeImporter importer = SourceCodeImporterFactory.getImporter(dto.getPath());
         importer.setCredentials(dto.getUsername(), dto.getPassword());
@@ -39,6 +44,17 @@ public class SourceCodeService {
         return repository.save(sourceCodeDirectory);
     }
 
+    /**
+     * Given a dto containing a path to a directory (File system or remote) and credentials (Optional),
+     * adds the directory and project to the database for later retrieval.
+     *
+     * @param dto Value object containing the path to a project.
+     * @return a job execution instance representing the adding of a project.
+     * @throws JobParametersInvalidException
+     * @throws JobExecutionAlreadyRunningException
+     * @throws JobRestartException
+     * @throws JobInstanceAlreadyCompleteException
+     */
     public JobExecution startSourceCodeDownload(SourceCodeDirectoryDto dto) throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException {
         Job job = sourceImportJobFactory.job(dto);
         return jobLauncher.run(job, parametersWithCurrentTimestamp());
@@ -47,5 +63,4 @@ public class SourceCodeService {
     private JobParameters parametersWithCurrentTimestamp() {
         return new JobParametersBuilder().addDate("timestamp", new Date()).toJobParameters();
     }
-
 }

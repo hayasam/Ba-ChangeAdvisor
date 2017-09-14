@@ -44,6 +44,7 @@ public class SourceCodeController {
 
     @PostMapping(path = "source")
     public long downloadSourceCode(@RequestBody @Valid SourceCodeDirectoryDto dto) throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException {
+        logger.info(String.format("Adding directory %s", dto.getPath()));
         JobExecution jobExecution = sourceCodeService.startSourceCodeDownload(dto);
         sessionUtil.addJob(jobExecution);
         return jobExecution.getJobId();

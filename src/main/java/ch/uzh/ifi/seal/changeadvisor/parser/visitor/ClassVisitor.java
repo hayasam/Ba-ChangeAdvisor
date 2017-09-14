@@ -4,6 +4,7 @@ import ch.uzh.ifi.seal.changeadvisor.parser.bean.ClassBean;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
+import com.google.common.collect.Lists;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -34,7 +35,7 @@ public class ClassVisitor extends VoidVisitorAdapter<String> {
     public static List<ClassBean> getClasses(String packageName, CompilationUnit node) {
         ClassVisitor visitor = new ClassVisitor();
         visitor.visit(node, packageName);
-        return visitor.classes;
+        return Lists.newArrayList(visitor.classes);
     }
 
     /**

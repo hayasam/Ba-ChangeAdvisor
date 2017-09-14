@@ -1,22 +1,20 @@
 package ch.uzh.ifi.seal.changeadvisor.source;
 
-import ch.uzh.ifi.seal.changeadvisor.batch.job.SourceComponentsTransformationStepConfig;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.SourceCodeDirectoryDto;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
-import org.springframework.batch.core.listener.ExecutionContextPromotionListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SourceImportJobFactory {
+public class SourceProcessingJobFactory {
 
-    private static final String SOURCE_IMPORT = "sourceImport";
+    private static final String SOURCE_IMPORT = "sourceProcessing";
 
-    private static final String STEP_NAME = "sourceImportStep";
+    private static final String STEP_NAME = "sourceProcessingStep";
 
     private final StepBuilderFactory stepBuilderFactory;
 
@@ -24,21 +22,17 @@ public class SourceImportJobFactory {
 
     private final SourceCodeDirectoryRepository repository;
 
-    private final SourceComponentsTransformationStepConfig sourceComponentsTransformationStepConfig;
-
     @Autowired
-    public SourceImportJobFactory(StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory, SourceCodeDirectoryRepository repository, SourceComponentsTransformationStepConfig sourceComponentsTransformationStepConfig) {
+    public SourceProcessingJobFactory(StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory, SourceCodeDirectoryRepository repository) {
         this.stepBuilderFactory = stepBuilderFactory;
         this.jobBuilderFactory = jobBuilderFactory;
         this.repository = repository;
-        this.sourceComponentsTransformationStepConfig = sourceComponentsTransformationStepConfig;
     }
 
     public Job job(SourceCodeDirectoryDto dto) {
         return jobBuilderFactory.get(SOURCE_IMPORT)
                 .incrementer(new RunIdIncrementer())
                 .flow(sourceImport(dto))
-                .next(sourceProcessing())
                 .end()
                 .build();
     }
@@ -48,17 +42,7 @@ public class SourceImportJobFactory {
         return stepBuilderFactory.get(STEP_NAME)
                 .allowStartIfComplete(true)
                 .tasklet(importTasklet)
-                .listener(executionContextPromotionListener())
                 .build();
     }
 
-    private Step sourceProcessing() {
-        return sourceComponentsTransformationStepConfig.extractBagOfWordsDefferedPath();
-    }
-
-    private ExecutionContextPromotionListener executionContextPromotionListener() {
-        ExecutionContextPromotionListener listener = new ExecutionContextPromotionListener();
-        listener.setKeys(new String[]{"directory"});
-        return listener;
-    }
 }

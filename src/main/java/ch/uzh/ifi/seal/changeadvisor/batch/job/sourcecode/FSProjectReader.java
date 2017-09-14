@@ -3,8 +3,6 @@ package ch.uzh.ifi.seal.changeadvisor.batch.job.sourcecode;
 import ch.uzh.ifi.seal.changeadvisor.parser.FSProjectParser;
 import ch.uzh.ifi.seal.changeadvisor.parser.bean.ClassBean;
 import ch.uzh.ifi.seal.changeadvisor.parser.bean.PackageBean;
-import org.springframework.batch.item.ItemReader;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 
 import java.nio.file.Path;
@@ -18,7 +16,7 @@ import java.util.List;
  * File System project reviewReader.
  * Created by alex on 15.07.2017.
  */
-public class FSProjectReader implements ItemReader<ClassBean> {
+public class FSProjectReader implements FileSystemReader {
 
     private final FSProjectParser projectParser;
 
@@ -32,7 +30,6 @@ public class FSProjectReader implements ItemReader<ClassBean> {
 
     private boolean isSortedRead;
 
-    @Autowired
     public FSProjectReader(FSProjectParser projectParser) {
         this.projectParser = projectParser;
         this.isSortedRead = false;
@@ -60,18 +57,23 @@ public class FSProjectReader implements ItemReader<ClassBean> {
     @Override
     public ClassBean read() throws Exception {
         if (hasNotParsedYet()) {
-            Assert.notNull(projectRootPath, "Must set a path in config before running batch job.");
             packages = parse();
             packageIterator = packages.iterator();
         }
         if (needsNewClassIterator()) {
-            classIterator = packageIterator.next().classIterator();
+            classIterator = getNextClassIterator();
         }
 
-        return classIterator.hasNext() ? classIterator.next() : null;
+        ClassBean classBean = classIterator.hasNext() ? classIterator.next() : null;
+        if (isDone(classBean)) {
+            clearReader();
+        }
+
+        return classBean;
     }
 
     private List<PackageBean> parse() {
+        Assert.notNull(projectRootPath, "Must set a path in config before running batch job.");
         List<PackageBean> projectPackages = projectParser.parse(projectRootPath, false);
 
         if (isSortedRead) {
@@ -88,11 +90,35 @@ public class FSProjectReader implements ItemReader<ClassBean> {
         return hasNoNextClass() && hasNextPackage();
     }
 
+    private Iterator<ClassBean> getNextClassIterator() {
+        return packageIterator.next().classIterator();
+    }
+
     private boolean hasNoNextClass() {
         return classIterator == null || !classIterator.hasNext();
     }
 
     private boolean hasNextPackage() {
         return packageIterator.hasNext();
+    }
+
+    /**
+     * If class iterator returns a null, it means there are no more classes to parse.
+     * We can free resources by calling {@link #clearReader()}
+     *
+     * @param classBean last classBean read.
+     * @return true iff there are no more classes to read;
+     */
+    private boolean isDone(ClassBean classBean) {
+        return classBean == null;
+    }
+
+    /**
+     * To avoid holding on to resources once the reader is done, we should clear this reader to free resources.
+     */
+    private void clearReader() {
+        packages.clear();
+        packageIterator = packages.iterator();
+        classIterator = null;
     }
 }

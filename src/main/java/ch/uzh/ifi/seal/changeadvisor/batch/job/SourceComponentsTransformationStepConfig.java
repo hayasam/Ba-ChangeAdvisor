@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.changeadvisor.batch.job;
 
+import ch.uzh.ifi.seal.changeadvisor.batch.job.sourcecode.FSDefferedProjectReader;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.sourcecode.FSProjectReader;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.sourcecode.SourceCodeProcessor;
 import ch.uzh.ifi.seal.changeadvisor.parser.CodeElement;
@@ -43,21 +44,35 @@ public class SourceComponentsTransformationStepConfig {
         this.mongoTemplate = mongoTemplate;
     }
 
-    @Bean
-    public Step extractBagOfWords() {
+    public Step extractBagOfWords(String projectPath) {
         return stepBuilderFactory.get(STEP_NAME)
                 .allowStartIfComplete(true)
                 .<ClassBean, CodeElement>chunk(10)
-                .reader(reader())
+                .reader(reader(projectPath))
                 .processor(processor())
                 .writer(mongoWriter())
                 .build();
     }
 
-    @Bean
-    public FSProjectReader reader() {
+    public Step extractBagOfWordsDefferedPath() {
+        return stepBuilderFactory.get(STEP_NAME)
+                .allowStartIfComplete(true)
+                .<ClassBean, CodeElement>chunk(10)
+                .reader(defferedReader())
+                .processor(processor())
+                .writer(mongoWriter())
+                .build();
+    }
+
+    public FSProjectReader reader(String projectPath) {
         FSProjectReader reader = new FSProjectReader(projectParser);
-        reader.setProjectRootPath(TEST_DIRECTORY + FROSTWIRE_DIRECTORY);
+        reader.setProjectRootPath(projectPath);
+        reader.setSortedRead(true);
+        return reader;
+    }
+
+    public FSDefferedProjectReader defferedReader() {
+        FSDefferedProjectReader reader = new FSDefferedProjectReader(new FSProjectReader(projectParser));
         reader.setSortedRead(true);
         return reader;
     }
