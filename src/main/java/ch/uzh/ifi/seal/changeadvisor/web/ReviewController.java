@@ -32,7 +32,7 @@ public class ReviewController {
     public long reviewImport(@RequestBody Map<String, Object> params) throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException, IOException {
         Assert.notEmpty(params, "Empty or null parameters. Need at least list of apps.");
         Assert.isTrue(params.containsKey("apps"), "Request has to contain list of apps.");
-        logger.info(String.format("Creating review import job and starting process with paramaters %s.", params));
+        logger.info(String.format("Creating review import job and starting process with parameters %s.", params));
         JobExecution jobExecution = reviewImportService.reviewImport(params);
         return jobExecution.getJobId();
     }

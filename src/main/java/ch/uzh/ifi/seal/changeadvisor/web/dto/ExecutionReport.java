@@ -1,4 +1,4 @@
-package ch.uzh.ifi.seal.changeadvisor.web;
+package ch.uzh.ifi.seal.changeadvisor.web.dto;
 
 import org.springframework.batch.core.StepExecution;
 

@@ -2,6 +2,7 @@ package ch.uzh.ifi.seal.changeadvisor.batch.job.reviews;
 
 import com.google.common.collect.ImmutableMap;
 import config.ConfigurationManager;
+import org.apache.commons.lang3.SystemUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -11,6 +12,8 @@ import java.util.Map;
 import java.util.Properties;
 
 public class ReviewsConfigurationManager {
+
+    private static final String PHANTOMJS_WIN = "C:/Users/alex/Documents/Java/reviews_crawler/phantomjs_win.exe";
 
     private ConfigurationManager config;
 
@@ -53,7 +56,12 @@ public class ReviewsConfigurationManager {
         ConfigurationManager config = ConfigurationManager.getInstance();
         Properties properties = configToProperties(config);
         properties.putAll(params);
-        properties.put(AllowedKeyword.PHANTOM_JS, config.getPathForPhantomJSDriver());
+
+        if (SystemUtils.IS_OS_WINDOWS) {
+            properties.put(AllowedKeyword.PHANTOM_JS, PHANTOMJS_WIN);
+        } else {
+            properties.put(AllowedKeyword.PHANTOM_JS, config.getPathForPhantomJSDriver());
+        }
         loadConfigFromProperties(config, properties);
 
         return config;

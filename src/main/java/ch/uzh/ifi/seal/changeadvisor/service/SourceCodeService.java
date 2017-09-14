@@ -1,7 +1,7 @@
 package ch.uzh.ifi.seal.changeadvisor.service;
 
 import ch.uzh.ifi.seal.changeadvisor.source.*;
-import ch.uzh.ifi.seal.changeadvisor.web.SourceCodeDirectoryDto;
+import ch.uzh.ifi.seal.changeadvisor.web.dto.SourceCodeDirectoryDto;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;

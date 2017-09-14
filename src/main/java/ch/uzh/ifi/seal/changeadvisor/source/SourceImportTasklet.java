@@ -1,6 +1,6 @@
 package ch.uzh.ifi.seal.changeadvisor.source;
 
-import ch.uzh.ifi.seal.changeadvisor.web.SourceCodeDirectoryDto;
+import ch.uzh.ifi.seal.changeadvisor.web.dto.SourceCodeDirectoryDto;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;

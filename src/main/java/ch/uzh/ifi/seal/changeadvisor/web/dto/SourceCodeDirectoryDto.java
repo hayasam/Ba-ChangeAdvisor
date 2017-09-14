@@ -1,4 +1,4 @@
-package ch.uzh.ifi.seal.changeadvisor.web;
+package ch.uzh.ifi.seal.changeadvisor.web.dto;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
