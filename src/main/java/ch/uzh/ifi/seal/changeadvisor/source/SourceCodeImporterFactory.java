@@ -55,6 +55,6 @@ public class SourceCodeImporterFactory {
     }
 
     private static boolean isGitPath(String path) {
-        return path.startsWith("git://");
+        return (path.startsWith("git://") || path.startsWith("http")) && path.endsWith(".git");
     }
 }
