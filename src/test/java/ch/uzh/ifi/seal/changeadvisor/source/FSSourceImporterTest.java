@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.changeadvisor.source;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -14,7 +15,12 @@ public class FSSourceImporterTest {
         FSSourceImporter importer = new FSSourceImporter(IMPORTED_CODE_FOLDER);
         SourceCodeDirectory directory = importer.importSource();
         Assert.assertThat(directory.getProjectName(), is(IMPORTED_CODE_FOLDER));
-        Assert.assertThat(directory.getPath(), is("/Users/alexanderhofmann/Dropbox/UZH/Bsc/Ba/changeadvisor/imported_code"));
+
+        if (SystemUtils.IS_OS_WINDOWS) {
+            Assert.assertThat(directory.getPath(), is("C:\\Users\\alex\\Documents\\Java\\ChangeAdvisor\\imported_code"));
+        } else {
+            Assert.assertThat(directory.getPath(), is("/Users/alexanderhofmann/Dropbox/UZH/Bsc/Ba/changeadvisor/imported_code"));
+        }
     }
 
 }
