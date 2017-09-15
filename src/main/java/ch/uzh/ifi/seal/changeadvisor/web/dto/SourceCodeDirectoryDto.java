@@ -1,5 +1,7 @@
 package ch.uzh.ifi.seal.changeadvisor.web.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
@@ -17,10 +19,7 @@ public class SourceCodeDirectoryDto {
 
     private String password;
 
-    public SourceCodeDirectoryDto() {
-    }
-
-    public SourceCodeDirectoryDto(String path) {
+    public SourceCodeDirectoryDto(@JsonProperty(value = "path", required = true) String path) {
         this.path = path;
     }
 
