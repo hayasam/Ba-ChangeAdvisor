@@ -1,7 +1,6 @@
 package ch.uzh.ifi.seal.changeadvisor.web;
 
 import ch.uzh.ifi.seal.changeadvisor.service.SourceCodeService;
-import ch.uzh.ifi.seal.changeadvisor.source.model.SourceCodeDirectory;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ExecutionReport;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.SourceCodeDirectoryDto;
 import org.apache.log4j.Logger;
@@ -27,19 +26,10 @@ public class SourceCodeController {
 
     private final SessionUtil sessionUtil;
 
-
     @Autowired
     public SourceCodeController(SourceCodeService sourceCodeService, SessionUtil sessionUtil) {
         this.sourceCodeService = sourceCodeService;
         this.sessionUtil = sessionUtil;
-    }
-
-    @PostMapping(path = "source/directory")
-    public SourceCodeDirectory addSourceDirectory(@RequestBody @Valid SourceCodeDirectoryDto dto) {
-        logger.info(String.format("Adding directory %s", dto.getPath()));
-        SourceCodeDirectory directory = sourceCodeService.addSourceDirectory(dto);
-        logger.info(String.format("Added directory %s", directory));
-        return directory;
     }
 
     @PostMapping(path = "source")

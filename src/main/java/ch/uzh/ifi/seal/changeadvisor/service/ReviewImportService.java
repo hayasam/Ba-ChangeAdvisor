@@ -3,9 +3,7 @@ package ch.uzh.ifi.seal.changeadvisor.service;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.ReviewImportJobFactory;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersInvalidException;
-import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
@@ -18,15 +16,15 @@ public class ReviewImportService {
 
     private final ReviewImportJobFactory reviewImportJobFactory;
 
-    private final JobLauncher jobLauncher;
+    private final JobService jobService;
 
-    public ReviewImportService(ReviewImportJobFactory reviewImportJobFactory, JobLauncher jobLauncher) {
+    public ReviewImportService(ReviewImportJobFactory reviewImportJobFactory, JobService jobService) {
         this.reviewImportJobFactory = reviewImportJobFactory;
-        this.jobLauncher = jobLauncher;
+        this.jobService = jobService;
     }
 
     public JobExecution reviewImport(Map<String, Object> params) throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException {
         Job reviewImport = reviewImportJobFactory.job(params);
-        return jobLauncher.run(reviewImport, new JobParameters());
+        return jobService.run(reviewImport);
     }
 }
