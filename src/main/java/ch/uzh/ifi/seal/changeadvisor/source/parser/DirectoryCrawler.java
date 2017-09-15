@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -17,27 +16,28 @@ import java.util.stream.Stream;
 public class DirectoryCrawler {
 
     private static final Logger logger = Logger.getLogger(DirectoryCrawler.class);
-    private CrawlerFilter filter = file -> file.toString().contains(".java");
-    private List<Path> paths = new LinkedList<>();
+
+    private static final String JAVA_EXTENSION = ".java";
+
+    private CrawlerFilter filter = file -> file.toString().contains(JAVA_EXTENSION);
 
     public List<Path> explore(Path root) {
-        explore(root, 0);
-        List<Path> result = new ArrayList<>(paths);
-        paths.clear();
-        return result;
+        List<Path> pathsExplored = new ArrayList<>();
+        explore(root, 0, pathsExplored);
+        return pathsExplored;
     }
 
-    private void explore(Path file, int depth) {
+    private void explore(Path file, int depth, List<Path> paths) {
         if (isDirectory(file)) {
-            exploreDirectory(file, depth);
+            exploreDirectory(file, depth, paths);
         } else if (filter.filter(file)) {
             paths.add(file);
         }
     }
 
-    private void exploreDirectory(Path directory, int depth) {
+    private void exploreDirectory(Path directory, int depth, List<Path> paths) {
         try (Stream<Path> stream = Files.list(directory)) {
-            stream.forEach(filePath -> explore(filePath, depth + 1));
+            stream.forEach(filePath -> explore(filePath, depth + 1, paths));
         } catch (IOException e) {
             logger.error("IOException while parsing directory: " + directory.getFileName(), e);
         }

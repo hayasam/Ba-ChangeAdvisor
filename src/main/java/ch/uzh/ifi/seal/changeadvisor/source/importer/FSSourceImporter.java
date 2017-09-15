@@ -1,5 +1,6 @@
-package ch.uzh.ifi.seal.changeadvisor.source;
+package ch.uzh.ifi.seal.changeadvisor.source.importer;
 
+import ch.uzh.ifi.seal.changeadvisor.source.model.SourceCodeDirectory;
 import org.apache.log4j.Logger;
 import org.springframework.util.Assert;
 
@@ -12,7 +13,7 @@ public class FSSourceImporter implements SourceCodeImporter {
 
     private final String path;
 
-    public FSSourceImporter(String path) {
+    FSSourceImporter(String path) {
         this.path = path;
     }
 

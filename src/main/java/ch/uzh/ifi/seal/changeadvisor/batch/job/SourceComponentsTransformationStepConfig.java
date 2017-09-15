@@ -4,7 +4,7 @@ import ch.uzh.ifi.seal.changeadvisor.batch.job.sourcecode.FSDeferredProjectReade
 import ch.uzh.ifi.seal.changeadvisor.batch.job.sourcecode.FSProjectReader;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.sourcecode.SourceCodeProcessor;
 import ch.uzh.ifi.seal.changeadvisor.preprocessing.CorpusProcessor;
-import ch.uzh.ifi.seal.changeadvisor.source.parser.CodeElement;
+import ch.uzh.ifi.seal.changeadvisor.source.model.CodeElement;
 import ch.uzh.ifi.seal.changeadvisor.source.parser.FSProjectParser;
 import ch.uzh.ifi.seal.changeadvisor.source.parser.bean.ClassBean;
 import org.springframework.batch.core.Step;

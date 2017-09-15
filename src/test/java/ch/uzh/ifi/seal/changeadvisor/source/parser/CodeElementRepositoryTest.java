@@ -2,6 +2,8 @@ package ch.uzh.ifi.seal.changeadvisor.source.parser;
 
 import ch.uzh.ifi.seal.changeadvisor.ChangeadvisorApplication;
 import ch.uzh.ifi.seal.changeadvisor.MongoTestConfig;
+import ch.uzh.ifi.seal.changeadvisor.source.model.CodeElement;
+import ch.uzh.ifi.seal.changeadvisor.source.model.CodeElementRepository;
 import com.google.common.collect.Sets;
 import org.junit.After;
 import org.junit.Assert;

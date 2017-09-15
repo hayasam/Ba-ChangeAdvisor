@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.changeadvisor.source;
 
+import ch.uzh.ifi.seal.changeadvisor.source.model.SourceCodeDirectoryRepository;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.SourceCodeDirectoryDto;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;

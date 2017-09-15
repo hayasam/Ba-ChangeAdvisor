@@ -1,6 +1,10 @@
 package ch.uzh.ifi.seal.changeadvisor.service;
 
-import ch.uzh.ifi.seal.changeadvisor.source.*;
+import ch.uzh.ifi.seal.changeadvisor.source.SourceImportJobFactory;
+import ch.uzh.ifi.seal.changeadvisor.source.importer.SourceCodeImporter;
+import ch.uzh.ifi.seal.changeadvisor.source.importer.SourceCodeImporterFactory;
+import ch.uzh.ifi.seal.changeadvisor.source.model.SourceCodeDirectory;
+import ch.uzh.ifi.seal.changeadvisor.source.model.SourceCodeDirectoryRepository;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.SourceCodeDirectoryDto;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.launch.JobLauncher;

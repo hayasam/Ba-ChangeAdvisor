@@ -1,4 +1,4 @@
-package ch.uzh.ifi.seal.changeadvisor.source.parser;
+package ch.uzh.ifi.seal.changeadvisor.source.model;
 
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.io.FileUtils;

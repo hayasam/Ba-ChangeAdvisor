@@ -1,7 +1,7 @@
 package ch.uzh.ifi.seal.changeadvisor.web;
 
 import ch.uzh.ifi.seal.changeadvisor.service.SourceCodeService;
-import ch.uzh.ifi.seal.changeadvisor.source.SourceCodeDirectory;
+import ch.uzh.ifi.seal.changeadvisor.source.model.SourceCodeDirectory;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ExecutionReport;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.SourceCodeDirectoryDto;
 import org.apache.log4j.Logger;

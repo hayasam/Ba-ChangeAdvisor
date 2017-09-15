@@ -2,7 +2,7 @@ package ch.uzh.ifi.seal.changeadvisor.batch.job.linking;
 
 import ch.uzh.ifi.seal.changeadvisor.batch.job.documentclustering.Topic;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.documentclustering.TopicAssignment;
-import ch.uzh.ifi.seal.changeadvisor.source.parser.CodeElement;
+import ch.uzh.ifi.seal.changeadvisor.source.model.CodeElement;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;

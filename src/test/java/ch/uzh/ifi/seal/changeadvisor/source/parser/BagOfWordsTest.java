@@ -1,6 +1,7 @@
 package ch.uzh.ifi.seal.changeadvisor.source.parser;
 
 import ch.uzh.ifi.seal.changeadvisor.preprocessing.CorpusProcessor;
+import ch.uzh.ifi.seal.changeadvisor.source.model.CodeElement;
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.google.common.base.Splitter;

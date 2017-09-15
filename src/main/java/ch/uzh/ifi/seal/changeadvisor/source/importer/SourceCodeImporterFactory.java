@@ -1,4 +1,4 @@
-package ch.uzh.ifi.seal.changeadvisor.source;
+package ch.uzh.ifi.seal.changeadvisor.source.importer;
 
 import ch.uzh.ifi.seal.changeadvisor.web.dto.SourceCodeDirectoryDto;
 import org.apache.commons.lang3.StringUtils;

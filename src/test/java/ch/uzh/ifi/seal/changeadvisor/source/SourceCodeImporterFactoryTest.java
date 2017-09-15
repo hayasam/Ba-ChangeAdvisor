@@ -1,5 +1,9 @@
 package ch.uzh.ifi.seal.changeadvisor.source;
 
+import ch.uzh.ifi.seal.changeadvisor.source.importer.FSSourceImporter;
+import ch.uzh.ifi.seal.changeadvisor.source.importer.GitSourceCodeImporter;
+import ch.uzh.ifi.seal.changeadvisor.source.importer.SourceCodeImporter;
+import ch.uzh.ifi.seal.changeadvisor.source.importer.SourceCodeImporterFactory;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.SourceCodeDirectoryDto;
 import org.junit.Assert;
 import org.junit.Test;

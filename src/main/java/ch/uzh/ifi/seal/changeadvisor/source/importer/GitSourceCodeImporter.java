@@ -1,5 +1,6 @@
-package ch.uzh.ifi.seal.changeadvisor.source;
+package ch.uzh.ifi.seal.changeadvisor.source.importer;
 
+import ch.uzh.ifi.seal.changeadvisor.source.model.SourceCodeDirectory;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.eclipse.jgit.api.Git;
@@ -25,7 +26,7 @@ public class GitSourceCodeImporter implements SourceCodeImporter {
 
     private CredentialsProvider credentialsProvider;
 
-    public GitSourceCodeImporter(String path) {
+    GitSourceCodeImporter(String path) {
         this.path = path;
     }
 

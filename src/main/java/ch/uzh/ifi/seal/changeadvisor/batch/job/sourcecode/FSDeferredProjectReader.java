@@ -1,6 +1,6 @@
 package ch.uzh.ifi.seal.changeadvisor.batch.job.sourcecode;
 
-import ch.uzh.ifi.seal.changeadvisor.source.SourceCodeDirectory;
+import ch.uzh.ifi.seal.changeadvisor.source.model.SourceCodeDirectory;
 import ch.uzh.ifi.seal.changeadvisor.source.parser.bean.ClassBean;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.annotation.BeforeStep;

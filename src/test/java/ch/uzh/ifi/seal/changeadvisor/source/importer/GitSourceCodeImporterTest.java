@@ -1,5 +1,6 @@
-package ch.uzh.ifi.seal.changeadvisor.source;
+package ch.uzh.ifi.seal.changeadvisor.source.importer;
 
+import ch.uzh.ifi.seal.changeadvisor.source.model.SourceCodeDirectory;
 import org.junit.Assert;
 import org.junit.Test;
 
