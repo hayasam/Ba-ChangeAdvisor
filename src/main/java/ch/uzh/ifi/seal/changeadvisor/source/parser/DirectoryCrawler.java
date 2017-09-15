@@ -13,7 +13,7 @@ import java.util.stream.Stream;
  * Crawls through directories in order to find all java files.
  * Created by alexanderhofmann on 13.07.17.
  */
-public class DirectoryCrawler {
+class DirectoryCrawler {
 
     private static final Logger logger = Logger.getLogger(DirectoryCrawler.class);
 
@@ -21,7 +21,7 @@ public class DirectoryCrawler {
 
     private CrawlerFilter filter = file -> file.toString().contains(JAVA_EXTENSION);
 
-    public List<Path> explore(Path root) {
+    List<Path> explore(Path root) {
         List<Path> pathsExplored = new ArrayList<>();
         explore(root, 0, pathsExplored);
         return pathsExplored;
