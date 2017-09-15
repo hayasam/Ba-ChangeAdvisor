@@ -5,7 +5,7 @@ import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResultsWriter;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.feedbackprocessing.FeedbackProcessor;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.feedbackprocessing.FeedbackWriter;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.feedbackprocessing.TransformedFeedback;
-import ch.uzh.ifi.seal.changeadvisor.parser.preprocessing.CorpusProcessor;
+import ch.uzh.ifi.seal.changeadvisor.preprocessing.CorpusProcessor;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.item.ItemProcessor;

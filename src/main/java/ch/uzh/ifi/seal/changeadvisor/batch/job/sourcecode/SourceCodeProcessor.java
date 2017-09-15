@@ -1,8 +1,8 @@
 package ch.uzh.ifi.seal.changeadvisor.batch.job.sourcecode;
 
-import ch.uzh.ifi.seal.changeadvisor.parser.CodeElement;
-import ch.uzh.ifi.seal.changeadvisor.parser.bean.ClassBean;
-import ch.uzh.ifi.seal.changeadvisor.parser.preprocessing.CorpusProcessor;
+import ch.uzh.ifi.seal.changeadvisor.preprocessing.CorpusProcessor;
+import ch.uzh.ifi.seal.changeadvisor.source.parser.CodeElement;
+import ch.uzh.ifi.seal.changeadvisor.source.parser.bean.ClassBean;
 import org.springframework.batch.item.ItemProcessor;
 
 import java.util.Set;

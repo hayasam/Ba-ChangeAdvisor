@@ -4,7 +4,7 @@ import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResultRepository;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.documentclustering.TopicAssignmentRepository;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.documentclustering.TopicRepository;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.feedbackprocessing.TransformedFeedbackRepository;
-import ch.uzh.ifi.seal.changeadvisor.parser.CodeElementRepository;
+import ch.uzh.ifi.seal.changeadvisor.source.parser.CodeElementRepository;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

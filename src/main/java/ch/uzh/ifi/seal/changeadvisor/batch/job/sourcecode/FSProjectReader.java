@@ -1,8 +1,8 @@
 package ch.uzh.ifi.seal.changeadvisor.batch.job.sourcecode;
 
-import ch.uzh.ifi.seal.changeadvisor.parser.FSProjectParser;
-import ch.uzh.ifi.seal.changeadvisor.parser.bean.ClassBean;
-import ch.uzh.ifi.seal.changeadvisor.parser.bean.PackageBean;
+import ch.uzh.ifi.seal.changeadvisor.source.parser.FSProjectParser;
+import ch.uzh.ifi.seal.changeadvisor.source.parser.bean.ClassBean;
+import ch.uzh.ifi.seal.changeadvisor.source.parser.bean.PackageBean;
 import org.springframework.util.Assert;
 
 import java.nio.file.Path;
@@ -35,6 +35,7 @@ public class FSProjectReader implements FileSystemReader {
         this.isSortedRead = false;
     }
 
+    @Override
     public void setProjectRootPath(String projectRoot) {
         Assert.notNull(projectRoot, "Project root to parse must not be null.");
         this.projectRootPath = Paths.get(projectRoot);
@@ -50,6 +51,7 @@ public class FSProjectReader implements FileSystemReader {
      * @param sortedRead true iff reads should happens in order. False otherwise.
      * @see PackageBean#compareTo(PackageBean)
      */
+    @Override
     public void setSortedRead(boolean sortedRead) {
         isSortedRead = sortedRead;
     }

@@ -53,7 +53,7 @@ public class SourceImportJobFactory {
     }
 
     private Step sourceProcessing() {
-        return sourceComponentsTransformationStepConfig.extractBagOfWordsDefferedPath();
+        return sourceComponentsTransformationStepConfig.extractBagOfWordsDeferredPath();
     }
 
     private ExecutionContextPromotionListener executionContextPromotionListener() {

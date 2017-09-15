@@ -1,12 +1,12 @@
 package ch.uzh.ifi.seal.changeadvisor.batch.job;
 
-import ch.uzh.ifi.seal.changeadvisor.batch.job.sourcecode.FSDefferedProjectReader;
+import ch.uzh.ifi.seal.changeadvisor.batch.job.sourcecode.FSDeferredProjectReader;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.sourcecode.FSProjectReader;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.sourcecode.SourceCodeProcessor;
-import ch.uzh.ifi.seal.changeadvisor.parser.CodeElement;
-import ch.uzh.ifi.seal.changeadvisor.parser.FSProjectParser;
-import ch.uzh.ifi.seal.changeadvisor.parser.bean.ClassBean;
-import ch.uzh.ifi.seal.changeadvisor.parser.preprocessing.CorpusProcessor;
+import ch.uzh.ifi.seal.changeadvisor.preprocessing.CorpusProcessor;
+import ch.uzh.ifi.seal.changeadvisor.source.parser.CodeElement;
+import ch.uzh.ifi.seal.changeadvisor.source.parser.FSProjectParser;
+import ch.uzh.ifi.seal.changeadvisor.source.parser.bean.ClassBean;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.item.ItemWriter;
@@ -28,8 +28,6 @@ public class SourceComponentsTransformationStepConfig {
     private static final String STEP_NAME = "sourceCodeTransformation";
 
     private static final String TEST_DIRECTORY = "test_files_parser";
-
-    private static final String FROSTWIRE_DIRECTORY = "/com.frostwire.android";
 
     private final StepBuilderFactory stepBuilderFactory;
 
@@ -54,11 +52,11 @@ public class SourceComponentsTransformationStepConfig {
                 .build();
     }
 
-    public Step extractBagOfWordsDefferedPath() {
+    public Step extractBagOfWordsDeferredPath() {
         return stepBuilderFactory.get(STEP_NAME)
                 .allowStartIfComplete(true)
                 .<ClassBean, CodeElement>chunk(10)
-                .reader(defferedReader())
+                .reader(deferredReader())
                 .processor(processor())
                 .writer(mongoWriter())
                 .build();
@@ -71,8 +69,8 @@ public class SourceComponentsTransformationStepConfig {
         return reader;
     }
 
-    public FSDefferedProjectReader defferedReader() {
-        FSDefferedProjectReader reader = new FSDefferedProjectReader(new FSProjectReader(projectParser));
+    public FSDeferredProjectReader deferredReader() {
+        FSDeferredProjectReader reader = new FSDeferredProjectReader(new FSProjectReader(projectParser));
         reader.setSortedRead(true);
         return reader;
     }

@@ -1,7 +1,7 @@
 package ch.uzh.ifi.seal.changeadvisor.batch.job.sourcecode;
 
-import ch.uzh.ifi.seal.changeadvisor.parser.bean.ClassBean;
-import ch.uzh.ifi.seal.changeadvisor.parser.bean.PackageBean;
+import ch.uzh.ifi.seal.changeadvisor.source.parser.bean.ClassBean;
+import ch.uzh.ifi.seal.changeadvisor.source.parser.bean.PackageBean;
 import org.springframework.batch.item.ItemReader;
 
 public interface FileSystemReader extends ItemReader<ClassBean> {
@@ -14,4 +14,11 @@ public interface FileSystemReader extends ItemReader<ClassBean> {
      * @see PackageBean#compareTo(PackageBean)
      */
     void setSortedRead(boolean sortedRead);
+
+    /**
+     * Path to the directory to read.
+     *
+     * @param path path to directory.
+     */
+    void setProjectRootPath(String path);
 }

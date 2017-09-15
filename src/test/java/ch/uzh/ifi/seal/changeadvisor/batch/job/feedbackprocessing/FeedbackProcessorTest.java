@@ -1,7 +1,7 @@
 package ch.uzh.ifi.seal.changeadvisor.batch.job.feedbackprocessing;
 
 import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResult;
-import ch.uzh.ifi.seal.changeadvisor.parser.preprocessing.CorpusProcessor;
+import ch.uzh.ifi.seal.changeadvisor.preprocessing.CorpusProcessor;
 import com.google.common.collect.Sets;
 import org.ardoc.Result;
 import org.junit.Assert;

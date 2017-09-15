@@ -1,8 +1,8 @@
 package ch.uzh.ifi.seal.changeadvisor.batch.job.linking;
 
 import ch.uzh.ifi.seal.changeadvisor.batch.job.documentclustering.TopicClusteringResult;
-import ch.uzh.ifi.seal.changeadvisor.parser.CodeElement;
-import ch.uzh.ifi.seal.changeadvisor.parser.CodeElementRepository;
+import ch.uzh.ifi.seal.changeadvisor.source.parser.CodeElement;
+import ch.uzh.ifi.seal.changeadvisor.source.parser.CodeElementRepository;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
