@@ -1,6 +1,8 @@
 package ch.uzh.ifi.seal.changeadvisor.web;
 
 import ch.uzh.ifi.seal.changeadvisor.service.SourceCodeService;
+import ch.uzh.ifi.seal.changeadvisor.source.model.SourceCodeDirectory;
+import ch.uzh.ifi.seal.changeadvisor.source.model.SourceCodeDirectoryRepository;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ExecutionReport;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.SourceCodeDirectoryDto;
 import org.apache.log4j.Logger;
@@ -15,6 +17,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -24,12 +28,27 @@ public class SourceCodeController {
 
     private final SourceCodeService sourceCodeService;
 
+    private final SourceCodeDirectoryRepository repository;
+
     private final SessionUtil sessionUtil;
 
     @Autowired
-    public SourceCodeController(SourceCodeService sourceCodeService, SessionUtil sessionUtil) {
+    public SourceCodeController(SourceCodeService sourceCodeService, SourceCodeDirectoryRepository repository, SessionUtil sessionUtil) {
         this.sourceCodeService = sourceCodeService;
+        this.repository = repository;
         this.sessionUtil = sessionUtil;
+    }
+
+    @GetMapping(path = "source")
+    public Collection<SourceCodeDirectory> directories() {
+        List<SourceCodeDirectory> all = repository.findAll();
+        return all;
+    }
+
+    @GetMapping(path = "source/{appName}")
+    public SourceCodeDirectory directory(@PathVariable(name = "appName") String appName) {
+        Optional<SourceCodeDirectory> project = repository.findByProjectName(appName);
+        return project.orElse(new SourceCodeDirectory());
     }
 
     @PostMapping(path = "source")

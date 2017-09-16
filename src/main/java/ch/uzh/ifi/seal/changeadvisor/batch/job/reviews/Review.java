@@ -19,6 +19,13 @@ public class Review {
 
     private int numberOfStars;
 
+    public Review() {
+    }
+
+    public Review(String appName) {
+        this.appName = appName;
+    }
+
     public Review(String id, String appName, String reviewText, Date reviewDate, int numberOfStars) {
         this.id = id;
         this.appName = appName;

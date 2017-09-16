@@ -3,6 +3,10 @@ package ch.uzh.ifi.seal.changeadvisor.batch.job;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocProcessor;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResults;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResultsWriter;
+import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ReviewProcessor;
+import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.Review;
+import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.ReviewReader;
+import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.ReviewRepository;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.item.ItemProcessor;
@@ -33,10 +37,13 @@ public class ArdocStepConfig {
 
     private final ArdocResultsWriter ardocWriter;
 
+    private final ReviewRepository reviewRepository;
+
     @Autowired
-    public ArdocStepConfig(StepBuilderFactory stepBuilderFactory, ArdocResultsWriter ardocWriter) {
+    public ArdocStepConfig(StepBuilderFactory stepBuilderFactory, ArdocResultsWriter ardocWriter, ReviewRepository reviewRepository) {
         this.stepBuilderFactory = stepBuilderFactory;
         this.ardocWriter = ardocWriter;
+        this.reviewRepository = reviewRepository;
     }
 
     @Bean
@@ -49,6 +56,15 @@ public class ArdocStepConfig {
                 .build();
     }
 
+    public Step ardocAnalysis(final String appName) {
+        return stepBuilderFactory.get(STEP_NAME)
+                .<Review, ArdocResults>chunk(10)
+                .reader(reviewReader(appName))
+                .processor(reviewProcessor())
+                .writer(ardocWriter)
+                .build();
+    }
+
     @Bean
     public FlatFileItemReader<String> reviewReader() {
         FlatFileItemReader<String> reader = new FlatFileItemReader<>();
@@ -57,8 +73,17 @@ public class ArdocStepConfig {
         return reader;
     }
 
+    public ReviewReader reviewReader(String app) {
+        return new ReviewReader(reviewRepository, app);
+    }
+
     @Bean
     public ItemProcessor<String, ArdocResults> ardocProcessor() {
         return new ArdocProcessor();
+    }
+
+    @Bean
+    public ItemProcessor<Review, ArdocResults> reviewProcessor() {
+        return new ReviewProcessor();
     }
 }

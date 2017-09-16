@@ -1,5 +1,7 @@
 package ch.uzh.ifi.seal.changeadvisor.batch.job.reviews;
 
+import ch.uzh.ifi.seal.changeadvisor.batch.job.ArdocStepConfig;
+import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewAnalysisDto;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -20,16 +22,23 @@ public class ReviewImportJobFactory {
 
     private static final String REVIEW_IMPORT = "reviewImport";
 
+    private static final String REVIEW_ANALYSIS = "reviewAnalysis";
+
     private static final String STEP_NAME = "reviewImportStep";
+
+    private static final String REVIEW_ANALYSIS_STEP = "reviewAnalysisStep";
 
     private final StepBuilderFactory stepBuilderFactory;
 
     private final JobBuilderFactory jobBuilderFactory;
 
+    private final ArdocStepConfig ardocConfig;
+
     @Autowired
-    public ReviewImportJobFactory(StepBuilderFactory stepBuilderFactory, JobBuilderFactory reviewImportJobBuilder) {
+    public ReviewImportJobFactory(StepBuilderFactory stepBuilderFactory, JobBuilderFactory reviewImportJobBuilder, ArdocStepConfig ardocConfig) {
         this.stepBuilderFactory = stepBuilderFactory;
         this.jobBuilderFactory = reviewImportJobBuilder;
+        this.ardocConfig = ardocConfig;
     }
 
     public Job job(Map<String, Object> params) {
@@ -52,6 +61,15 @@ public class ReviewImportJobFactory {
         return stepBuilderFactory.get(STEP_NAME)
                 .allowStartIfComplete(true)
                 .tasklet(new ReviewImportTasklet(apps, configManager.getConfig()))
+                .build();
+    }
+
+    public Job reviewAnalysis(ReviewAnalysisDto dto) {
+        String app = dto.getApp();
+        return jobBuilderFactory.get(REVIEW_ANALYSIS)
+                .incrementer(new RunIdIncrementer())
+                .flow(ardocConfig.ardocAnalysis(app))
+                .end()
                 .build();
     }
 }
