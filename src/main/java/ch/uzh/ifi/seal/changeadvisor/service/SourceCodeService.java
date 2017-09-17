@@ -4,10 +4,6 @@ import ch.uzh.ifi.seal.changeadvisor.source.SourceImportJobFactory;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.SourceCodeDirectoryDto;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobParametersInvalidException;
-import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
-import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
-import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,12 +26,9 @@ public class SourceCodeService {
      *
      * @param dto Value object containing the path to a project.
      * @return a job execution instance representing the adding of a project.
-     * @throws JobParametersInvalidException
-     * @throws JobExecutionAlreadyRunningException
-     * @throws JobRestartException
-     * @throws JobInstanceAlreadyCompleteException
+     * @throws ch.uzh.ifi.seal.changeadvisor.service.JobService.FailedToRunJobException if an exception occured while starting job.
      */
-    public JobExecution startSourceCodeDownload(SourceCodeDirectoryDto dto) throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException {
+    public JobExecution startSourceCodeDownload(SourceCodeDirectoryDto dto) throws JobService.FailedToRunJobException {
         Job job = sourceImportJobFactory.job(dto);
         return jobService.run(job);
     }

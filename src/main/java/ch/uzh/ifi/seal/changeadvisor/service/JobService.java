@@ -20,18 +20,29 @@ public class JobService {
         this.jobLauncher = jobLauncher;
     }
 
-    public JobExecution run(Job job) throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException {
+    public JobExecution run(Job job) throws FailedToRunJobException {
         return run(job, parametersWithCurrentTimestamp());
     }
 
-    public JobExecution run(Job job, JobParameters parameters) throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException {
+    public JobExecution run(Job job, JobParameters parameters) throws FailedToRunJobException {
         if (job == null || parameters == null) {
             throw new IllegalArgumentException(String.format("Job and parameters must both be not null. Got %s, %s", job, parameters));
         }
-        return jobLauncher.run(job, parameters);
+        try {
+            return jobLauncher.run(job, parameters);
+        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobParametersInvalidException | JobInstanceAlreadyCompleteException e) {
+            throw new FailedToRunJobException("Failed to start job.", e);
+        }
     }
 
     JobParameters parametersWithCurrentTimestamp() {
         return new JobParametersBuilder().addDate("timestamp", new Date()).toJobParameters();
+    }
+
+    public static class FailedToRunJobException extends Exception {
+
+        public FailedToRunJobException(String message, Throwable cause) {
+            super(message, cause);
+        }
     }
 }

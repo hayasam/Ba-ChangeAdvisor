@@ -3,22 +3,18 @@ package ch.uzh.ifi.seal.changeadvisor.web;
 
 import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.Review;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.ReviewRepository;
+import ch.uzh.ifi.seal.changeadvisor.service.JobService;
 import ch.uzh.ifi.seal.changeadvisor.service.ReviewImportService;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ExecutionReport;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewAnalysisDto;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.StepExecution;
-import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
-import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
-import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +39,7 @@ public class ReviewController {
     }
 
     @PostMapping(path = "reviews")
-    public long reviewImport(@RequestBody Map<String, Object> params) throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException, IOException {
+    public long reviewImport(@RequestBody Map<String, Object> params) throws JobService.FailedToRunJobException {
         Assert.notEmpty(params, "Empty or null parameters. Need at least list of apps.");
         Assert.isTrue(params.containsKey("apps"), "Request has to contain list of apps.");
         logger.info(String.format("Creating review import job and starting process with parameters %s.", params));
@@ -58,7 +54,7 @@ public class ReviewController {
     }
 
     @PostMapping(path = "reviews/analyze")
-    public long reviewAnalysis(@RequestBody @Valid ReviewAnalysisDto dto) throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException {
+    public long reviewAnalysis(@RequestBody @Valid ReviewAnalysisDto dto) throws JobService.FailedToRunJobException {
         logger.info(String.format("Starting analysis job for app %s!", dto.getApp()));
         JobExecution jobExecution = reviewImportService.reviewAnalysis(dto);
         sessionUtil.addJob(jobExecution);

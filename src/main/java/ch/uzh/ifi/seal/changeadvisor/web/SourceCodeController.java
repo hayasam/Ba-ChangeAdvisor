@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.changeadvisor.web;
 
+import ch.uzh.ifi.seal.changeadvisor.service.JobService;
 import ch.uzh.ifi.seal.changeadvisor.service.SourceCodeService;
 import ch.uzh.ifi.seal.changeadvisor.source.model.SourceCodeDirectory;
 import ch.uzh.ifi.seal.changeadvisor.source.model.SourceCodeDirectoryRepository;
@@ -7,11 +8,7 @@ import ch.uzh.ifi.seal.changeadvisor.web.dto.ExecutionReport;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.SourceCodeDirectoryDto;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.StepExecution;
-import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
-import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
-import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -52,7 +49,7 @@ public class SourceCodeController {
     }
 
     @PostMapping(path = "source")
-    public long downloadSourceCode(@RequestBody @Valid SourceCodeDirectoryDto dto) throws JobParametersInvalidException, JobExecutionAlreadyRunningException, JobRestartException, JobInstanceAlreadyCompleteException {
+    public long downloadSourceCode(@RequestBody @Valid SourceCodeDirectoryDto dto) throws JobService.FailedToRunJobException {
         logger.info(String.format("Adding directory %s", dto.getPath()));
         JobExecution jobExecution = sourceCodeService.startSourceCodeDownload(dto);
         sessionUtil.addJob(jobExecution);
