@@ -55,7 +55,7 @@ public class GitSourceCodeImporter implements SourceCodeImporter {
                 .call()) {
 
             logger.info(String.format("Having repository: %s", result.getRepository().getDirectory()));
-            return new SourceCodeDirectory(projectName, projectPath.getAbsolutePath());
+            return SourceCodeDirectory.of(projectName, projectPath.getAbsolutePath(), REMOTE_URL);
         } catch (TransportException e) {
             throw new RuntimeException(String.format("No Credentials provided for repository or no repository found @ %s", REMOTE_URL), e);
         } catch (GitAPIException e) {
