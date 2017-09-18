@@ -4,11 +4,9 @@ import ch.uzh.ifi.seal.changeadvisor.service.JobService;
 import ch.uzh.ifi.seal.changeadvisor.service.SourceCodeService;
 import ch.uzh.ifi.seal.changeadvisor.source.model.SourceCodeDirectory;
 import ch.uzh.ifi.seal.changeadvisor.source.model.SourceCodeDirectoryRepository;
-import ch.uzh.ifi.seal.changeadvisor.web.dto.ExecutionReport;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.SourceCodeDirectoryDto;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.JobExecution;
-import org.springframework.batch.core.StepExecution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,7 +14,6 @@ import javax.validation.Valid;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 public class SourceCodeController {
@@ -27,13 +24,13 @@ public class SourceCodeController {
 
     private final SourceCodeDirectoryRepository repository;
 
-    private final SessionUtil sessionUtil;
+    private final JobHolder jobHolder;
 
     @Autowired
-    public SourceCodeController(SourceCodeService sourceCodeService, SourceCodeDirectoryRepository repository, SessionUtil sessionUtil) {
+    public SourceCodeController(SourceCodeService sourceCodeService, SourceCodeDirectoryRepository repository, JobHolder jobHolder) {
         this.sourceCodeService = sourceCodeService;
         this.repository = repository;
-        this.sessionUtil = sessionUtil;
+        this.jobHolder = jobHolder;
     }
 
     @GetMapping(path = "source")
@@ -52,22 +49,8 @@ public class SourceCodeController {
     public long downloadSourceCode(@RequestBody @Valid SourceCodeDirectoryDto dto) throws JobService.FailedToRunJobException {
         logger.info(String.format("Adding directory %s", dto.getPath()));
         JobExecution jobExecution = sourceCodeService.startSourceCodeDownload(dto);
-        sessionUtil.addJob(jobExecution);
+        jobHolder.addJob(jobExecution);
         return jobExecution.getJobId();
-    }
-
-    @GetMapping(path = "source/status/{jobId}")
-    @ResponseBody
-    public Collection<ExecutionReport> status(@PathVariable("jobId") Long jobId) {
-        if (sessionUtil.hasJob(jobId)) {
-            JobExecution job = sessionUtil.getJob(jobId);
-            Collection<StepExecution> stepExecutions = job.getStepExecutions();
-            return stepExecutions
-                    .stream()
-                    .map(ExecutionReport::of)
-                    .collect(Collectors.toList());
-        }
-        throw new IllegalArgumentException(String.format("No job found for job id: %d", jobId));
     }
 
 }
