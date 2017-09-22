@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.changeadvisor.service;
 
+import ch.uzh.ifi.seal.changeadvisor.web.JobHolder;
 import org.springframework.batch.core.*;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
@@ -15,9 +16,12 @@ public class JobService {
 
     private final JobLauncher jobLauncher;
 
+    private final JobHolder jobHolder;
+
     @Autowired
-    public JobService(JobLauncher jobLauncher) {
+    public JobService(JobLauncher jobLauncher, JobHolder jobHolder) {
         this.jobLauncher = jobLauncher;
+        this.jobHolder = jobHolder;
     }
 
     public JobExecution run(Job job) throws FailedToRunJobException {
@@ -29,7 +33,9 @@ public class JobService {
             throw new IllegalArgumentException(String.format("Job and parameters must both be not null. Got %s, %s", job, parameters));
         }
         try {
-            return jobLauncher.run(job, parameters);
+            JobExecution jobExecution = jobLauncher.run(job, parameters);
+            jobHolder.addJob(jobExecution);
+            return jobExecution;
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobParametersInvalidException | JobInstanceAlreadyCompleteException e) {
             throw new FailedToRunJobException("Failed to start job.", e);
         }
@@ -37,12 +43,5 @@ public class JobService {
 
     JobParameters parametersWithCurrentTimestamp() {
         return new JobParametersBuilder().addDate("timestamp", new Date()).toJobParameters();
-    }
-
-    public static class FailedToRunJobException extends Exception {
-
-        public FailedToRunJobException(String message, Throwable cause) {
-            super(message, cause);
-        }
     }
 }

@@ -5,7 +5,7 @@ import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResult;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.Review;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.ReviewRepository;
 import ch.uzh.ifi.seal.changeadvisor.service.ArdocService;
-import ch.uzh.ifi.seal.changeadvisor.service.JobService;
+import ch.uzh.ifi.seal.changeadvisor.service.FailedToRunJobException;
 import ch.uzh.ifi.seal.changeadvisor.service.ReviewImportService;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewAnalysisDto;
 import org.apache.log4j.Logger;
@@ -42,12 +42,11 @@ public class ReviewController {
     }
 
     @PostMapping(path = "reviews")
-    public long reviewImport(@RequestBody Map<String, Object> params) throws JobService.FailedToRunJobException {
+    public long reviewImport(@RequestBody Map<String, Object> params) throws FailedToRunJobException {
         Assert.notEmpty(params, "Empty or null parameters. Need at least list of apps.");
         Assert.isTrue(params.containsKey("apps"), "Request has to contain list of apps.");
         logger.info(String.format("Creating review import job and starting process with parameters %s.", params));
         JobExecution jobExecution = reviewImportService.reviewImport(params);
-        jobHolder.addJob(jobExecution);
         return jobExecution.getJobId();
     }
 
@@ -58,10 +57,9 @@ public class ReviewController {
     }
 
     @PostMapping(path = "reviews/analyze")
-    public long reviewAnalysis(@RequestBody @Valid ReviewAnalysisDto dto) throws JobService.FailedToRunJobException {
+    public long reviewAnalysis(@RequestBody @Valid ReviewAnalysisDto dto) throws FailedToRunJobException {
         logger.info(String.format("Starting analysis job for app %s!", dto.getApp()));
         JobExecution jobExecution = reviewImportService.reviewAnalysis(dto);
-        jobHolder.addJob(jobExecution);
         return jobExecution.getJobId();
     }
 

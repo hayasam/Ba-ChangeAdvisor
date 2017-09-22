@@ -27,10 +27,6 @@ public class JobHolder {
         }
     }
 
-    public void addJobs(Collection<JobExecution> jobs) {
-        jobs.forEach(this::addJob);
-    }
-
     public boolean hasJob(Long id) {
         return jobs.containsKey(id);
     }
@@ -47,6 +43,13 @@ public class JobHolder {
         jobs.clear();
     }
 
+    /**
+     * Generates an execution report out of a jobExecution instance.
+     *
+     * @param jobId id of jobExecution.
+     * @return collection of reports of execution steps for the wanted job.
+     * @see ExecutionReport
+     */
     public Collection<ExecutionReport> executionReportForJob(Long jobId) {
         if (jobId != null && hasJob(jobId)) {
             JobExecution job = getJob(jobId);

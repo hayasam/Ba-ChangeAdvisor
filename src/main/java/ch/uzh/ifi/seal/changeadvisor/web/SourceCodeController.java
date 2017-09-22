@@ -1,6 +1,6 @@
 package ch.uzh.ifi.seal.changeadvisor.web;
 
-import ch.uzh.ifi.seal.changeadvisor.service.JobService;
+import ch.uzh.ifi.seal.changeadvisor.service.FailedToRunJobException;
 import ch.uzh.ifi.seal.changeadvisor.service.SourceCodeService;
 import ch.uzh.ifi.seal.changeadvisor.source.model.SourceCodeDirectory;
 import ch.uzh.ifi.seal.changeadvisor.source.model.SourceCodeDirectoryRepository;
@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -24,19 +23,15 @@ public class SourceCodeController {
 
     private final SourceCodeDirectoryRepository repository;
 
-    private final JobHolder jobHolder;
-
     @Autowired
-    public SourceCodeController(SourceCodeService sourceCodeService, SourceCodeDirectoryRepository repository, JobHolder jobHolder) {
+    public SourceCodeController(SourceCodeService sourceCodeService, SourceCodeDirectoryRepository repository) {
         this.sourceCodeService = sourceCodeService;
         this.repository = repository;
-        this.jobHolder = jobHolder;
     }
 
     @GetMapping(path = "source")
     public Collection<SourceCodeDirectory> directories() {
-        List<SourceCodeDirectory> all = repository.findAll();
-        return all;
+        return repository.findAll();
     }
 
     @GetMapping(path = "source/{appName}")
@@ -46,10 +41,9 @@ public class SourceCodeController {
     }
 
     @PostMapping(path = "source")
-    public long downloadSourceCode(@RequestBody @Valid SourceCodeDirectoryDto dto) throws JobService.FailedToRunJobException {
+    public long downloadSourceCode(@RequestBody @Valid SourceCodeDirectoryDto dto) throws FailedToRunJobException {
         logger.info(String.format("Adding directory %s", dto.getPath()));
         JobExecution jobExecution = sourceCodeService.startSourceCodeDownload(dto);
-        jobHolder.addJob(jobExecution);
         return jobExecution.getJobId();
     }
 

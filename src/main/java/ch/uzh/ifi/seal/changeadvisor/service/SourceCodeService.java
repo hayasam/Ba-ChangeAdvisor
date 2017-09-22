@@ -26,9 +26,9 @@ public class SourceCodeService {
      *
      * @param dto Value object containing the path to a project.
      * @return a job execution instance representing the adding of a project.
-     * @throws ch.uzh.ifi.seal.changeadvisor.service.JobService.FailedToRunJobException if an exception occured while starting job.
+     * @throws ch.uzh.ifi.seal.changeadvisor.service.FailedToRunJobException if an exception occured while starting job.
      */
-    public JobExecution startSourceCodeDownload(SourceCodeDirectoryDto dto) throws JobService.FailedToRunJobException {
+    public JobExecution startSourceCodeDownload(SourceCodeDirectoryDto dto) throws FailedToRunJobException {
         Job job = sourceImportJobFactory.job(dto);
         return jobService.run(job);
     }
