@@ -47,6 +47,7 @@ public class SourceCodeImporterFactory {
         }
         SourceCodeImporter importer = getImporter(dto.getPath());
         importer.setCredentials(dto.getUsername(), dto.getPassword());
+        importer.setProjectName(dto.getProjectName());
         return importer;
     }
 

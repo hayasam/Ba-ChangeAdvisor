@@ -19,8 +19,11 @@ public class SourceCodeDirectoryDto {
 
     private String password;
 
-    public SourceCodeDirectoryDto(@JsonProperty(value = "path", required = true) String path) {
+    public SourceCodeDirectoryDto(
+            @JsonProperty(value = "path", required = true) String path,
+            @JsonProperty(value = "projectName", required = false) String projectName) {
         this.path = path;
+        this.projectName = projectName;
     }
 
     public String getProjectName() {

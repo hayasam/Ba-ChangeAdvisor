@@ -2,6 +2,7 @@ package ch.uzh.ifi.seal.changeadvisor.source.importer;
 
 import ch.uzh.ifi.seal.changeadvisor.source.model.SourceCodeDirectory;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -26,6 +27,8 @@ public class GitSourceCodeImporter implements SourceCodeImporter {
 
     private CredentialsProvider credentialsProvider;
 
+    private String projectName;
+
     GitSourceCodeImporter(String path) {
         this.path = path;
     }
@@ -38,9 +41,14 @@ public class GitSourceCodeImporter implements SourceCodeImporter {
     }
 
     @Override
+    public void setProjectName(String projectName) {
+        this.projectName = projectName;
+    }
+
+    @Override
     public SourceCodeDirectory importSource() {
         final String REMOTE_URL = getURLFromPath();
-        final String projectName = getProjectNameFromPath();
+        final String projectName = StringUtils.isEmpty(this.projectName) ? getProjectNameFromPath() : this.projectName;
         final File projectPath = new File(IMPORTED_CODE_FOLDER.getName() + "/" + projectName);
 
         if (projectPath.exists()) {

@@ -49,6 +49,6 @@ public class SourceCodeImporterFactoryTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void getImporterWrong2() throws Exception {
-        SourceCodeImporterFactory.getImporter(new SourceCodeDirectoryDto("adfdsf"));
+        SourceCodeImporterFactory.getImporter(new SourceCodeDirectoryDto("adfdsf", "adsf"));
     }
 }
