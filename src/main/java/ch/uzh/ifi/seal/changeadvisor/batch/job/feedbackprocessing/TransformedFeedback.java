@@ -52,11 +52,11 @@ public class TransformedFeedback {
     }
 
     public String getSentence() {
-        return ardocResult.getResult().getSentence();
+        return ardocResult.getSentence();
     }
 
     public String getCategory() {
-        return ardocResult.getResult().getSentenceClass();
+        return ardocResult.getCategory();
     }
 
     public void setId(String id) {
@@ -78,7 +78,7 @@ public class TransformedFeedback {
     @Override
     public String toString() {
         return "TransformedFeedback{" +
-                "sentence=" + ardocResult.getResult().getSentence() +
+                "sentence=" + ardocResult.getSentence() +
                 ", bagOfWords=" + bagOfWords +
                 '}';
     }

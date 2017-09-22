@@ -18,7 +18,7 @@ public class ReviewProcessor implements ItemProcessor<Review, ArdocResults> {
 
     @Override
     public ArdocResults process(Review item) throws UnknownCombinationException {
-        ArdocResults result = new ArdocResults(parser.extract(ARDOC_METHODS, item.getReviewText()));
+        ArdocResults result = new ArdocResults(item, parser.extract(ARDOC_METHODS, item.getReviewText()));
         trackProgress();
         return result;
     }

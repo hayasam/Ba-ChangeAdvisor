@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc;
 
+import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.Review;
 import org.ardoc.Result;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,8 +18,8 @@ public class ArdocResults implements Iterable<ArdocResult> {
 
     private List<ArdocResult> results;
 
-    public ArdocResults(List<Result> results) {
-        this.results = results.stream().map(ArdocResult::new).collect(Collectors.toList());
+    public ArdocResults(Review review, List<Result> results) {
+        this.results = results.stream().map(result -> new ArdocResult(review, result)).collect(Collectors.toList());
     }
 
     public List<ArdocResult> getResults() {

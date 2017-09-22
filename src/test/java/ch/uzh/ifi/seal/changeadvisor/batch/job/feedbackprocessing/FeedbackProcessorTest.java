@@ -1,6 +1,7 @@
 package ch.uzh.ifi.seal.changeadvisor.batch.job.feedbackprocessing;
 
 import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResult;
+import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.Review;
 import ch.uzh.ifi.seal.changeadvisor.preprocessing.CorpusProcessor;
 import com.google.common.collect.Sets;
 import org.ardoc.Result;
@@ -24,8 +25,9 @@ public class FeedbackProcessorTest {
     @Test
     public void process() throws Exception {
         Result result = Mockito.mock(Result.class);
+        Review review = new Review("app");
         when(result.getSentence()).thenReturn("My only complaint is that I'd like to organize things more, remove or add album pics, rearrange things, etc.");
-        ArdocResult ardocResult = new ArdocResult(result);
+        ArdocResult ardocResult = new ArdocResult(review, result);
 
         FeedbackProcessor processor = new FeedbackProcessor(
                 new CorpusProcessor.Builder()

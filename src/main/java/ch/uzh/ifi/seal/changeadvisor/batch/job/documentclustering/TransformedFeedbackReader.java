@@ -35,7 +35,7 @@ public class TransformedFeedbackReader implements ItemReader<List<TransformedFee
             return null;
         }
 
-        List<TransformedFeedback> allFeedbacks = feedbackRepository.findAllByArdocResult_ResultCategoryIn(Sets.newHashSet("FEATURE REQUEST", "PROBLEM DISCOVERY"));
+        List<TransformedFeedback> allFeedbacks = feedbackRepository.findAllByArdocResultCategoryIn(Sets.newHashSet("FEATURE REQUEST", "PROBLEM DISCOVERY"));
         hasRead = true;
         logger.info(allFeedbacks.size());
         return allFeedbacks;

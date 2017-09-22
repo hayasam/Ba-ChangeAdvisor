@@ -12,5 +12,5 @@ import java.util.List;
 @Repository
 public interface TransformedFeedbackRepository extends MongoRepository<TransformedFeedback, String> {
 
-    List<TransformedFeedback> findAllByArdocResult_ResultCategoryIn(Collection<String> categories);
+    List<TransformedFeedback> findAllByArdocResultCategoryIn(Collection<String> categories);
 }

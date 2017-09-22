@@ -19,7 +19,7 @@ public class FeedbackProcessor implements ItemProcessor<ArdocResult, Transformed
 
     @Override
     public TransformedFeedback process(ArdocResult item) throws Exception {
-        Set<String> bag = corpusProcessor.transform(item.getResult().getSentence());
+        Set<String> bag = corpusProcessor.transform(item.getSentence());
         if (bag.isEmpty()) {
             return null;
         }

@@ -7,6 +7,7 @@ import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ReviewProcessor;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.Review;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.ReviewReader;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.ReviewRepository;
+import ch.uzh.ifi.seal.changeadvisor.service.ArdocService;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.item.ItemProcessor;
@@ -39,11 +40,14 @@ public class ArdocStepConfig {
 
     private final ReviewRepository reviewRepository;
 
+    private final ArdocService ardocService;
+
     @Autowired
-    public ArdocStepConfig(StepBuilderFactory stepBuilderFactory, ArdocResultsWriter ardocWriter, ReviewRepository reviewRepository) {
+    public ArdocStepConfig(StepBuilderFactory stepBuilderFactory, ArdocResultsWriter ardocWriter, ReviewRepository reviewRepository, ArdocService ardocService) {
         this.stepBuilderFactory = stepBuilderFactory;
         this.ardocWriter = ardocWriter;
         this.reviewRepository = reviewRepository;
+        this.ardocService = ardocService;
     }
 
     @Bean
@@ -74,7 +78,7 @@ public class ArdocStepConfig {
     }
 
     public ReviewReader reviewReader(String app) {
-        return new ReviewReader(reviewRepository, app);
+        return new ReviewReader(ardocService, app);
     }
 
     @Bean

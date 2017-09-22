@@ -21,7 +21,7 @@ public class ArdocProcessor implements ItemProcessor<String, ArdocResults> {
 
     @Override
     public ArdocResults process(String item) throws UnknownCombinationException {
-        ArdocResults result = new ArdocResults(parser.extract(ARDOC_METHODS, item));
+        ArdocResults result = new ArdocResults(null, parser.extract(ARDOC_METHODS, item));
         trackProgress();
         return result;
     }

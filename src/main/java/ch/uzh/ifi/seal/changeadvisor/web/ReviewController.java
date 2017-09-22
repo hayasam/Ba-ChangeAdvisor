@@ -1,8 +1,10 @@
 package ch.uzh.ifi.seal.changeadvisor.web;
 
 
+import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResult;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.Review;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.ReviewRepository;
+import ch.uzh.ifi.seal.changeadvisor.service.ArdocService;
 import ch.uzh.ifi.seal.changeadvisor.service.JobService;
 import ch.uzh.ifi.seal.changeadvisor.service.ReviewImportService;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewAnalysisDto;
@@ -10,10 +12,8 @@ import org.apache.log4j.Logger;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.Collection;
@@ -29,12 +29,15 @@ public class ReviewController {
 
     private final ReviewRepository repository;
 
+    private final ArdocService ardocService;
+
     private final JobHolder jobHolder;
 
     @Autowired
-    public ReviewController(ReviewImportService reviewImportService, ReviewRepository repository, JobHolder jobHolder) {
+    public ReviewController(ReviewImportService reviewImportService, ReviewRepository repository, ArdocService ardocService, JobHolder jobHolder) {
         this.reviewImportService = reviewImportService;
         this.repository = repository;
+        this.ardocService = ardocService;
         this.jobHolder = jobHolder;
     }
 
@@ -60,5 +63,21 @@ public class ReviewController {
         JobExecution jobExecution = reviewImportService.reviewAnalysis(dto);
         jobHolder.addJob(jobExecution);
         return jobExecution.getJobId();
+    }
+
+    @GetMapping(path = "reviews/lastAnalyzed")
+    public ArdocResult lastResultAnalyzed(@RequestParam("app") String app) {
+        if (StringUtils.isEmpty(app)) {
+            throw new IllegalArgumentException("Need an app name!");
+        }
+        return ardocService.getLastAnalyzed(app);
+    }
+
+    @GetMapping(path = "reviews/sinceLastAnalyzed")
+    public List<Review> reviewsSinceLastAnalyzed(@RequestParam("app") String app) {
+        if (StringUtils.isEmpty(app)) {
+            throw new IllegalArgumentException("Need an app name!");
+        }
+        return ardocService.getReviewsSinceLastAnalyzed(app);
     }
 }

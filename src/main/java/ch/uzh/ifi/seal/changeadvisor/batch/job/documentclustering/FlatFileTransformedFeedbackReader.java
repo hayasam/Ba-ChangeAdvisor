@@ -58,7 +58,7 @@ public class FlatFileTransformedFeedbackReader implements ItemReader<List<Transf
                     .filter(line -> line.length == 3 && inputCategories.contains(line[1]))
                     .map(line -> {
                         Result result = new MockResult(line[0], line[1]);
-                        ArdocResult ardocResult = new ArdocResult(result);
+                        ArdocResult ardocResult = new ArdocResult(null, result);
                         LinkedHashSet<String> tokens = Sets.newLinkedHashSet(Splitter.on(" ").omitEmptyStrings().trimResults().split(line[2]));
                         return new TransformedFeedback(ardocResult, tokens);
                     })

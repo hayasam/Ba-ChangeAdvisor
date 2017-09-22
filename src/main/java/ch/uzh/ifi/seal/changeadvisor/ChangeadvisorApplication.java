@@ -47,9 +47,7 @@ public class ChangeadvisorApplication implements CommandLineRunner {
         topicAssignmentRepository.deleteAll();
         topicRepository.deleteAll();
         transformedFeedbackRepository.deleteAll();
-        ardocResultRepository.deleteAll();
-
-
+//        ardocResultRepository.deleteAll();
     }
 
     public static void main(String[] args) {
