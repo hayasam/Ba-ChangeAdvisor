@@ -88,7 +88,7 @@ public class SourceComponentsTransformationStepConfig {
                 .stem()
                 .removeTokensShorterThan(3)
                 .build();
-        return new SourceCodeProcessor(processor);
+        return new SourceCodeProcessor(5, processor);
     }
 
     @Bean

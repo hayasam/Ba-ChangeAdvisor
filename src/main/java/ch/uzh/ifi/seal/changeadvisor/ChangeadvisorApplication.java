@@ -43,10 +43,10 @@ public class ChangeadvisorApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        codeElementRepository.deleteAll();
-        topicAssignmentRepository.deleteAll();
-        topicRepository.deleteAll();
-        transformedFeedbackRepository.deleteAll();
+//        codeElementRepository.deleteAll();
+//        topicAssignmentRepository.deleteAll();
+//        topicRepository.deleteAll();
+//        transformedFeedbackRepository.deleteAll();
 //        ardocResultRepository.deleteAll();
     }
 

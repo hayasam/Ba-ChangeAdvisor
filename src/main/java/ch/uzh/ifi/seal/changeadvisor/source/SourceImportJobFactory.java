@@ -1,6 +1,7 @@
 package ch.uzh.ifi.seal.changeadvisor.source;
 
 import ch.uzh.ifi.seal.changeadvisor.batch.job.SourceComponentsTransformationStepConfig;
+import ch.uzh.ifi.seal.changeadvisor.source.model.SourceCodeDirectory;
 import ch.uzh.ifi.seal.changeadvisor.source.model.SourceCodeDirectoryRepository;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.SourceCodeDirectoryDto;
 import org.springframework.batch.core.Job;
@@ -11,6 +12,8 @@ import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.listener.ExecutionContextPromotionListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.Optional;
 
 @Component
 public class SourceImportJobFactory {
@@ -35,11 +38,19 @@ public class SourceImportJobFactory {
         this.sourceComponentsTransformationStepConfig = sourceComponentsTransformationStepConfig;
     }
 
-    public Job job(SourceCodeDirectoryDto dto) {
+    public Job importAndProcessingJob(SourceCodeDirectoryDto dto) {
         return jobBuilderFactory.get(SOURCE_IMPORT)
                 .incrementer(new RunIdIncrementer())
                 .flow(sourceImport(dto))
                 .next(sourceProcessing())
+                .end()
+                .build();
+    }
+
+    public Job processingJob(final String appName) {
+        return jobBuilderFactory.get(SOURCE_IMPORT)
+                .incrementer(new RunIdIncrementer())
+                .flow(sourceProcessing(appName))
                 .end()
                 .build();
     }
@@ -51,6 +62,14 @@ public class SourceImportJobFactory {
                 .tasklet(importTasklet)
                 .listener(executionContextPromotionListener())
                 .build();
+    }
+
+    private Step sourceProcessing(final String appName) {
+        Optional<SourceCodeDirectory> projectDirectory = repository.findByProjectName(appName);
+        if (projectDirectory.isPresent()) {
+            return sourceComponentsTransformationStepConfig.extractBagOfWords(projectDirectory.get().getPath());
+        }
+        throw new IllegalArgumentException(String.format("No project imported for app name %s", appName));
     }
 
     private Step sourceProcessing() {

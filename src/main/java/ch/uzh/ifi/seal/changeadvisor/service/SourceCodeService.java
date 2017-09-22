@@ -29,7 +29,12 @@ public class SourceCodeService {
      * @throws ch.uzh.ifi.seal.changeadvisor.service.FailedToRunJobException if an exception occured while starting job.
      */
     public JobExecution startSourceCodeDownload(SourceCodeDirectoryDto dto) throws FailedToRunJobException {
-        Job job = sourceImportJobFactory.job(dto);
+        Job job = sourceImportJobFactory.importAndProcessingJob(dto);
+        return jobService.run(job);
+    }
+
+    public JobExecution startSourceCodeProcessing(final String appName) throws FailedToRunJobException {
+        Job job = sourceImportJobFactory.processingJob(appName);
         return jobService.run(job);
     }
 }

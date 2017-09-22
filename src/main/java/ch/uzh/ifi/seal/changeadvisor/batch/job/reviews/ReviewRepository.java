@@ -11,6 +11,8 @@ import java.util.List;
 @Repository
 public interface ReviewRepository extends MongoRepository<Review, String> {
 
+    List<Review> findByAppName(String appName);
+
     Page<Review> findByAppName(String appName, Pageable pageable);
 
     List<Review> findByAppNameAndReviewDateGreaterThanEqualOrderByReviewDateDesc(String appName, Date reviewDate);

@@ -12,18 +12,25 @@ import java.util.Set;
  */
 public class SourceCodeProcessor implements ItemProcessor<ClassBean, CodeElement> {
 
+    private final int THRESHOLD;
+
     private CorpusProcessor corpusProcessor;
 
-    public SourceCodeProcessor(CorpusProcessor corpusProcessor) {
+    public SourceCodeProcessor(final int threshold, CorpusProcessor corpusProcessor) {
+        this.THRESHOLD = threshold;
         this.corpusProcessor = corpusProcessor;
     }
 
     @Override
     public CodeElement process(ClassBean item) throws Exception {
         Set<String> bag = corpusProcessor.transform(item.getPublicCorpus());
-        if (bag.isEmpty()) {
+        if (isBelowThreshold(bag)) {
             return null;
         }
         return new CodeElement(item.getFullyQualifiedClassName(), bag);
+    }
+
+    private boolean isBelowThreshold(Set<String> bag) {
+        return bag.size() < THRESHOLD;
     }
 }
