@@ -45,11 +45,6 @@ public class ChangeadvisorApplicationTests {
     }
 
     private void clearDb() {
-        codeElementRepository.deleteAll();
-        topicRepository.deleteAll();
-        topicAssignmentRepository.deleteAll();
-        transformedFeedbackRepository.deleteAll();
-        ardocResultRepository.deleteAll();
     }
 
     @Test

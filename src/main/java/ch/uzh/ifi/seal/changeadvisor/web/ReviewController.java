@@ -6,8 +6,10 @@ import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.Review;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.ReviewRepository;
 import ch.uzh.ifi.seal.changeadvisor.service.ArdocService;
 import ch.uzh.ifi.seal.changeadvisor.service.FailedToRunJobException;
+import ch.uzh.ifi.seal.changeadvisor.service.ReviewAggregationService;
 import ch.uzh.ifi.seal.changeadvisor.service.ReviewImportService;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewAnalysisDto;
+import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewDistributionReport;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,11 +33,14 @@ public class ReviewController {
 
     private final ArdocService ardocService;
 
+    private final ReviewAggregationService aggregationService;
+
     @Autowired
-    public ReviewController(ReviewImportService reviewImportService, ReviewRepository repository, ArdocService ardocService) {
+    public ReviewController(ReviewImportService reviewImportService, ReviewRepository repository, ArdocService ardocService, ReviewAggregationService service) {
         this.reviewImportService = reviewImportService;
         this.repository = repository;
         this.ardocService = ardocService;
+        this.aggregationService = service;
     }
 
     @PostMapping(path = "reviews")
@@ -87,5 +92,10 @@ public class ReviewController {
         logger.info(String.format("Starting reviews clustering job for app %s!", dto.getApp()));
         JobExecution jobExecution = reviewImportService.reviewClustering(dto);
         return jobExecution.getJobId();
+    }
+
+    @PostMapping(path = "reviews/distribution")
+    public ReviewDistributionReport report(@RequestBody @Valid ReviewAnalysisDto dto) {
+        return aggregationService.groupByCategories(dto.getApp());
     }
 }

@@ -51,14 +51,4 @@ public class ChangeAdvisorDbConfig extends AbstractRepoConfig {
     public MongoTemplate mongoTemplate() throws Exception {
         return new MongoTemplate(mongo(), getDatabaseName());
     }
-
-//    @Bean
-//    public MongoDbFactory mongoDbFactory() {
-//        return new SimpleMongoDbFactory(new MongoClient(), "changeAdvisor");
-//    }
-
-//    @Bean
-//    public MongoTemplate mongoTemplate() {
-//        return new MongoTemplate(mongoDbFactory());
-//    }
 }
