@@ -84,7 +84,7 @@ public class FeedbackTransformationStepConfig {
         return reader;
     }
 
-    public RepositoryItemReader<ArdocResult> feedbackRepositoryReader(final String appName) {
+    private RepositoryItemReader<ArdocResult> feedbackRepositoryReader(final String appName) {
         RepositoryItemReader<ArdocResult> reader = new RepositoryItemReader<>();
         reader.setRepository(ardocRepository);
         reader.setMethodName("findByAppName");
@@ -96,7 +96,7 @@ public class FeedbackTransformationStepConfig {
         return reader;
     }
 
-    public ItemProcessor<ArdocResult, TransformedFeedback> feedbackProcessor() {
+    protected ItemProcessor<ArdocResult, TransformedFeedback> feedbackProcessor() {
         return new FeedbackProcessor(corpusProcessor(), THRESHOLD);
     }
 
