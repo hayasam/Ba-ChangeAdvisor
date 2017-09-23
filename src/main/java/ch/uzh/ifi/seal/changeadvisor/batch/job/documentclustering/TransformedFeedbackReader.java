@@ -6,7 +6,6 @@ import com.google.common.collect.Sets;
 import org.apache.log4j.Logger;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -24,7 +23,7 @@ public class TransformedFeedbackReader implements ItemReader<List<TransformedFee
     private boolean hasRead = false;
 
     @Autowired
-    public TransformedFeedbackReader(MongoTemplate mongoTemplate, TransformedFeedbackRepository feedbackRepository) {
+    public TransformedFeedbackReader(TransformedFeedbackRepository feedbackRepository) {
         this.feedbackRepository = feedbackRepository;
     }
 
