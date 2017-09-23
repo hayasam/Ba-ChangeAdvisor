@@ -31,4 +31,9 @@ public class ReviewImportService {
         Job reviewAnalysis = reviewImportJobFactory.reviewAnalysis(dto);
         return jobService.run(reviewAnalysis);
     }
+
+    public JobExecution reviewProcessing(ReviewAnalysisDto dto) throws FailedToRunJobException {
+        Job reviewProcessing = reviewImportJobFactory.reviewProcessing(dto);
+        return jobService.run(reviewProcessing);
+    }
 }

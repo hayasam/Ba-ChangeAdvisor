@@ -38,7 +38,7 @@ public class FeedbackProcessorTest {
                         .removeStopWords()
                         .stem()
                         .removeTokensShorterThan(3)
-                        .build());
+                        .build(), 5);
 
         TransformedFeedback transformedFeedback = processor.process(ardocResult);
 

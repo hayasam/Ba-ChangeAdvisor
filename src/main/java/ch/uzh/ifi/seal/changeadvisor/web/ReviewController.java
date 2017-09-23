@@ -78,4 +78,11 @@ public class ReviewController {
         }
         return ardocService.getReviewsSinceLastAnalyzed(app);
     }
+
+    @PostMapping(path = "reviews/processing")
+    public long reviewsProcessing(@RequestBody @Valid ReviewAnalysisDto dto) throws FailedToRunJobException {
+        logger.info(String.format("Starting reviews processing job for app %s!", dto.getApp()));
+        JobExecution jobExecution = reviewImportService.reviewProcessing(dto);
+        return jobExecution.getJobId();
+    }
 }

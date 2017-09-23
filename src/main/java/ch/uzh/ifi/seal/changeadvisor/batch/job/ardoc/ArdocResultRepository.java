@@ -1,5 +1,7 @@
 package ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
@@ -14,4 +16,6 @@ public interface ArdocResultRepository extends MongoRepository<ArdocResult, Stri
     List<ArdocResult> findByAppNameOrderByReview_ReviewDateDesc(String appName);
 
     Optional<ArdocResult> findFirstByAppNameOrderByReview_ReviewDateDesc(String appName);
+
+    Page<ArdocResult> findByAppName(String appName, Pageable pageable);
 }

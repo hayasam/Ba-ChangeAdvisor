@@ -1,16 +1,19 @@
 package ch.uzh.ifi.seal.changeadvisor.batch.job;
 
 import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResult;
+import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResultRepository;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResultsWriter;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.feedbackprocessing.FeedbackProcessor;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.feedbackprocessing.FeedbackWriter;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.feedbackprocessing.TransformedFeedback;
 import ch.uzh.ifi.seal.changeadvisor.preprocessing.CorpusProcessor;
+import com.google.common.collect.Lists;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.item.ItemProcessor;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.data.MongoItemReader;
+import org.springframework.batch.item.data.RepositoryItemReader;
 import org.springframework.batch.item.file.FlatFileItemWriter;
 import org.springframework.batch.item.file.transform.LineAggregator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,14 +36,19 @@ public class FeedbackTransformationStepConfig {
 
     private static final String TEST_DIRECTORY = "test_files_parser";
 
+    private static final int THRESHOLD = 3;
+
     private final StepBuilderFactory stepBuilderFactory;
 
     private final MongoTemplate mongoTemplate;
 
+    private final ArdocResultRepository ardocRepository;
+
     @Autowired
-    public FeedbackTransformationStepConfig(StepBuilderFactory stepBuilderFactory, MongoTemplate mongoTemplate) {
+    public FeedbackTransformationStepConfig(StepBuilderFactory stepBuilderFactory, MongoTemplate mongoTemplate, ArdocResultRepository ardocRepository) {
         this.stepBuilderFactory = stepBuilderFactory;
         this.mongoTemplate = mongoTemplate;
+        this.ardocRepository = ardocRepository;
     }
 
     @Bean
@@ -48,6 +56,16 @@ public class FeedbackTransformationStepConfig {
         return stepBuilderFactory.get(STEP_NAME)
                 .<ArdocResult, TransformedFeedback>chunk(10)
                 .reader(feedbackReader())
+                .processor(feedbackProcessor())
+                .writer(writer())
+                .build();
+    }
+
+    public Step transformFeedback(final String appName) {
+        return stepBuilderFactory.get(STEP_NAME)
+                .allowStartIfComplete(true)
+                .<ArdocResult, TransformedFeedback>chunk(10)
+                .reader(feedbackRepositoryReader(appName))
                 .processor(feedbackProcessor())
                 .writer(writer())
                 .build();
@@ -66,9 +84,20 @@ public class FeedbackTransformationStepConfig {
         return reader;
     }
 
-    @Bean
+    public RepositoryItemReader<ArdocResult> feedbackRepositoryReader(final String appName) {
+        RepositoryItemReader<ArdocResult> reader = new RepositoryItemReader<>();
+        reader.setRepository(ardocRepository);
+        reader.setMethodName("findByAppName");
+        reader.setArguments(Lists.newArrayList(appName));
+        reader.setPageSize(10);
+        Map<String, Sort.Direction> sort = new HashMap<>();
+        sort.put("_id", Sort.Direction.ASC);
+        reader.setSort(sort);
+        return reader;
+    }
+
     public ItemProcessor<ArdocResult, TransformedFeedback> feedbackProcessor() {
-        return new FeedbackProcessor(corpusProcessor());
+        return new FeedbackProcessor(corpusProcessor(), THRESHOLD);
     }
 
     private CorpusProcessor corpusProcessor() {

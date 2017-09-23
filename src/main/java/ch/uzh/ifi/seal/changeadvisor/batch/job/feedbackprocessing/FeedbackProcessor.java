@@ -13,14 +13,17 @@ public class FeedbackProcessor implements ItemProcessor<ArdocResult, Transformed
 
     private CorpusProcessor corpusProcessor;
 
-    public FeedbackProcessor(CorpusProcessor corpusProcessor) {
+    private final int THRESHOLD;
+
+    public FeedbackProcessor(CorpusProcessor corpusProcessor, int threshold) {
         this.corpusProcessor = corpusProcessor;
+        THRESHOLD = threshold;
     }
 
     @Override
     public TransformedFeedback process(ArdocResult item) throws Exception {
         Set<String> bag = corpusProcessor.transform(item.getSentence());
-        if (bag.isEmpty()) {
+        if (bag.size() < THRESHOLD) {
             return null;
         }
         return new TransformedFeedback(item, bag);
