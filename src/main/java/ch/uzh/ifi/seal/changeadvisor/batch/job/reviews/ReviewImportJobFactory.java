@@ -1,6 +1,7 @@
 package ch.uzh.ifi.seal.changeadvisor.batch.job.reviews;
 
 import ch.uzh.ifi.seal.changeadvisor.batch.job.ArdocStepConfig;
+import ch.uzh.ifi.seal.changeadvisor.batch.job.DocumentClusteringStepConfig;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.FeedbackTransformationStepConfig;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewAnalysisDto;
 import org.apache.log4j.Logger;
@@ -37,12 +38,15 @@ public class ReviewImportJobFactory {
 
     private final FeedbackTransformationStepConfig feedbackTransformationStepConfig;
 
+    private final DocumentClusteringStepConfig documentClusteringStepConfig;
+
     @Autowired
-    public ReviewImportJobFactory(StepBuilderFactory stepBuilderFactory, JobBuilderFactory reviewImportJobBuilder, ArdocStepConfig ardocConfig, FeedbackTransformationStepConfig feedbackTransformationStepConfig) {
+    public ReviewImportJobFactory(StepBuilderFactory stepBuilderFactory, JobBuilderFactory reviewImportJobBuilder, ArdocStepConfig ardocConfig, FeedbackTransformationStepConfig feedbackTransformationStepConfig, DocumentClusteringStepConfig documentClusteringStepConfig) {
         this.stepBuilderFactory = stepBuilderFactory;
         this.jobBuilderFactory = reviewImportJobBuilder;
         this.ardocConfig = ardocConfig;
         this.feedbackTransformationStepConfig = feedbackTransformationStepConfig;
+        this.documentClusteringStepConfig = documentClusteringStepConfig;
     }
 
     public Job job(Map<String, Object> params) {
@@ -74,6 +78,7 @@ public class ReviewImportJobFactory {
                 .incrementer(new RunIdIncrementer())
                 .flow(ardocConfig.ardocAnalysis(app))
                 .next(feedbackTransformationStepConfig.transformFeedback(app))
+                .next(documentClusteringStepConfig.documentsClustering(app))
                 .end()
                 .build();
     }
@@ -83,6 +88,16 @@ public class ReviewImportJobFactory {
         return jobBuilderFactory.get(REVIEW_ANALYSIS)
                 .incrementer(new RunIdIncrementer())
                 .flow(feedbackTransformationStepConfig.transformFeedback(app))
+                .next(documentClusteringStepConfig.documentsClustering(app))
+                .end()
+                .build();
+    }
+
+    public Job reviewClustering(ReviewAnalysisDto dto) {
+        String app = dto.getApp();
+        return jobBuilderFactory.get(REVIEW_ANALYSIS)
+                .incrementer(new RunIdIncrementer())
+                .flow(documentClusteringStepConfig.documentsClustering(app))
                 .end()
                 .build();
     }

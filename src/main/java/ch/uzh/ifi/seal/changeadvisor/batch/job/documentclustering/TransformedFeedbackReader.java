@@ -2,13 +2,15 @@ package ch.uzh.ifi.seal.changeadvisor.batch.job.documentclustering;
 
 import ch.uzh.ifi.seal.changeadvisor.batch.job.feedbackprocessing.TransformedFeedback;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.feedbackprocessing.TransformedFeedbackRepository;
-import com.google.common.collect.Sets;
+import com.google.common.collect.ImmutableSet;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.batch.item.ItemReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by alex on 24.07.2017.
@@ -18,15 +20,23 @@ public class TransformedFeedbackReader implements ItemReader<List<TransformedFee
 
     private static final Logger logger = Logger.getLogger(TransformedFeedbackReader.class);
 
+    private static final Set<String> ARDOC_CATEGORIES = ImmutableSet.of("FEATURE REQUEST", "PROBLEM DISCOVERY");
+
     private TransformedFeedbackRepository feedbackRepository;
 
     private boolean hasRead = false;
 
+    private final String appName;
+
     @Autowired
     public TransformedFeedbackReader(TransformedFeedbackRepository feedbackRepository) {
-        this.feedbackRepository = feedbackRepository;
+        this(feedbackRepository, "");
     }
 
+    public TransformedFeedbackReader(TransformedFeedbackRepository feedbackRepository, String appName) {
+        this.feedbackRepository = feedbackRepository;
+        this.appName = appName;
+    }
 
     @Override
     public List<TransformedFeedback> read() throws Exception {
@@ -34,9 +44,22 @@ public class TransformedFeedbackReader implements ItemReader<List<TransformedFee
             return null;
         }
 
-        List<TransformedFeedback> allFeedbacks = feedbackRepository.findAllByArdocResultCategoryIn(Sets.newHashSet("FEATURE REQUEST", "PROBLEM DISCOVERY"));
+        List<TransformedFeedback> feedback;
+        if (StringUtils.isEmpty(appName)) {
+            feedback = readAll();
+        } else {
+            feedback = readFeedbackForApp();
+        }
         hasRead = true;
-        logger.info(allFeedbacks.size());
-        return allFeedbacks;
+        logger.info(feedback.size());
+        return feedback;
+    }
+
+    private List<TransformedFeedback> readAll() {
+        return feedbackRepository.findAllByArdocResultCategoryIn(ARDOC_CATEGORIES);
+    }
+
+    private List<TransformedFeedback> readFeedbackForApp() {
+        return feedbackRepository.findByArdocResultAppNameAndArdocResultCategoryIn(appName, ARDOC_CATEGORIES);
     }
 }

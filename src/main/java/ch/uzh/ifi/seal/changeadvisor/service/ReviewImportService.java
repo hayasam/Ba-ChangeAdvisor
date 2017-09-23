@@ -36,4 +36,9 @@ public class ReviewImportService {
         Job reviewProcessing = reviewImportJobFactory.reviewProcessing(dto);
         return jobService.run(reviewProcessing);
     }
+
+    public JobExecution reviewClustering(ReviewAnalysisDto dto) throws FailedToRunJobException {
+        Job reviewClustering = reviewImportJobFactory.reviewClustering(dto);
+        return jobService.run(reviewClustering);
+    }
 }

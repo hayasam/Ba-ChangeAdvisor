@@ -47,7 +47,7 @@ public class TopicClustering implements ItemProcessor<List<TransformedFeedback>,
         return new TopicClusteringResult(topics, assignments);
     }
 
-    Corpus toCorpus(List<TransformedFeedback> feedback) {
+    private Corpus toCorpus(List<TransformedFeedback> feedback) {
         List<List<String>> documents = feedback.stream().map(f -> new ArrayList<>(f.getBagOfWords())).collect(Collectors.toList());
         List<String> originalSentences = feedback.stream().map(TransformedFeedback::getSentence).collect(Collectors.toList());
         return new Corpus(originalSentences, documents);

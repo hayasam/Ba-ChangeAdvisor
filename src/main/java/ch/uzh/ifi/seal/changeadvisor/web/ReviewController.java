@@ -31,14 +31,11 @@ public class ReviewController {
 
     private final ArdocService ardocService;
 
-    private final JobHolder jobHolder;
-
     @Autowired
-    public ReviewController(ReviewImportService reviewImportService, ReviewRepository repository, ArdocService ardocService, JobHolder jobHolder) {
+    public ReviewController(ReviewImportService reviewImportService, ReviewRepository repository, ArdocService ardocService) {
         this.reviewImportService = reviewImportService;
         this.repository = repository;
         this.ardocService = ardocService;
-        this.jobHolder = jobHolder;
     }
 
     @PostMapping(path = "reviews")
@@ -52,8 +49,7 @@ public class ReviewController {
 
     @GetMapping(path = "reviews")
     public Collection<Review> reviews() {
-        List<Review> all = repository.findAll();
-        return all;
+        return repository.findAll();
     }
 
     @PostMapping(path = "reviews/analyze")
@@ -83,6 +79,13 @@ public class ReviewController {
     public long reviewsProcessing(@RequestBody @Valid ReviewAnalysisDto dto) throws FailedToRunJobException {
         logger.info(String.format("Starting reviews processing job for app %s!", dto.getApp()));
         JobExecution jobExecution = reviewImportService.reviewProcessing(dto);
+        return jobExecution.getJobId();
+    }
+
+    @PostMapping(path = "reviews/clustering")
+    public long reviewsClustering(@RequestBody @Valid ReviewAnalysisDto dto) throws FailedToRunJobException {
+        logger.info(String.format("Starting reviews clustering job for app %s!", dto.getApp()));
+        JobExecution jobExecution = reviewImportService.reviewClustering(dto);
         return jobExecution.getJobId();
     }
 }
