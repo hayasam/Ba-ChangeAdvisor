@@ -16,35 +16,25 @@ public class SourceCodeImporterFactoryTest {
 
     @Test
     public void getImporterFS() throws Exception {
-        String fileSystemPath = "file://Users/hoal/Document";
-
-        SourceCodeImporter importer = SourceCodeImporterFactory.getImporter(fileSystemPath);
+        final String fileSystemPath = "file://Users/hoal/Document";
+        final SourceCodeDirectoryDto dto = new SourceCodeDirectoryDto(fileSystemPath, "");
+        SourceCodeImporter importer = SourceCodeImporterFactory.getImporter(dto);
         Assert.assertThat(importer, is(instanceOf(FSSourceImporter.class)));
         Assert.assertThat(importer, not(instanceOf(GitSourceCodeImporter.class)));
     }
 
     @Test
     public void getImporterGit() throws Exception {
-        String gitPath = "git://https://github.com/a-a-hofmann/SoftwareProject.git";
-
-        SourceCodeImporter importer = SourceCodeImporterFactory.getImporter(gitPath);
+        final String gitPath = "git://https://github.com/a-a-hofmann/SoftwareProject.git";
+        final SourceCodeDirectoryDto dto = new SourceCodeDirectoryDto(gitPath, "");
+        SourceCodeImporter importer = SourceCodeImporterFactory.getImporter(dto);
         Assert.assertThat(importer, not(instanceOf(FSSourceImporter.class)));
         Assert.assertThat(importer, is(instanceOf(GitSourceCodeImporter.class)));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void getImporterEmpty() throws Exception {
-        SourceCodeImporterFactory.getImporter((SourceCodeDirectoryDto) null);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void getImporterEmpty2() throws Exception {
-        SourceCodeImporterFactory.getImporter((String) null);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void getImporterWrong() throws Exception {
-        SourceCodeImporterFactory.getImporter("asdfasdf");
+        SourceCodeImporterFactory.getImporter(null);
     }
 
     @Test(expected = IllegalArgumentException.class)

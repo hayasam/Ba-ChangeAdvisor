@@ -5,8 +5,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class SourceCodeDirectoryDto {
+
+    private static final String FILE_PREFIX = "file://";
 
     @NotNull(message = "Path may not be null")
     @Size(min = 1, message = "Path may not be empty")
@@ -38,6 +42,13 @@ public class SourceCodeDirectoryDto {
         return path;
     }
 
+    public Path asPath() {
+        if (isFileSystemPath()) {
+            return Paths.get(path.split(FILE_PREFIX)[1]);
+        }
+        return Paths.get(path);
+    }
+
     public void setPath(String path) {
         this.path = path;
     }
@@ -56,5 +67,13 @@ public class SourceCodeDirectoryDto {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public boolean isFileSystemPath() {
+        return path.startsWith("file://");
+    }
+
+    public boolean isGitPath() {
+        return (path.startsWith("git://") || path.startsWith("http")) && path.endsWith(".git");
     }
 }

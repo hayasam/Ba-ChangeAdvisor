@@ -1,44 +1,46 @@
 package ch.uzh.ifi.seal.changeadvisor.source.importer;
 
 import ch.uzh.ifi.seal.changeadvisor.source.model.SourceCodeDirectory;
-import org.apache.log4j.Logger;
-import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
+import ch.uzh.ifi.seal.changeadvisor.web.dto.SourceCodeDirectoryDto;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public class FSSourceImporter implements SourceCodeImporter {
 
-    private static final Logger logger = Logger.getLogger(FSSourceImporter.class);
+    private static final String PATH_NOT_FOUND_OR_NOT_DIRECTORY = "Path [%s] doesn't exist or is not directory";
 
-    private final String path;
+    private final Path path;
 
     private String projectName;
 
-    FSSourceImporter(String path) {
-        this.path = path;
-    }
+    FSSourceImporter(SourceCodeDirectoryDto dto) {
+        this.path = dto.asPath();
+        this.projectName = dto.getProjectName();
 
-    @Override
-    public void setCredentials(String username, String password) {
-        logger.debug("Nothing to do here!");
-    }
-
-    @Override
-    public void setProjectName(String projectName) {
-        this.projectName = projectName;
+        if (org.apache.commons.lang3.StringUtils.isEmpty(this.projectName)) {
+            this.projectName = projectNameFromPath(this.path);
+        }
     }
 
     @Override
     public SourceCodeDirectory importSource() {
-        Path path = Paths.get(this.path);
-        Assert.isTrue(path.toFile().exists() && path.toFile().isDirectory(), "Path doesn't exist or is not directory");
+        validatePath(path);
+        return new SourceCodeDirectory(this.projectName, path.toAbsolutePath().toString());
+    }
 
-        if (StringUtils.isEmpty(projectName)) {
-            return new SourceCodeDirectory(path.getFileName().toString(), path.toAbsolutePath().toString());
-        } else {
-            return new SourceCodeDirectory(this.projectName, path.toAbsolutePath().toString());
+    /**
+     * Checks if the path is valid, whether it exists and is a directory.
+     * Throws exception in case it isn't valid. Passes silently otherwise.
+     *
+     * @param path to validate.
+     */
+    private void validatePath(Path path) {
+        if (!path.toFile().exists() || !path.toFile().isDirectory()) {
+            throw new IllegalArgumentException(String.format(PATH_NOT_FOUND_OR_NOT_DIRECTORY, path.toString()));
         }
+    }
+
+    private String projectNameFromPath(Path path) {
+        return path.getFileName().toString();
     }
 }

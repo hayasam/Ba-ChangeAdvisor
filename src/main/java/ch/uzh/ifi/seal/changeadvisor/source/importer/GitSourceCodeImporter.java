@@ -1,6 +1,7 @@
 package ch.uzh.ifi.seal.changeadvisor.source.importer;
 
 import ch.uzh.ifi.seal.changeadvisor.source.model.SourceCodeDirectory;
+import ch.uzh.ifi.seal.changeadvisor.web.dto.SourceCodeDirectoryDto;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -19,30 +20,31 @@ public class GitSourceCodeImporter implements SourceCodeImporter {
 
     private static final Logger logger = Logger.getLogger(GitSourceCodeImporter.class);
 
-    static final File IMPORTED_CODE_FOLDER = new File("imported_code");
-
     private static final Pattern PROJECT_NAME_GIT_PATTERN = Pattern.compile(".*/(\\w+).git");
+
+    private static final String CLONING_REPOSITORY = "Cloning project %s from %s to %s";
+
+    private static final String NO_CREDENTIALS_OR_NOT_FOUND = "No Credentials provided for repository or no repository found @ %s";
+
+    private static final String FAILED_TO_CLONE = "Failed to clone the repository @ %s.";
+
+    private static final String CLONED_REPOSITORY = "Cloned repository: %s";
+
+    static final File IMPORTED_CODE_FOLDER = new File("imported_code");
 
     private final String path;
 
-    private CredentialsProvider credentialsProvider;
-
     private String projectName;
 
-    GitSourceCodeImporter(String path) {
-        this.path = path;
-    }
+    private CredentialsProvider credentialsProvider;
 
-    @Override
-    public void setCredentials(String username, String password) {
-        username = username != null ? username : "";
-        password = password != null ? password : "";
+    GitSourceCodeImporter(SourceCodeDirectoryDto dto) {
+        this.path = dto.getPath();
+        this.projectName = dto.getProjectName() != null ? dto.getProjectName() : "";
+
+        final String username = dto.getUsername() != null ? dto.getUsername() : "";
+        final String password = dto.getPassword() != null ? dto.getPassword() : "";
         credentialsProvider = new UsernamePasswordCredentialsProvider(username, password);
-    }
-
-    @Override
-    public void setProjectName(String projectName) {
-        this.projectName = projectName;
     }
 
     @Override
@@ -55,20 +57,14 @@ public class GitSourceCodeImporter implements SourceCodeImporter {
             clearDirectory(projectPath);
         }
 
-        logger.info(String.format("Cloning project %s from %s to %s", projectName, REMOTE_URL, projectPath.getPath()));
-        try (Git result = Git.cloneRepository()
-                .setURI(REMOTE_URL)
-                .setDirectory(projectPath)
-                .setCredentialsProvider(credentialsProvider)
-                .call()) {
-
-            logger.info(String.format("Having repository: %s", result.getRepository().getDirectory()));
+        logger.info(String.format(CLONING_REPOSITORY, projectName, REMOTE_URL, projectPath.getPath()));
+        try (Git result = cloneRepo(REMOTE_URL, projectPath)) {
+            logger.info(String.format(CLONED_REPOSITORY, result.getRepository().getDirectory()));
             return SourceCodeDirectory.of(projectName, projectPath.getAbsolutePath(), REMOTE_URL);
         } catch (TransportException e) {
-            throw new RuntimeException(String.format("No Credentials provided for repository or no repository found @ %s", REMOTE_URL), e);
+            throw new RuntimeException(String.format(NO_CREDENTIALS_OR_NOT_FOUND, REMOTE_URL), e);
         } catch (GitAPIException e) {
-            logger.error(String.format("Failed to clone the repository @ %s.", REMOTE_URL), e);
-            throw new RuntimeException(String.format("Failed to clone the repository @ %s.", REMOTE_URL), e);
+            throw new RuntimeException(String.format(FAILED_TO_CLONE, REMOTE_URL), e);
         }
     }
 
@@ -79,6 +75,14 @@ public class GitSourceCodeImporter implements SourceCodeImporter {
             logger.error("Failed to delete directory");
             throw new RuntimeException("Failed to delete directory", e);
         }
+    }
+
+    private Git cloneRepo(final String REMOTE_URL, File projectPath) throws GitAPIException {
+        return Git.cloneRepository()
+                .setURI(REMOTE_URL)
+                .setDirectory(projectPath)
+                .setCredentialsProvider(credentialsProvider)
+                .call();
     }
 
     String getURLFromPath() {

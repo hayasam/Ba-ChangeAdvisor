@@ -5,31 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 
 public class SourceCodeImporterFactory {
 
-    /**
-     * Gets the appropriate source code importer for the given path.
-     *
-     * @param path path to source code.
-     *             Can either be a 'file://' path or a 'git://' path.
-     * @return Source code importer
-     * @see SourceCodeImporter
-     * @see FSSourceImporter
-     * @see GitSourceCodeImporter
-     */
-    public static SourceCodeImporter getImporter(String path) {
-        if (StringUtils.isEmpty(path)) {
-            throw new IllegalArgumentException("Path to source code may not be empty");
-        }
-
-        if (isFileSystemPath(path)) {
-            return new FSSourceImporter(path);
-        }
-
-        if (isGitPath(path)) {
-            return new GitSourceCodeImporter(path);
-        }
-
-        throw new IllegalArgumentException(String.format("Couldn't instantiate Source code importer. Can't determine path for %s", path));
-    }
+    private static final String FAILED_TO_CREATE_IMPORTER = "Couldn't instantiate Source code importer. Can't determine path for %s";
 
     /**
      * Gets the appropriate source code importer for the given path.
@@ -42,20 +18,31 @@ public class SourceCodeImporterFactory {
      * @see GitSourceCodeImporter
      */
     public static SourceCodeImporter getImporter(SourceCodeDirectoryDto dto) {
+        validateDto(dto);
+
+        if (dto.isFileSystemPath()) {
+            return new FSSourceImporter(dto);
+        }
+
+        if (dto.isGitPath()) {
+            return new GitSourceCodeImporter(dto);
+        }
+
+        throw new IllegalArgumentException(String.format(FAILED_TO_CREATE_IMPORTER, dto.getPath()));
+    }
+
+    /**
+     * Checks if the dto is valid, as in it is not null and has not an empty path.
+     * Throws exception in case it isn't valid. Passes silently otherwise.
+     *
+     * @param dto dto to validate.
+     */
+    private static void validateDto(SourceCodeDirectoryDto dto) {
         if (dto == null) {
             throw new IllegalArgumentException("Source code directory dto may not be null");
         }
-        SourceCodeImporter importer = getImporter(dto.getPath());
-        importer.setCredentials(dto.getUsername(), dto.getPassword());
-        importer.setProjectName(dto.getProjectName());
-        return importer;
-    }
-
-    private static boolean isFileSystemPath(String path) {
-        return path.startsWith("file://");
-    }
-
-    private static boolean isGitPath(String path) {
-        return (path.startsWith("git://") || path.startsWith("http")) && path.endsWith(".git");
+        if (StringUtils.isEmpty(dto.getPath())) {
+            throw new IllegalArgumentException("Path to source code may not be empty");
+        }
     }
 }
