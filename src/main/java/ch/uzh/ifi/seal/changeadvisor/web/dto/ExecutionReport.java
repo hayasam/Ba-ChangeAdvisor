@@ -4,6 +4,7 @@ import org.springframework.batch.core.StepExecution;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
 
 public class ExecutionReport {
 
@@ -89,10 +90,27 @@ public class ExecutionReport {
 
     public static ExecutionReport of(StepExecution stepExecution) {
         String message = "";
-        if (!stepExecution.getFailureExceptions().isEmpty()) {
+        if (hasFailureInContext(stepExecution)) {
             message = stepExecution.getFailureExceptions().get(0).getMessage();
+        }
+        if (hasProgressInContext(stepExecution)) {
+            Map<String, Integer> progressMap = getProgressFromContext(stepExecution);
+            message = progressMap.toString();
         }
         return new ExecutionReport(stepExecution.getStepName(), stepExecution.getStartTime(),
                 stepExecution.getEndTime(), stepExecution.getLastUpdated(), message, stepExecution.getExitStatus().getExitCode());
+    }
+
+    private static boolean hasFailureInContext(StepExecution stepExecution) {
+        return !stepExecution.getFailureExceptions().isEmpty();
+    }
+
+    private static boolean hasProgressInContext(StepExecution stepExecution) {
+        return stepExecution.getExecutionContext().containsKey("extractor.progress");
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Map<String, Integer> getProgressFromContext(StepExecution stepExecution) {
+        return (Map<String, Integer>) stepExecution.getExecutionContext().get("extractor.progress");
     }
 }
