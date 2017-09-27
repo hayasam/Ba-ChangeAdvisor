@@ -25,8 +25,8 @@ public class ReviewAggregationService {
     public ReviewDistributionReport groupByCategories(final String appName) {
         TypedAggregation<ArdocResult> categoryAggregation = Aggregation.newAggregation(ArdocResult.class,
                 Aggregation.match(Criteria.where("appName").is(appName)),
-                Aggregation.group("category").first("category").as("category") // set group by field and save it as 'as' in resulting object.
-                        .push("$$ROOT").as("reviews") // push entire document to field 'pushTo' in ReviewCategory.
+                Aggregation.group("category").first("category").as("category") // set group by field and save it as 'category' in resulting object.
+                        .push("$$ROOT").as("reviews") // push entire document to field 'reviews' in ReviewCategory.
         );
 
         AggregationResults<ReviewCategory> groupResults =

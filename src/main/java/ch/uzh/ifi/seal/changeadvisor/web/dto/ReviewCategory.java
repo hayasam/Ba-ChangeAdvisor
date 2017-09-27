@@ -1,7 +1,6 @@
 package ch.uzh.ifi.seal.changeadvisor.web.dto;
 
 import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResult;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.ImmutableSet;
 
 import java.util.Collection;
@@ -18,7 +17,6 @@ public class ReviewCategory {
         this.category = category;
     }
 
-    @JsonIgnore
     public Set<ArdocResult> getReviews() {
         return reviews;
     }
