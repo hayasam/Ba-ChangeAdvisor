@@ -15,6 +15,6 @@ public class TFiDF<T extends AbstractNGram> {
         if (documentFrequency == 0) {
             return 0.0;
         }
-        return Math.log10(documents.size() / documentFrequency);
+        return Math.log10(documents.size() / (double) documentFrequency);
     }
 }
