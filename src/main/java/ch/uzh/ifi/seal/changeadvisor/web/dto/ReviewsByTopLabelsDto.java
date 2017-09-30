@@ -14,12 +14,12 @@ public class ReviewsByTopLabelsDto {
 
     public ReviewsByTopLabelsDto(@JsonProperty(value = "app", required = true) String app,
                                  @JsonProperty(value = "category", required = true) String category,
-                                 @JsonProperty(value = "limit", defaultValue = "10") int limit,
-                                 @JsonProperty(value = "ngrams", defaultValue = "1") int ngrams) {
+                                 @JsonProperty(value = "limit") int limit,
+                                 @JsonProperty(value = "ngrams") int ngrams) {
         this.app = app;
         this.category = category;
-        this.limit = limit;
-        this.ngrams = ngrams;
+        this.limit = limit < 1 ? -1 : limit;
+        this.ngrams = ngrams < 1 ? 1 : ngrams;
     }
 
     public String getApp() {
@@ -32,6 +32,10 @@ public class ReviewsByTopLabelsDto {
 
     public int getLimit() {
         return limit;
+    }
+
+    public boolean hasLimit() {
+        return limit > 0;
     }
 
     public int getNgrams() {

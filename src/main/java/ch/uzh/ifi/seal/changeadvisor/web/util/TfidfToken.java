@@ -2,19 +2,19 @@ package ch.uzh.ifi.seal.changeadvisor.web.util;
 
 import org.jetbrains.annotations.NotNull;
 
-public class TfidfToken<T> implements Comparable<TfidfToken<T>> {
+public class TfidfToken<T> implements Comparable<TfidfToken> {
 
-    private T token;
+    private AbstractNGram<T> token;
 
     private double score;
 
-    public TfidfToken(T token, double score) {
+    public TfidfToken(AbstractNGram<T> token, double score) {
         this.token = token;
         this.score = score;
     }
 
     public T getToken() {
-        return token;
+        return token.getTokens();
     }
 
     public double getScore() {
@@ -26,7 +26,7 @@ public class TfidfToken<T> implements Comparable<TfidfToken<T>> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        TfidfToken<?> that = (TfidfToken<?>) o;
+        TfidfToken that = (TfidfToken) o;
 
         if (Double.compare(that.score, score) != 0) return false;
         return token != null ? token.equals(that.token) : that.token == null;

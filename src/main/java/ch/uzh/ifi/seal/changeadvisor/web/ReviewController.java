@@ -12,10 +12,7 @@ import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewAnalysisDto;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewCategory;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewDistributionReport;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewsByTopLabelsDto;
-import ch.uzh.ifi.seal.changeadvisor.web.util.Corpus;
-import ch.uzh.ifi.seal.changeadvisor.web.util.Document;
-import ch.uzh.ifi.seal.changeadvisor.web.util.TFiDF;
-import ch.uzh.ifi.seal.changeadvisor.web.util.TfidfToken;
+import ch.uzh.ifi.seal.changeadvisor.web.util.*;
 import edu.emory.mathcs.backport.java.util.Collections;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.JobExecution;
@@ -109,58 +106,36 @@ public class ReviewController {
     }
 
     @PostMapping(path = "reviews/top")
-    public List<TfidfToken<String>> reviewsByTopNLabels(@RequestBody ReviewsByTopLabelsDto dto) {
-//        final String app = "com.frostwire.android";
-
+    public List<TfidfToken> reviewsByTopNLabels(@RequestBody ReviewsByTopLabelsDto dto) {
         ReviewDistributionReport reviewsByCategory = aggregationService.groupByCategories(dto.getApp());
         final String category = dto.getCategory();
         Assert.isTrue(reviewsByCategory.hasCategory(category), String.format("Unknown category %s", category));
 
-        TFiDF tFiDF = new TFiDF();
-        Map<String, Document<String>> categoryDocumentMap = new HashMap<>();
-        for (ReviewCategory reviewCategory : reviewsByCategory) {
-            categoryDocumentMap.put(reviewCategory.getCategory(), reviewCategory.asDocument());
-        }
-
-        Document<String> document = categoryDocumentMap.get(category);
-        List<String> uniqueTokens = document.uniqueTokens();
-
-        Corpus<String> corpus = new Corpus<>(categoryDocumentMap.values());
-        List<TfidfToken<String>> tokensWithScore = uniqueTokens
-                .stream()
-                .map(token -> new TfidfToken<>(token, tFiDF.computeTfidf(token, document, corpus)))
-                .collect(Collectors.toList());
+        List<TfidfToken> tokensWithScore = getNgramTokensWithScore(reviewsByCategory, category, dto.getNgrams());
 
         Collections.sort(tokensWithScore, Collections.reverseOrder());
-
         logger.info(tokensWithScore.size());
-        return tokensWithScore.subList(0, dto.getLimit());
+        final int limit = dto.getLimit();
+        if (!dto.hasLimit() || limit >= tokensWithScore.size()) {
+            return tokensWithScore;
+        }
+        return tokensWithScore.subList(0, limit);
     }
 
-    @PostMapping(path = "reviews/ngrams/top")
-    public List<TfidfToken<List<String>>> reviewsByTopNLabelsNgrams(@RequestBody ReviewsByTopLabelsDto dto) {
-        ReviewDistributionReport reviewsByCategory = aggregationService.groupByCategories(dto.getApp());
-        final String category = dto.getCategory();
-        Assert.isTrue(reviewsByCategory.hasCategory(category), String.format("Unknown category %s", category));
-
-        TFiDF<List<String>> tFiDF = new TFiDF<>();
-        Map<String, Document<List<String>>> categoryDocumentMap = new HashMap<>();
+    private List<TfidfToken> getNgramTokensWithScore(ReviewDistributionReport reviewsByCategory, final String category, final int ngramSize) {
+        Map<String, Document> categoryDocumentMap = new HashMap<>();
         for (ReviewCategory reviewCategory : reviewsByCategory) {
-            categoryDocumentMap.put(reviewCategory.getCategory(), reviewCategory.asDocument(dto.getNgrams()));
+            categoryDocumentMap.put(reviewCategory.getCategory(), reviewCategory.asDocument(ngramSize));
         }
 
-        Document<List<String>> document = categoryDocumentMap.get(category);
-        List<List<String>> uniqueTokens = document.uniqueTokens();
+        Document document = categoryDocumentMap.get(category);
+        List<? extends AbstractNGram> uniqueTokens = document.uniqueTokens();
 
-        Corpus<List<String>> corpus = new Corpus<>(categoryDocumentMap.values());
-        List<TfidfToken<List<String>>> tokensWithScore = uniqueTokens
+        TFiDF tFiDF = new TFiDF();
+        Corpus corpus = new Corpus(categoryDocumentMap.values());
+        return uniqueTokens
                 .stream()
-                .map(token -> new TfidfToken<>(token, tFiDF.computeTfidf(token, document, corpus)))
+                .map(token -> new TfidfToken(token, tFiDF.computeTfidf(token, document, corpus)))
                 .collect(Collectors.toList());
-
-        Collections.sort(tokensWithScore, Collections.reverseOrder());
-
-        logger.info(tokensWithScore.size());
-        return tokensWithScore.subList(0, dto.getLimit());
     }
 }

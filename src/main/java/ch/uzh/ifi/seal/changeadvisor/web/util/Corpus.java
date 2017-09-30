@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class Corpus<T> {
+public class Corpus {
 
-    private List<Document<T>> documents;
+    private List<Document> documents;
 
-    public Corpus(Collection<Document<T>> documents) {
+    public Corpus(Collection<Document> documents) {
         this.documents = new ArrayList<>(documents);
     }
 
@@ -16,13 +16,13 @@ public class Corpus<T> {
         return documents.size();
     }
 
-    public int documentFrequency(final T token) {
+    public int documentFrequency(final AbstractNGram token) {
         if (documents.isEmpty()) {
             return 0;
         }
 
         int count = 0;
-        for (Document<T> d : documents) {
+        for (Document d : documents) {
             if (d.contains(token)) {
                 count += 1;
             }

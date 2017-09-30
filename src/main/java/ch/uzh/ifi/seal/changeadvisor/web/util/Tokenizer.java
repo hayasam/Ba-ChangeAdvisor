@@ -14,7 +14,7 @@ public class Tokenizer {
     private static final CoreLabelTokenFactory tokenFactory = new CoreLabelTokenFactory();
 
     public List<String> tokenize(String text) {
-        PTBTokenizer<CoreLabel> ptbt = new PTBTokenizer<>(new StringReader(text), tokenFactory, "");
+        PTBTokenizer<CoreLabel> ptbt = new PTBTokenizer<>(new StringReader(text.toLowerCase()), tokenFactory, "");
         List<String> tokens = new ArrayList<>((int) (text.length() / 4.));
         while (ptbt.hasNext()) {
             CoreLabel label = ptbt.next();

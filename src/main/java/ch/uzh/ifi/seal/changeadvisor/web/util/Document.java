@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-public class Document<T> {
+public class Document {
 
-    private List<T> document;
+    private List<? extends AbstractNGram> document;
 
-    public Document(List<T> document) {
+    public Document(List<? extends AbstractNGram> document) {
         this.document = document;
     }
 
@@ -16,13 +16,13 @@ public class Document<T> {
         return document.size();
     }
 
-    public double frequency(T token) {
+    public double frequency(AbstractNGram token) {
         if (document.isEmpty()) {
             return 0.0;
         }
 
         double count = 0;
-        for (T word : document) {
+        for (AbstractNGram word : document) {
             if (word.equals(token)) {
                 count += 1;
             }
@@ -30,15 +30,15 @@ public class Document<T> {
         return count / size();
     }
 
-    public boolean contains(T token) {
+    public boolean contains(AbstractNGram token) {
         return document.contains(token);
     }
 
-    public List<T> tokens() {
+    public List<? extends AbstractNGram> tokens() {
         return document;
     }
 
-    public List<T> uniqueTokens() {
+    public List<? extends AbstractNGram> uniqueTokens() {
         return new ArrayList<>(new HashSet<>(document));
     }
 }
