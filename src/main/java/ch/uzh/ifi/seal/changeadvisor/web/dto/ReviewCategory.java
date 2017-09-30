@@ -43,12 +43,6 @@ public class ReviewCategory {
         return size();
     }
 
-    public Document asDocument() {
-        List<String> tokens = tokenizer.tokenize(aggregateReviewsIntoDocument());
-        List<Unigram> unigrams = tokens.stream().map(Unigram::new).collect(Collectors.toList());
-        return new Document(unigrams);
-    }
-
     public Document asDocument(int n) {
         if (n == 1) {
             List<String> tokens = tokenizer.tokenize(aggregateReviewsIntoDocument());
