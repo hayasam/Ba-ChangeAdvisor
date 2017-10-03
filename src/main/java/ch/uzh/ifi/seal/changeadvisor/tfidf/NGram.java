@@ -1,4 +1,4 @@
-package ch.uzh.ifi.seal.changeadvisor.web.util;
+package ch.uzh.ifi.seal.changeadvisor.tfidf;
 
 import com.google.common.collect.ImmutableList;
 import org.springframework.util.Assert;
@@ -9,9 +9,12 @@ public class NGram implements AbstractNGram<List<String>> {
 
     private final List<String> tokens;
 
+    private final String ngramString;
+
     public NGram(List<String> tokens) {
         Assert.notNull(tokens, "Tokens cannot be null!");
         this.tokens = ImmutableList.copyOf(tokens);
+        ngramString = String.join(" ", tokens);
     }
 
     @Override
@@ -32,5 +35,10 @@ public class NGram implements AbstractNGram<List<String>> {
     @Override
     public int hashCode() {
         return tokens.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return ngramString;
     }
 }

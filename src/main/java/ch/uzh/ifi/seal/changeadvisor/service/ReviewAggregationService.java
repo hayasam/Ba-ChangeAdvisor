@@ -4,14 +4,10 @@ package ch.uzh.ifi.seal.changeadvisor.service;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResult;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.Review;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.ReviewRepository;
-import ch.uzh.ifi.seal.changeadvisor.tfidf.TfidfService;
+import ch.uzh.ifi.seal.changeadvisor.tfidf.*;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewCategory;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewDistributionReport;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewsByTopLabelsDto;
-import ch.uzh.ifi.seal.changeadvisor.web.util.AbstractNGram;
-import ch.uzh.ifi.seal.changeadvisor.web.util.Corpus;
-import ch.uzh.ifi.seal.changeadvisor.web.util.Document;
-import ch.uzh.ifi.seal.changeadvisor.web.util.Label;
 import edu.emory.mathcs.backport.java.util.Collections;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +23,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 public class ReviewAggregationService {
@@ -66,30 +61,16 @@ public class ReviewAggregationService {
      *
      * @param dto object representing the parameters we use to compute the top N labels
      *            (e.g. how many labels and for which app)
-     * @return
+     * @return reviews for the top N labels.
      */
     public List<LabelWithReviews> reviewsByTopNLabels(ReviewsByTopLabelsDto dto) {
+        List<Label> labels = topNLabels(dto);
 
-        List<LabelWithReviews> labelWithReviews = new ArrayList<>();
-        if (dto.getNgrams() == 1) {
-            List<Label<String>> labels = topNLabels(dto)
-                    .stream()
-                    .map(token -> (Label<String>) token).collect(Collectors.toList());
-
-            for (Label<String> label : labels) {
-                List<Review> reviews = repository.findByAppNameAndReviewTextContainingIgnoreCase(dto.getApp(), label.getToken());
-                labelWithReviews.add(new LabelWithReviews(label.getToken(), reviews));
-            }
-        } else {
-            List<Label<List<String>>> labels = topNLabels(dto)
-                    .stream()
-                    .map(token -> (Label<List<String>>) token).collect(Collectors.toList());
-
-            for (Label<List<String>> label : labels) {
-                final String labelString = String.join(" ", label.getToken());
-                List<Review> reviews = repository.findByAppNameAndReviewTextContainingIgnoreCase(dto.getApp(), labelString);
-                labelWithReviews.add(new LabelWithReviews(labelString, reviews));
-            }
+        logger.info(String.format("Fetching reviews for top %d labels: %s", dto.getLimit(), labels));
+        List<LabelWithReviews> labelWithReviews = new ArrayList<>(labels.size());
+        for (Label label : labels) {
+            List<Review> reviews = repository.findByAppNameAndReviewTextContainingIgnoreCase(dto.getApp(), label.getLabel());
+            labelWithReviews.add(new LabelWithReviews(label.getLabel(), reviews));
         }
 
         return labelWithReviews;
@@ -125,7 +106,7 @@ public class ReviewAggregationService {
 
         Corpus corpus = new Corpus(categoryDocumentMap.values());
         Document document = categoryDocumentMap.get(category);
-        List<? extends AbstractNGram> uniqueTokens = document.uniqueTokens();
+        List<AbstractNGram> uniqueTokens = document.uniqueTokens();
 
         return tfidfService.computeTfidfScoreForTokens(uniqueTokens, document, corpus);
     }

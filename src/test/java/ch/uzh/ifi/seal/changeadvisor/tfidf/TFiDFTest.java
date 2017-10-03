@@ -1,4 +1,4 @@
-package ch.uzh.ifi.seal.changeadvisor.web.util;
+package ch.uzh.ifi.seal.changeadvisor.tfidf;
 
 import com.google.common.collect.Lists;
 import org.junit.Assert;
@@ -11,21 +11,24 @@ import static org.hamcrest.core.Is.is;
 
 public class TFiDFTest {
 
+    private List<AbstractNGram> tokens1 = Lists.newArrayList("this", "is", "a", "a", "sample")
+            .stream().map(Unigram::new).collect(Collectors.toList());
+
+    private List<AbstractNGram> tokens2 = Lists.newArrayList("this", "is", "another", "another", "example", "example", "example")
+            .stream().map(Unigram::new).collect(Collectors.toList());
+
+    private Document d1 = new Document(tokens1);
+
+    private Document d2 = new Document(tokens2);
+
     @Test
     public void frequency() throws Exception {
-        List<Unigram> tokens1 = Lists.newArrayList("this", "is", "a", "a", "sample")
-                .stream().map(Unigram::new).collect(Collectors.toList());
-        List<Unigram> tokens2 = Lists.newArrayList("this", "is", "another", "another", "example", "example", "example")
-                .stream().map(Unigram::new).collect(Collectors.toList());
-
-        Document d1 = new Document(tokens1);
-        Document d2 = new Document(tokens2);
         Document emptyDocument = new Document(Lists.newArrayList());
 
         Unigram thisUnigram = new Unigram("this");
         Unigram exampleUnigram = new Unigram("example");
 
-        TFiDF<Unigram> tFiDF = new TFiDF<>();
+        TFiDF tFiDF = new TFiDF();
         double frequency = tFiDF.tf(thisUnigram, d1);
         Assert.assertThat(frequency, is(1. / 5));
 
@@ -44,19 +47,12 @@ public class TFiDFTest {
 
     @Test
     public void idf() throws Exception {
-        List<Unigram> tokens1 = Lists.newArrayList("this", "is", "a", "a", "sample")
-                .stream().map(Unigram::new).collect(Collectors.toList());
-        List<Unigram> tokens2 = Lists.newArrayList("this", "is", "another", "another", "example", "example", "example")
-                .stream().map(Unigram::new).collect(Collectors.toList());
-
-        Document d1 = new Document(tokens1);
-        Document d2 = new Document(tokens2);
         Corpus corpus = new Corpus(Lists.newArrayList(d1, d2));
 
         Unigram thisUnigram = new Unigram("this");
         Unigram exampleUnigram = new Unigram("example");
 
-        TFiDF<Unigram> tFiDF = new TFiDF<>();
+        TFiDF tFiDF = new TFiDF();
         double result = tFiDF.idf(thisUnigram, corpus);
         Assert.assertThat(result, is(0.0));
 
@@ -66,18 +62,11 @@ public class TFiDFTest {
 
     @Test
     public void computeTfidf() throws Exception {
-        List<Unigram> tokens1 = Lists.newArrayList("this", "is", "a", "a", "sample")
-                .stream().map(Unigram::new).collect(Collectors.toList());
-        List<Unigram> tokens2 = Lists.newArrayList("this", "is", "another", "another", "example", "example", "example")
-                .stream().map(Unigram::new).collect(Collectors.toList());
-
-        Document d1 = new Document(tokens1);
-        Document d2 = new Document(tokens2);
         Corpus corpus = new Corpus(Lists.newArrayList(d1, d2));
 
         Unigram exampleUnigram = new Unigram("example");
 
-        TFiDF<Unigram> tFiDF = new TFiDF<>();
+        TFiDF tFiDF = new TFiDF();
         double result = tFiDF.compute(exampleUnigram, d1, corpus);
         Assert.assertThat(result, is(0.0));
 

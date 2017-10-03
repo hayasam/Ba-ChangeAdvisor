@@ -1,20 +1,20 @@
-package ch.uzh.ifi.seal.changeadvisor.web.util;
+package ch.uzh.ifi.seal.changeadvisor.tfidf;
 
 import org.jetbrains.annotations.NotNull;
 
-public class Label<T> implements Comparable<Label> {
+public class Label implements Comparable<Label> {
 
-    private AbstractNGram<T> token;
+    private String token;
 
     private double score;
 
-    public Label(AbstractNGram<T> token, double score) {
-        this.token = token;
+    public Label(AbstractNGram token, double score) {
+        this.token = token.toString();
         this.score = score;
     }
 
-    public T getToken() {
-        return token.getTokens();
+    public String getLabel() {
+        return token;
     }
 
     public double getScore() {
@@ -50,7 +50,7 @@ public class Label<T> implements Comparable<Label> {
     @Override
     public String toString() {
         return "Label{" +
-                "token='" + token.toString() + '\'' +
+                "token='" + token + '\'' +
                 ", score=" + score +
                 '}';
     }

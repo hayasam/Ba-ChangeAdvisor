@@ -1,10 +1,7 @@
 package ch.uzh.ifi.seal.changeadvisor.web.dto;
 
 import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResult;
-import ch.uzh.ifi.seal.changeadvisor.web.util.Document;
-import ch.uzh.ifi.seal.changeadvisor.web.util.NGram;
-import ch.uzh.ifi.seal.changeadvisor.web.util.Tokenizer;
-import ch.uzh.ifi.seal.changeadvisor.web.util.Unigram;
+import ch.uzh.ifi.seal.changeadvisor.tfidf.*;
 import com.google.common.collect.ImmutableSet;
 
 import java.util.Collection;
@@ -46,11 +43,11 @@ public class ReviewCategory {
     public Document asDocument(int n) {
         if (n == 1) {
             List<String> tokens = tokenizer.tokenize(aggregateReviewsIntoDocument());
-            List<Unigram> unigrams = tokens.stream().map(Unigram::new).collect(Collectors.toList());
+            List<AbstractNGram> unigrams = tokens.stream().map(Unigram::new).collect(Collectors.toList());
             return new Document(unigrams);
         } else {
             List<List<String>> tokens = tokenizer.tokenize(aggregateReviewsIntoDocument(), n);
-            List<NGram> ngrams = tokens.stream().map(NGram::new).collect(Collectors.toList());
+            List<AbstractNGram> ngrams = tokens.stream().map(NGram::new).collect(Collectors.toList());
             return new Document(ngrams);
         }
     }

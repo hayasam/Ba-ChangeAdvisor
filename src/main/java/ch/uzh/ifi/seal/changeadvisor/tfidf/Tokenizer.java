@@ -1,4 +1,4 @@
-package ch.uzh.ifi.seal.changeadvisor.web.util;
+package ch.uzh.ifi.seal.changeadvisor.tfidf;
 
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.process.CoreLabelTokenFactory;

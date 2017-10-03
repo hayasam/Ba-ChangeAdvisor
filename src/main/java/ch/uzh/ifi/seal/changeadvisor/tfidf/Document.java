@@ -1,4 +1,4 @@
-package ch.uzh.ifi.seal.changeadvisor.web.util;
+package ch.uzh.ifi.seal.changeadvisor.tfidf;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -6,9 +6,9 @@ import java.util.List;
 
 public class Document {
 
-    private List<? extends AbstractNGram> document;
+    private List<AbstractNGram> document;
 
-    public Document(List<? extends AbstractNGram> document) {
+    public Document(List<AbstractNGram> document) {
         this.document = document;
     }
 
@@ -34,11 +34,11 @@ public class Document {
         return document.contains(token);
     }
 
-    public List<? extends AbstractNGram> tokens() {
+    public List<AbstractNGram> tokens() {
         return document;
     }
 
-    public List<? extends AbstractNGram> uniqueTokens() {
+    public List<AbstractNGram> uniqueTokens() {
         return new ArrayList<>(new HashSet<>(document));
     }
 }
