@@ -18,4 +18,6 @@ public interface ArdocResultRepository extends MongoRepository<ArdocResult, Stri
     Optional<ArdocResult> findFirstByAppNameOrderByReview_ReviewDateDesc(String appName);
 
     Page<ArdocResult> findByAppName(String appName, Pageable pageable);
+
+    List<ArdocResult> findByAppNameAndCategoryAndSentenceContainingIgnoreCase(String appName, String category, String label);
 }

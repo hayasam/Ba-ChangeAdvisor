@@ -2,6 +2,7 @@ package ch.uzh.ifi.seal.changeadvisor.service;
 
 
 import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResult;
+import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResultRepository;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.Review;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.ReviewRepository;
 import ch.uzh.ifi.seal.changeadvisor.tfidf.*;
@@ -23,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class ReviewAggregationService {
@@ -35,11 +37,14 @@ public class ReviewAggregationService {
 
     private final ReviewRepository repository;
 
+    private final ArdocResultRepository ardocRepository;
+
     @Autowired
-    public ReviewAggregationService(MongoTemplate mongoOperations, TfidfService tfidfService, ReviewRepository repository) {
+    public ReviewAggregationService(MongoTemplate mongoOperations, TfidfService tfidfService, ReviewRepository repository, ArdocResultRepository ardocRepository) {
         this.mongoOperations = mongoOperations;
         this.tfidfService = tfidfService;
         this.repository = repository;
+        this.ardocRepository = ardocRepository;
     }
 
     public ReviewDistributionReport groupByCategories(final String appName) {
@@ -69,7 +74,9 @@ public class ReviewAggregationService {
         logger.info(String.format("Fetching reviews for top %d labels: %s", dto.getLimit(), labels));
         List<LabelWithReviews> labelWithReviews = new ArrayList<>(labels.size());
         for (Label label : labels) {
-            List<Review> reviews = repository.findByAppNameAndReviewTextContainingIgnoreCase(dto.getApp(), label.getLabel());
+            List<ArdocResult> ardocResults =
+                    ardocRepository.findByAppNameAndCategoryAndSentenceContainingIgnoreCase(dto.getApp(), dto.getCategory(), label.getLabel());
+            List<Review> reviews = ardocResults.stream().map(ArdocResult::getReview).collect(Collectors.toList());
             labelWithReviews.add(new LabelWithReviews(label.getLabel(), reviews));
         }
 
