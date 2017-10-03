@@ -8,7 +8,7 @@ import ch.uzh.ifi.seal.changeadvisor.service.*;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewAnalysisDto;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewDistributionReport;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewsByTopLabelsDto;
-import ch.uzh.ifi.seal.changeadvisor.web.util.TfidfToken;
+import ch.uzh.ifi.seal.changeadvisor.web.util.Label;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,7 +99,7 @@ public class ReviewController {
     }
 
     @PostMapping(path = "reviews/top")
-    public List<TfidfToken> topNLabels(@RequestBody ReviewsByTopLabelsDto dto) {
+    public List<Label> topNLabels(@RequestBody ReviewsByTopLabelsDto dto) {
         return aggregationService.topNLabels(dto);
     }
 

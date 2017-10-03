@@ -5,7 +5,7 @@ import org.springframework.util.Assert;
 
 import java.util.List;
 
-public class NGram extends AbstractNGram<List<String>> {
+public class NGram implements AbstractNGram<List<String>> {
 
     private final List<String> tokens;
 

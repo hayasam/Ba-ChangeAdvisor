@@ -2,13 +2,13 @@ package ch.uzh.ifi.seal.changeadvisor.web.util;
 
 import org.jetbrains.annotations.NotNull;
 
-public class TfidfToken<T> implements Comparable<TfidfToken> {
+public class Label<T> implements Comparable<Label> {
 
     private AbstractNGram<T> token;
 
     private double score;
 
-    public TfidfToken(AbstractNGram<T> token, double score) {
+    public Label(AbstractNGram<T> token, double score) {
         this.token = token;
         this.score = score;
     }
@@ -26,7 +26,7 @@ public class TfidfToken<T> implements Comparable<TfidfToken> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        TfidfToken that = (TfidfToken) o;
+        Label that = (Label) o;
 
         if (Double.compare(that.score, score) != 0) return false;
         return token != null ? token.equals(that.token) : that.token == null;
@@ -43,13 +43,13 @@ public class TfidfToken<T> implements Comparable<TfidfToken> {
     }
 
     @Override
-    public int compareTo(@NotNull TfidfToken o) {
+    public int compareTo(@NotNull Label o) {
         return Double.compare(score, o.score);
     }
 
     @Override
     public String toString() {
-        return "TfidfToken{" +
+        return "Label{" +
                 "token='" + token.toString() + '\'' +
                 ", score=" + score +
                 '}';

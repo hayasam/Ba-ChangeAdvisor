@@ -2,7 +2,7 @@ package ch.uzh.ifi.seal.changeadvisor.web.util;
 
 import org.junit.Assert;
 
-public class Unigram extends AbstractNGram<String> {
+public class Unigram implements AbstractNGram<String> {
 
     private final String token;
 
