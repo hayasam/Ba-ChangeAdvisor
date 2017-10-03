@@ -1,6 +1,7 @@
 package ch.uzh.ifi.seal.changeadvisor.web.util;
 
-import java.util.ArrayList;
+import com.google.common.collect.ImmutableList;
+
 import java.util.Collection;
 import java.util.List;
 
@@ -9,7 +10,7 @@ public class Corpus {
     private List<Document> documents;
 
     public Corpus(Collection<Document> documents) {
-        this.documents = new ArrayList<>(documents);
+        this.documents = ImmutableList.copyOf(documents);
     }
 
     public int size() {

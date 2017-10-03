@@ -4,16 +4,11 @@ package ch.uzh.ifi.seal.changeadvisor.web;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResult;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.Review;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.ReviewRepository;
-import ch.uzh.ifi.seal.changeadvisor.service.ArdocService;
-import ch.uzh.ifi.seal.changeadvisor.service.FailedToRunJobException;
-import ch.uzh.ifi.seal.changeadvisor.service.ReviewAggregationService;
-import ch.uzh.ifi.seal.changeadvisor.service.ReviewImportService;
+import ch.uzh.ifi.seal.changeadvisor.service.*;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewAnalysisDto;
-import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewCategory;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewDistributionReport;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewsByTopLabelsDto;
-import ch.uzh.ifi.seal.changeadvisor.web.util.*;
-import edu.emory.mathcs.backport.java.util.Collections;
+import ch.uzh.ifi.seal.changeadvisor.web.util.TfidfToken;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,10 +18,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 public class ReviewController {
@@ -106,36 +99,12 @@ public class ReviewController {
     }
 
     @PostMapping(path = "reviews/top")
-    public List<TfidfToken> reviewsByTopNLabels(@RequestBody ReviewsByTopLabelsDto dto) {
-        ReviewDistributionReport reviewsByCategory = aggregationService.groupByCategories(dto.getApp());
-        final String category = dto.getCategory();
-        Assert.isTrue(reviewsByCategory.hasCategory(category), String.format("Unknown category %s", category));
-
-        List<TfidfToken> tokensWithScore = getNgramTokensWithScore(reviewsByCategory, category, dto.getNgrams());
-
-        Collections.sort(tokensWithScore, Collections.reverseOrder());
-        logger.info(tokensWithScore.size());
-        final int limit = dto.getLimit();
-        if (!dto.hasLimit() || limit >= tokensWithScore.size()) {
-            return tokensWithScore;
-        }
-        return tokensWithScore.subList(0, limit);
+    public List<TfidfToken> topNLabels(@RequestBody ReviewsByTopLabelsDto dto) {
+        return aggregationService.topNLabels(dto);
     }
 
-    private List<TfidfToken> getNgramTokensWithScore(ReviewDistributionReport reviewsByCategory, final String category, final int ngramSize) {
-        Map<String, Document> categoryDocumentMap = new HashMap<>();
-        for (ReviewCategory reviewCategory : reviewsByCategory) {
-            categoryDocumentMap.put(reviewCategory.getCategory(), reviewCategory.asDocument(ngramSize));
-        }
-
-        Document document = categoryDocumentMap.get(category);
-        List<? extends AbstractNGram> uniqueTokens = document.uniqueTokens();
-
-        TFiDF tFiDF = new TFiDF();
-        Corpus corpus = new Corpus(categoryDocumentMap.values());
-        return uniqueTokens
-                .stream()
-                .map(token -> new TfidfToken(token, tFiDF.computeTfidf(token, document, corpus)))
-                .collect(Collectors.toList());
+    @PostMapping(path = "reviews/labels")
+    public List<LabelWithReviews> reviewsByTopNLabels(@RequestBody ReviewsByTopLabelsDto dto) {
+        return aggregationService.reviewsByTopNLabels(dto);
     }
 }

@@ -16,4 +16,6 @@ public interface ReviewRepository extends MongoRepository<Review, String> {
     Page<Review> findByAppName(String appName, Pageable pageable);
 
     List<Review> findByAppNameAndReviewDateGreaterThanEqualOrderByReviewDateDesc(String appName, Date reviewDate);
+
+    List<Review> findByAppNameAndReviewTextContainingIgnoreCase(String appName, String label);
 }

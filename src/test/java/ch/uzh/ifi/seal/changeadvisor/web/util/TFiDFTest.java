@@ -78,17 +78,17 @@ public class TFiDFTest {
         Unigram exampleUnigram = new Unigram("example");
 
         TFiDF<Unigram> tFiDF = new TFiDF<>();
-        double result = tFiDF.computeTfidf(exampleUnigram, d1, corpus);
+        double result = tFiDF.compute(exampleUnigram, d1, corpus);
         Assert.assertThat(result, is(0.0));
 
-        result = tFiDF.computeTfidf(exampleUnigram, d2, corpus);
+        result = tFiDF.compute(exampleUnigram, d2, corpus);
         Assert.assertThat(result, is(Math.log10(2) * 3. / 7));
 
         // word not in corpus.
         Unigram random = new Unigram("asdfasdf");
-        result = tFiDF.computeTfidf(random, d1, corpus);
+        result = tFiDF.compute(random, d1, corpus);
         Assert.assertThat(result, is(0.0));
-        result = tFiDF.computeTfidf(random, d2, corpus);
+        result = tFiDF.compute(random, d2, corpus);
         Assert.assertThat(result, is(0.0));
     }
 }

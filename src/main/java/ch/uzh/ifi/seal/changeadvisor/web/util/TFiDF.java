@@ -2,7 +2,7 @@ package ch.uzh.ifi.seal.changeadvisor.web.util;
 
 public class TFiDF<T extends AbstractNGram> {
 
-    public double computeTfidf(T token, Document document, Corpus documents) {
+    public double compute(T token, Document document, Corpus documents) {
         return tf(token, document) * idf(token, documents);
     }
 
