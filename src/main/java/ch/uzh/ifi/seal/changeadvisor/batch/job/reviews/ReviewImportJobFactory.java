@@ -3,6 +3,7 @@ package ch.uzh.ifi.seal.changeadvisor.batch.job.reviews;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.ArdocStepConfig;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.DocumentClusteringStepConfig;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.FeedbackTransformationStepConfig;
+import ch.uzh.ifi.seal.changeadvisor.batch.job.TermFrequencyInverseDocumentFrequencyStepConfig;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewAnalysisDto;
 import com.google.common.collect.Lists;
 import org.apache.log4j.Logger;
@@ -39,13 +40,16 @@ public class ReviewImportJobFactory {
 
     private final DocumentClusteringStepConfig documentClusteringStepConfig;
 
+    private final TermFrequencyInverseDocumentFrequencyStepConfig tfidfStepConfig;
+
     @Autowired
-    public ReviewImportJobFactory(StepBuilderFactory stepBuilderFactory, JobBuilderFactory reviewImportJobBuilder, ArdocStepConfig ardocConfig, FeedbackTransformationStepConfig feedbackTransformationStepConfig, DocumentClusteringStepConfig documentClusteringStepConfig) {
+    public ReviewImportJobFactory(StepBuilderFactory stepBuilderFactory, JobBuilderFactory reviewImportJobBuilder, ArdocStepConfig ardocConfig, FeedbackTransformationStepConfig feedbackTransformationStepConfig, DocumentClusteringStepConfig documentClusteringStepConfig, TermFrequencyInverseDocumentFrequencyStepConfig tfidfStepConfig) {
         this.stepBuilderFactory = stepBuilderFactory;
         this.jobBuilderFactory = reviewImportJobBuilder;
         this.ardocConfig = ardocConfig;
         this.feedbackTransformationStepConfig = feedbackTransformationStepConfig;
         this.documentClusteringStepConfig = documentClusteringStepConfig;
+        this.tfidfStepConfig = tfidfStepConfig;
     }
 
     public Job job(Map<String, Object> params) {
@@ -56,6 +60,7 @@ public class ReviewImportJobFactory {
                 .next(ardocConfig.ardocAnalysis(app))
                 .next(feedbackTransformationStepConfig.transformFeedback(app))
                 .next(documentClusteringStepConfig.documentsClustering(app))
+                .next(tfidfStepConfig.computeLabels(app))
                 .end()
                 .build();
     }
@@ -100,6 +105,15 @@ public class ReviewImportJobFactory {
         return jobBuilderFactory.get(REVIEW_ANALYSIS)
                 .incrementer(new RunIdIncrementer())
                 .flow(documentClusteringStepConfig.documentsClustering(app))
+                .end()
+                .build();
+    }
+
+    public Job labelReviews(ReviewAnalysisDto dto) {
+        String app = dto.getApp();
+        return jobBuilderFactory.get(REVIEW_ANALYSIS)
+                .incrementer(new RunIdIncrementer())
+                .flow(tfidfStepConfig.computeLabels(app))
                 .end()
                 .build();
     }

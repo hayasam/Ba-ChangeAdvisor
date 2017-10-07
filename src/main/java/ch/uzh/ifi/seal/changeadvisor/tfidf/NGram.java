@@ -23,6 +23,11 @@ public class NGram implements AbstractNGram<List<String>> {
     }
 
     @Override
+    public int ngramSize() {
+        return tokens.size();
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

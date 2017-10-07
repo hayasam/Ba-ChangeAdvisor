@@ -4,8 +4,8 @@ package ch.uzh.ifi.seal.changeadvisor.web;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResult;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.Review;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.ReviewRepository;
+import ch.uzh.ifi.seal.changeadvisor.batch.job.tfidf.Label;
 import ch.uzh.ifi.seal.changeadvisor.service.*;
-import ch.uzh.ifi.seal.changeadvisor.tfidf.Label;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewAnalysisDto;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewDistributionReport;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewsByTopLabelsDto;
@@ -106,5 +106,11 @@ public class ReviewController {
     @PostMapping(path = "reviews/labels")
     public List<LabelWithReviews> reviewsByTopNLabels(@RequestBody ReviewsByTopLabelsDto dto) {
         return aggregationService.reviewsByTopNLabels(dto);
+    }
+
+    @PostMapping(path = "reviews/labeling")
+    public long reviewLabeling(@RequestBody ReviewAnalysisDto dto) throws FailedToRunJobException {
+        JobExecution jobExecution = reviewImportService.reviewLabeling(dto);
+        return jobExecution.getJobId();
     }
 }

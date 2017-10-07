@@ -17,6 +17,11 @@ public class Unigram implements AbstractNGram<String> {
     }
 
     @Override
+    public int ngramSize() {
+        return 1;
+    }
+
+    @Override
     public String toString() {
         return token;
     }

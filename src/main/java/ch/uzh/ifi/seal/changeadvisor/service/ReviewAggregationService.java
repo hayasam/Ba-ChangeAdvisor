@@ -5,7 +5,12 @@ import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResult;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResultRepository;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.Review;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.ReviewRepository;
-import ch.uzh.ifi.seal.changeadvisor.tfidf.*;
+import ch.uzh.ifi.seal.changeadvisor.batch.job.tfidf.Label;
+import ch.uzh.ifi.seal.changeadvisor.batch.job.tfidf.LabelRepository;
+import ch.uzh.ifi.seal.changeadvisor.tfidf.AbstractNGram;
+import ch.uzh.ifi.seal.changeadvisor.tfidf.Corpus;
+import ch.uzh.ifi.seal.changeadvisor.tfidf.Document;
+import ch.uzh.ifi.seal.changeadvisor.tfidf.TfidfService;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewCategory;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewDistributionReport;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewsByTopLabelsDto;
@@ -39,12 +44,15 @@ public class ReviewAggregationService {
 
     private final ArdocResultRepository ardocRepository;
 
+    private final LabelRepository labelRepository;
+
     @Autowired
-    public ReviewAggregationService(MongoTemplate mongoOperations, TfidfService tfidfService, ReviewRepository repository, ArdocResultRepository ardocRepository) {
+    public ReviewAggregationService(MongoTemplate mongoOperations, TfidfService tfidfService, ReviewRepository repository, ArdocResultRepository ardocRepository, LabelRepository labelRepository) {
         this.mongoOperations = mongoOperations;
         this.tfidfService = tfidfService;
         this.repository = repository;
         this.ardocRepository = ardocRepository;
+        this.labelRepository = labelRepository;
     }
 
     public ReviewDistributionReport groupByCategories(final String appName) {
@@ -69,7 +77,13 @@ public class ReviewAggregationService {
      * @return reviews for the top N labels.
      */
     public List<LabelWithReviews> reviewsByTopNLabels(ReviewsByTopLabelsDto dto) {
-        List<Label> labels = topNLabels(dto);
+        List<Label> labels;//= topNLabels(dto);
+
+        labels = labelRepository.findByAppNameAndCategoryAndNgramSizeOrderByScoreDesc(dto.getApp(), dto.getCategory(), dto.getNgrams());
+        final int limit = dto.getLimit();
+        if (dto.hasLimit() && limit < labels.size()) {
+            labels = labels.subList(0, dto.getLimit());
+        }
 
         logger.info(String.format("Fetching reviews for top %d labels: %s", dto.getLimit(), labels));
         List<LabelWithReviews> labelWithReviews = new ArrayList<>(labels.size());
@@ -95,14 +109,18 @@ public class ReviewAggregationService {
      * @see ReviewsByTopLabelsDto
      */
     public List<Label> topNLabels(ReviewsByTopLabelsDto dto) {
+        // READER
         ReviewDistributionReport reviewsByCategory = groupByCategories(dto.getApp());
         final String category = dto.getCategory();
         Assert.isTrue(reviewsByCategory.hasCategory(category), String.format("Unknown category %s", category));
 
-        List<Label> tokensWithScore = getNgramTokensWithScore(reviewsByCategory, category, dto.getNgrams());
+        // PROCESSOR
+        List<Label> tokensWithScore = getNgramTokensWithScore(reviewsByCategory, dto);
 
         Collections.sort(tokensWithScore, Collections.reverseOrder());
         logger.info(tokensWithScore.size());
+
+        // WRITER
         final int limit = dto.getLimit();
         if (!dto.hasLimit() || limit >= tokensWithScore.size()) {
             return tokensWithScore;
@@ -110,14 +128,14 @@ public class ReviewAggregationService {
         return tokensWithScore.subList(0, limit);
     }
 
-    private List<Label> getNgramTokensWithScore(ReviewDistributionReport reviewsByCategory, final String category, final int ngramSize) {
-        Map<String, Document> categoryDocumentMap = mapReviewsToDocuments(reviewsByCategory, ngramSize);
+    private List<Label> getNgramTokensWithScore(ReviewDistributionReport reviewsByCategory, ReviewsByTopLabelsDto dto) {
+        Map<String, Document> categoryDocumentMap = mapReviewsToDocuments(reviewsByCategory, dto.getNgrams());
 
         Corpus corpus = new Corpus(categoryDocumentMap.values());
-        Document document = categoryDocumentMap.get(category);
+        Document document = categoryDocumentMap.get(dto.getCategory());
         List<AbstractNGram> uniqueTokens = document.uniqueTokens();
 
-        return tfidfService.computeTfidfScoreForTokens(uniqueTokens, document, corpus);
+        return tfidfService.computeTfidfScoreForTokens(dto.getApp(), dto.getCategory(), uniqueTokens, document, corpus);
     }
 
     private Map<String, Document> mapReviewsToDocuments(ReviewDistributionReport reviewDistribution, final int ngramSize) {
