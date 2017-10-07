@@ -76,7 +76,9 @@ public class ReviewAggregationService {
         for (Label label : labels) {
             List<ArdocResult> ardocResults =
                     ardocRepository.findByAppNameAndCategoryAndSentenceContainingIgnoreCase(dto.getApp(), dto.getCategory(), label.getLabel());
-            List<Review> reviews = ardocResults.stream().map(ArdocResult::getReview).collect(Collectors.toList());
+            // Two ardoc results could be mapped to the same review, so in this step we removed duplicate reviews.
+            List<Review> reviews = new ArrayList<>(ardocResults.stream().map(ArdocResult::getReview).collect(Collectors.toSet()));
+            java.util.Collections.sort(reviews);
             labelWithReviews.add(new LabelWithReviews(label.getLabel(), reviews));
         }
 

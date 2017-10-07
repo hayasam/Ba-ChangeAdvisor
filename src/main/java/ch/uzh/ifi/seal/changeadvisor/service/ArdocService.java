@@ -34,7 +34,7 @@ public class ArdocService {
         List<Review> reviewsSinceLastAnalyzed;
         if (lastAnalyzed != null) {
             reviewsSinceLastAnalyzed = reviewRepository
-                    .findByAppNameAndReviewDateGreaterThanEqualOrderByReviewDateDesc(app, lastAnalyzed.getReviewDate());
+                    .findByAppNameAndReviewDateGreaterThanOrderByReviewDateDesc(app, lastAnalyzed.getReviewDate());
             logger.info(
                     String.format("Found %d reviews to analyze since last ardoc run. Review Date: %s.\tArdoc timestamp: %s.",
                             reviewsSinceLastAnalyzed.size(), lastAnalyzed.getReviewDate(), lastAnalyzed.getTimestamp()));
