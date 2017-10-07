@@ -4,7 +4,6 @@ package ch.uzh.ifi.seal.changeadvisor.service;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResult;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResultRepository;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.Review;
-import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.ReviewRepository;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.tfidf.Label;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.tfidf.LabelRepository;
 import ch.uzh.ifi.seal.changeadvisor.tfidf.AbstractNGram;
@@ -40,17 +39,15 @@ public class ReviewAggregationService {
 
     private final TfidfService tfidfService;
 
-    private final ReviewRepository repository;
-
     private final ArdocResultRepository ardocRepository;
 
     private final LabelRepository labelRepository;
 
     @Autowired
-    public ReviewAggregationService(MongoTemplate mongoOperations, TfidfService tfidfService, ReviewRepository repository, ArdocResultRepository ardocRepository, LabelRepository labelRepository) {
+    public ReviewAggregationService(MongoTemplate mongoOperations, TfidfService tfidfService,
+                                    ArdocResultRepository ardocRepository, LabelRepository labelRepository) {
         this.mongoOperations = mongoOperations;
         this.tfidfService = tfidfService;
-        this.repository = repository;
         this.ardocRepository = ardocRepository;
         this.labelRepository = labelRepository;
     }
@@ -77,9 +74,7 @@ public class ReviewAggregationService {
      * @return reviews for the top N labels.
      */
     public List<LabelWithReviews> reviewsByTopNLabels(ReviewsByTopLabelsDto dto) {
-        List<Label> labels;//= topNLabels(dto);
-
-        labels = labelRepository.findByAppNameAndCategoryAndNgramSizeOrderByScoreDesc(dto.getApp(), dto.getCategory(), dto.getNgrams());
+        List<Label> labels = labelRepository.findByAppNameAndCategoryAndNgramSizeOrderByScoreDesc(dto.getApp(), dto.getCategory(), dto.getNgrams());
         final int limit = dto.getLimit();
         if (dto.hasLimit() && limit < labels.size()) {
             labels = labels.subList(0, dto.getLimit());
@@ -90,7 +85,7 @@ public class ReviewAggregationService {
         for (Label label : labels) {
             List<ArdocResult> ardocResults =
                     ardocRepository.findByAppNameAndCategoryAndSentenceContainingIgnoreCase(dto.getApp(), dto.getCategory(), label.getLabel());
-            // Two ardoc results could be mapped to the same review, so in this step we removed duplicate reviews.
+            // Two ardoc results could be mapped to the same review, so in this step we remove duplicate reviews.
             List<Review> reviews = new ArrayList<>(ardocResults.stream().map(ArdocResult::getReview).collect(Collectors.toSet()));
             java.util.Collections.sort(reviews);
             labelWithReviews.add(new LabelWithReviews(label.getLabel(), reviews));
