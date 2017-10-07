@@ -77,9 +77,7 @@ public class ReviewAggregationService {
      * @return reviews for the top N labels.
      */
     public List<LabelWithReviews> reviewsByTopNLabels(ReviewsByTopLabelsDto dto) {
-        List<Label> labels;//= topNLabels(dto);
-
-        labels = labelRepository.findByAppNameAndCategoryAndNgramSizeOrderByScoreDesc(dto.getApp(), dto.getCategory(), dto.getNgrams());
+        List<Label> labels = labelRepository.findByAppNameAndCategoryAndNgramSizeOrderByScoreDesc(dto.getApp(), dto.getCategory(), dto.getNgrams());
         final int limit = dto.getLimit();
         if (dto.hasLimit() && limit < labels.size()) {
             labels = labels.subList(0, dto.getLimit());
@@ -90,7 +88,7 @@ public class ReviewAggregationService {
         for (Label label : labels) {
             List<ArdocResult> ardocResults =
                     ardocRepository.findByAppNameAndCategoryAndSentenceContainingIgnoreCase(dto.getApp(), dto.getCategory(), label.getLabel());
-            // Two ardoc results could be mapped to the same review, so in this step we removed duplicate reviews.
+            // Two ardoc results could be mapped to the same review, so in this step we remove duplicate reviews.
             List<Review> reviews = new ArrayList<>(ardocResults.stream().map(ArdocResult::getReview).collect(Collectors.toSet()));
             java.util.Collections.sort(reviews);
             labelWithReviews.add(new LabelWithReviews(label.getLabel(), reviews));
