@@ -4,6 +4,7 @@ import ch.uzh.ifi.seal.changeadvisor.batch.job.ArdocStepConfig;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.DocumentClusteringStepConfig;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.FeedbackTransformationStepConfig;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewAnalysisDto;
+import com.google.common.collect.Lists;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -28,8 +29,6 @@ public class ReviewImportJobFactory {
 
     private static final String STEP_NAME = "reviewImportStep";
 
-    private static final String REVIEW_ANALYSIS_STEP = "reviewAnalysisStep";
-
     private final StepBuilderFactory stepBuilderFactory;
 
     private final JobBuilderFactory jobBuilderFactory;
@@ -50,17 +49,20 @@ public class ReviewImportJobFactory {
     }
 
     public Job job(Map<String, Object> params) {
-        ArrayList<String> apps = getApps(params).orElseThrow(() -> new IllegalArgumentException("Apps to parse cannot be empty."));
+        String app = getApp(params).orElseThrow(() -> new IllegalArgumentException("Apps to parse cannot be empty."));
         return jobBuilderFactory.get(REVIEW_IMPORT)
                 .incrementer(new RunIdIncrementer())
-                .flow(reviewImport(apps, params))
+                .flow(reviewImport(Lists.newArrayList(app), params))
+                .next(ardocConfig.ardocAnalysis(app))
+                .next(feedbackTransformationStepConfig.transformFeedback(app))
+                .next(documentClusteringStepConfig.documentsClustering(app))
                 .end()
                 .build();
     }
 
     @SuppressWarnings("unchecked")
-    private Optional<ArrayList<String>> getApps(Map<String, Object> params) {
-        ArrayList<String> apps = (ArrayList<String>) params.get("apps");
+    private Optional<String> getApp(Map<String, Object> params) {
+        String apps = (String) params.get("apps");
         return Optional.ofNullable(apps);
     }
 
