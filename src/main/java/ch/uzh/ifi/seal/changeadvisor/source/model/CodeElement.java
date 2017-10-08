@@ -8,8 +8,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Represents a code component. A set of words and the code component they are derived from.
@@ -23,14 +23,14 @@ public class CodeElement implements Comparable<CodeElement> {
 
     private String fullyQualifiedClassName;
 
-    private Set<String> bag;
+    private Collection<String> bag;
 
     private LocalDateTime timestamp = LocalDateTime.now();
 
     CodeElement() {
     }
 
-    public CodeElement(String fullyQualifiedClassName, Set<String> bag) {
+    public CodeElement(String fullyQualifiedClassName, Collection<String> bag) {
         this.fullyQualifiedClassName = fullyQualifiedClassName;
         this.bag = bag;
     }
@@ -39,7 +39,7 @@ public class CodeElement implements Comparable<CodeElement> {
         return id;
     }
 
-    public Set<String> getBag() {
+    public Collection<String> getBag() {
         return bag;
     }
 

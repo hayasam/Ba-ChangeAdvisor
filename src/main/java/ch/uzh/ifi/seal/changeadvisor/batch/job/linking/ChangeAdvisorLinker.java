@@ -5,7 +5,7 @@ import ch.uzh.ifi.seal.changeadvisor.batch.job.linking.metrics.AsymmetricDiceInd
 import ch.uzh.ifi.seal.changeadvisor.batch.job.linking.metrics.SimilarityMetric;
 import ch.uzh.ifi.seal.changeadvisor.preprocessing.CorpusProcessor;
 import ch.uzh.ifi.seal.changeadvisor.source.model.CodeElement;
-import edu.stanford.nlp.util.Sets;
+import com.google.common.collect.ImmutableSet;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
@@ -32,7 +32,7 @@ public class ChangeAdvisorLinker implements Linker {
         Assert.notNull(similarityMetric, "No similarity metric set!");
 
         Map<Integer, List<TopicAssignment>> clusters = groupByTopic(assignments);
-        Map<CodeElement, Set<String>> codeComponentWords = codeComponentWordMap(codeElements);
+        Map<CodeElement, Collection<String>> codeComponentWords = codeComponentWordMap(codeElements);
 
         List<LinkingResult> results = new ArrayList<>(assignments.size());
         for (Map.Entry<Integer, List<TopicAssignment>> cluster : clusters.entrySet()) {
@@ -45,13 +45,13 @@ public class ChangeAdvisorLinker implements Linker {
                 // Find candidates
                 findCandidates(cluster.getValue(), codeComponentWords, candidates, clusterBag, originalReviews);
 
-                final Set<String> clusterCleanedBag = corpusProcessor.transform(clusterBag);
+                final Collection<String> clusterCleanedBag = corpusProcessor.transform(clusterBag);
 
                 logger.debug(String.format("Cluster: %d, size: %d", cluster.getKey(), cluster.getValue().size()));
                 logger.debug(String.format("Candidates size: %d", candidates.size()));
 
                 for (CodeElement codeElement : candidates) {
-                    final Set<String> codeElementBag = corpusProcessor.transform(codeElement.getBag());
+                    final Collection<String> codeElementBag = corpusProcessor.transform(codeElement.getBag());
 
                     if (!clusterCleanedBag.isEmpty() && !codeElementBag.isEmpty()) {
 
@@ -88,7 +88,7 @@ public class ChangeAdvisorLinker implements Linker {
             // Find candidates
             findCandidates(assignments, codeElements, candidates, clusterBag, originalReviews);
 
-            final Set<String> clusterCleanedBag = corpusProcessor.transform(clusterBag);
+            final Collection<String> clusterCleanedBag = corpusProcessor.transform(clusterBag);
 
             logger.debug(String.format("Cluster: %d, size: %d", topicId, assignments.size()));
             logger.debug(String.format("Candidates size: %d", candidates.size()));
@@ -101,7 +101,7 @@ public class ChangeAdvisorLinker implements Linker {
         return results;
     }
 
-    private List<LinkingResult> checkSimilarity(int topicId, Collection<CodeElement> candidates, Set<String> clusterBag, Set<String> reviews) {
+    private List<LinkingResult> checkSimilarity(int topicId, Collection<CodeElement> candidates, Collection<String> clusterBag, Collection<String> reviews) {
         List<LinkingResult> results = new ArrayList<>();
 
         for (CodeElement candidate : candidates) {
@@ -111,8 +111,8 @@ public class ChangeAdvisorLinker implements Linker {
         return results;
     }
 
-    private Optional<LinkingResult> checkSimilarity(int topicId, CodeElement candidate, Set<String> clusterBag, Set<String> reviews) {
-        final Set<String> codeElementBag = corpusProcessor.transform(candidate.getBag());
+    private Optional<LinkingResult> checkSimilarity(int topicId, CodeElement candidate, Collection<String> clusterBag, Collection<String> reviews) {
+        final Collection<String> codeElementBag = corpusProcessor.transform(candidate.getBag());
 
         if (!clusterBag.isEmpty() && !codeElementBag.isEmpty()) {
 
@@ -134,8 +134,9 @@ public class ChangeAdvisorLinker implements Linker {
             Set<String> reviewWords = review.getBag();
 
             for (CodeElement codeElement : elements) {
-                Set<String> intersection = Sets.intersection(reviewWords, codeElement.getBag());
 
+                //Set<String> intersection = Sets.intersection(reviewWords, codeElement.getBag());
+                Collection<String> intersection = intersection(reviewWords, codeElement.getBag());
                 if (!intersection.isEmpty()) {
                     clusterBag.addAll(review.getBag());
                     candidates.add(codeElement);
@@ -145,12 +146,20 @@ public class ChangeAdvisorLinker implements Linker {
         }
     }
 
-    private void findCandidates(Collection<TopicAssignment> assignments, Map<CodeElement, Set<String>> codeComponentWords, Collection<CodeElement> candidates, Set<String> clusterBag, Set<String> originalReviews) {
+    private <T> Collection<T> intersection(Collection<T> c1, Collection<T> c2) {
+        Set<T> set = new HashSet<>();
+        set.addAll(c1);
+        set.retainAll(c2);
+        return ImmutableSet.copyOf(set);
+    }
+
+    private void findCandidates(Collection<TopicAssignment> assignments, Map<CodeElement, Collection<String>> codeComponentWords, Collection<CodeElement> candidates, Set<String> clusterBag, Set<String> originalReviews) {
         for (TopicAssignment review : assignments) {
             Set<String> reviewWords = review.getBag();
 
-            for (Map.Entry<CodeElement, Set<String>> codeElement : codeComponentWords.entrySet()) {
-                Set<String> intersection = Sets.intersection(reviewWords, codeElement.getValue());
+            for (Map.Entry<CodeElement, Collection<String>> codeElement : codeComponentWords.entrySet()) {
+                //Set<String> intersection = Sets.intersection(reviewWords, codeElement.getValue());
+                Collection<String> intersection = intersection(reviewWords, codeElement.getValue());
 
                 if (!intersection.isEmpty()) {
                     clusterBag.addAll(review.getBag());
@@ -165,7 +174,7 @@ public class ChangeAdvisorLinker implements Linker {
         return assignments.stream().collect(Collectors.groupingBy(TopicAssignment::getTopic));
     }
 
-    Map<CodeElement, Set<String>> codeComponentWordMap(Collection<CodeElement> codeElements) {
+    Map<CodeElement, Collection<String>> codeComponentWordMap(Collection<CodeElement> codeElements) {
         return codeElements.stream().filter(c -> c != null && c.getBag() != null).collect(Collectors.toMap(Function.identity(), CodeElement::getBag));
     }
 }

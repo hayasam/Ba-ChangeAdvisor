@@ -4,8 +4,8 @@ import com.google.common.collect.Sets;
 import org.springframework.util.Assert;
 
 import java.util.Collection;
-import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * NLP processor for text. Use builder {@link CorpusProcessor.Builder} to configure its steps.
@@ -29,6 +29,8 @@ public class CorpusProcessor {
 
     private boolean shouldLowerCase;
 
+    private boolean shouldRemoveDuplicates = true;
+
     private int minLength;
 
     private boolean posFilter;
@@ -48,7 +50,7 @@ public class CorpusProcessor {
      * @param bag bag of words.
      * @return transformed bag of words.
      */
-    public Set<String> transform(Collection<String> bag) {
+    public Collection<String> transform(Collection<String> bag) {
         Assert.notNull(bag, "Text to transform must not be null.");
         return transform(String.join(" ", bag));
     }
@@ -59,7 +61,7 @@ public class CorpusProcessor {
      * @param text text as string.
      * @return transformed bag of words.
      */
-    public Set<String> transform(String text) {
+    public Collection<String> transform(String text) {
         Assert.notNull(text, "Text to transform must not be null.");
 
         if (text.isEmpty()) {
@@ -87,7 +89,7 @@ public class CorpusProcessor {
             text = text.toLowerCase();
         }
 
-        Set<AnnotatedToken> tokens = tokenize(text, posFilter);
+        Collection<AnnotatedToken> tokens = tokenize(text, shouldRemoveDuplicates, posFilter);
 
         tokenAutoCorrect(tokens);
 
@@ -107,33 +109,39 @@ public class CorpusProcessor {
             tokens.removeIf(this::isTooShort);
         }
 
-        return tokens.stream().map(AnnotatedToken::getToken).collect(Collectors.toSet());
+        //return tokens.stream().map(AnnotatedToken::getToken).collect(Collectors.toSet());
+        return annotatedTokensToStringTokens(tokens);
     }
 
-    private void tokenAutoCorrect(Set<AnnotatedToken> tokens) {
+    private void tokenAutoCorrect(Collection<AnnotatedToken> tokens) {
         if (spellChecker != null) {
             tokens.forEach(token -> token.setToken(spellChecker.correct(token.getToken())));
         }
     }
 
-    private Set<AnnotatedToken> tokenize(String text, boolean shouldFilterPos) {
-        return annotator.annotate(text, shouldFilterPos);
+    private Collection<AnnotatedToken> tokenize(String text, boolean shouldRemoveDuplicates, boolean shouldFilterPos) {
+        return annotator.annotate(text, shouldRemoveDuplicates, shouldFilterPos);
     }
 
-    private void singularize(Set<AnnotatedToken> tokens) {
+    private void singularize(Collection<AnnotatedToken> tokens) {
         tokens.forEach(AnnotatedToken::singularize);
     }
 
-    private void removeStopWords(Set<AnnotatedToken> tokens) {
+    private void removeStopWords(Collection<AnnotatedToken> tokens) {
         tokens.removeIf(AnnotatedToken::isStopWord);
     }
 
-    private void stem(Set<AnnotatedToken> tokens) {
+    private void stem(Collection<AnnotatedToken> tokens) {
         tokens.forEach(AnnotatedToken::stem);
     }
 
     private boolean isTooShort(AnnotatedToken token) {
         return token.length() < minLength;
+    }
+
+    private Collection<String> annotatedTokensToStringTokens(Collection<AnnotatedToken> tokens) {
+        Stream<String> stream = tokens.stream().map(AnnotatedToken::getToken);
+        return shouldRemoveDuplicates ? stream.collect(Collectors.toSet()) : stream.collect(Collectors.toList());
     }
 
     /**
@@ -201,6 +209,17 @@ public class CorpusProcessor {
          */
         public Builder withContractionExpander() {
             corpusProcessor.contractionsExpander = new ContractionsExpander();
+            return this;
+        }
+
+        /**
+         * Will remove duplicates. Defaults to true.
+         *
+         * @param removeDuplicates whether to remove duplicates or not.
+         * @return this builder for chaining.
+         */
+        public Builder removeDuplicates(boolean removeDuplicates) {
+            corpusProcessor.shouldRemoveDuplicates = removeDuplicates;
             return this;
         }
 

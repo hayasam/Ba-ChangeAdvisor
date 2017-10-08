@@ -12,9 +12,9 @@ import org.junit.Test;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Created by alex on 14.07.2017.
@@ -45,8 +45,9 @@ public class BagOfWordsTest {
                 .removeStopWords()
                 .stem()
                 .removeTokensShorterThan(3)
+                .removeDuplicates(true)
                 .build();
-        Set<String> bag = processor.transform(corpus);
+        Collection<String> bag = processor.transform(corpus);
         CodeElement bagOfWords = new CodeElement(packageName + "." + path.getFileName().toString(), bag);
 
         bagOfWords.writeToFile(Paths.get(TEST_DIRECTORY + "/test_generated/processed_source_components.csv"), false);

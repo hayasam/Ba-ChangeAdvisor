@@ -9,10 +9,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.when;
@@ -44,7 +41,7 @@ public class FeedbackProcessorTest {
 
         final Set<String> pocResults = Sets.newHashSet("add rearrang complaint etc organ remov".split(" "));
         final Set<String> expectedResults = Sets.newHashSet("add rearrang complaint album etc organ remov pic".split(" "));
-        final Set<String> results = transformedFeedback.getBagOfWords();
+        final Collection<String> results = transformedFeedback.getBagOfWords();
 
         List<String> expectedResultsSorted = new ArrayList<>(expectedResults);
         List<String> resultsSorted = new ArrayList<>(results);

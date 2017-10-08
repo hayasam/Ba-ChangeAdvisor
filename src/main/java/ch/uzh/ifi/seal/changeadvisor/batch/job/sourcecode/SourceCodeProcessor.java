@@ -5,7 +5,7 @@ import ch.uzh.ifi.seal.changeadvisor.source.model.CodeElement;
 import ch.uzh.ifi.seal.changeadvisor.source.parser.bean.ClassBean;
 import org.springframework.batch.item.ItemProcessor;
 
-import java.util.Set;
+import java.util.Collection;
 
 /**
  * Created by alex on 22.07.2017.
@@ -23,14 +23,14 @@ public class SourceCodeProcessor implements ItemProcessor<ClassBean, CodeElement
 
     @Override
     public CodeElement process(ClassBean item) throws Exception {
-        Set<String> bag = corpusProcessor.transform(item.getPublicCorpus());
+        Collection<String> bag = corpusProcessor.transform(item.getPublicCorpus());
         if (isBelowThreshold(bag)) {
             return null;
         }
         return new CodeElement(item.getFullyQualifiedClassName(), bag);
     }
 
-    private boolean isBelowThreshold(Set<String> bag) {
+    private boolean isBelowThreshold(Collection<String> bag) {
         return bag.size() < THRESHOLD;
     }
 }

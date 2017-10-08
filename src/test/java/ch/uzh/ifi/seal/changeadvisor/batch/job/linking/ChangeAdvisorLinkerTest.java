@@ -22,9 +22,9 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.lessThan;
@@ -161,7 +161,7 @@ public class ChangeAdvisorLinkerTest {
         CodeElement c3 = new CodeElement(null, null);
         ArrayList<CodeElement> codeElements = Lists.newArrayList(c1, c2, c3);
 
-        Map<CodeElement, Set<String>> codeElementSetMap = linker.codeComponentWordMap(codeElements);
+        Map<CodeElement, Collection<String>> codeElementSetMap = linker.codeComponentWordMap(codeElements);
         Assert.assertThat(codeElementSetMap.size(), is(2));
         Assert.assertTrue(codeElementSetMap.containsKey(c1));
         Assert.assertTrue(codeElementSetMap.containsKey(c2));

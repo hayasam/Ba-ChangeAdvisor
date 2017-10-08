@@ -5,7 +5,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
-import java.util.Set;
+import java.util.Collection;
 
 /**
  * Created by alex on 20.07.2017.
@@ -18,14 +18,14 @@ public class TransformedFeedback {
 
     private ArdocResult ardocResult;
 
-    private Set<String> bagOfWords;
+    private Collection<String> bagOfWords;
 
     private LocalDateTime timestamp;
 
     public TransformedFeedback() {
     }
 
-    public TransformedFeedback(ArdocResult ardocResult, Set<String> tokens) {
+    public TransformedFeedback(ArdocResult ardocResult, Collection<String> tokens) {
         this.ardocResult = ardocResult;
         this.bagOfWords = tokens;
         this.timestamp = LocalDateTime.now();
@@ -39,7 +39,7 @@ public class TransformedFeedback {
         return ardocResult;
     }
 
-    public Set<String> getBagOfWords() {
+    public Collection<String> getBagOfWords() {
         return bagOfWords;
     }
 
@@ -67,7 +67,7 @@ public class TransformedFeedback {
         this.ardocResult = ardocResult;
     }
 
-    public void setBagOfWords(Set<String> bagOfWords) {
+    public void setBagOfWords(Collection<String> bagOfWords) {
         this.bagOfWords = bagOfWords;
     }
 

@@ -4,9 +4,9 @@ import org.assertj.core.util.Lists;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.core.Is.is;
@@ -23,7 +23,7 @@ public class AnnotatorTest {
         final List<String> nounsAndVerbs = Lists.newArrayList(
                 "Add", "text", "can", "contain", "sentences", "'s", "pushing", "edge", "'ve", "was", "thing", "had", "seen", "do");
 
-        Set<AnnotatedToken> annotatedTokens = annotator.annotate("Add your text here! It can contain multiple sentences. It's pushing me over the longest edge I've ever seen it was the evilest thing I had ever seen him do!", true);
+        Collection<AnnotatedToken> annotatedTokens = annotator.annotate("Add your text here! It can contain multiple sentences. It's pushing me over the longest edge I've ever seen it was the evilest thing I had ever seen him do!", true, true);
         List<String> filtered = annotatedTokens.stream().map(AnnotatedToken::getToken).collect(Collectors.toList());
         Collections.sort(filtered);
         Collections.sort(nounsAndVerbs);
@@ -36,10 +36,10 @@ public class AnnotatorTest {
 
     @Test
     public void filterEmpty() throws Exception {
-        Set<AnnotatedToken> filter = annotator.annotate(null, true);
+        Collection<AnnotatedToken> filter = annotator.annotate(null, true, true);
         Assert.assertTrue(filter.isEmpty());
 
-        filter = annotator.annotate("", true);
+        filter = annotator.annotate("", true, true);
         Assert.assertTrue(filter.isEmpty());
     }
 }

@@ -7,10 +7,7 @@ import edu.stanford.nlp.pipeline.Annotation;
 import edu.stanford.nlp.pipeline.StanfordCoreNLP;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Helper class en lieu of Stanford SimpleNLP.
@@ -50,7 +47,7 @@ public class Annotator {
      * @param shouldFilterPos whether to filter while processing, keeping only nouns and verbs.
      * @return filtered text by POS tags.
      */
-    public Set<AnnotatedToken> annotate(String text, boolean shouldFilterPos) {
+    public Collection<AnnotatedToken> annotate(String text, boolean shouldRemoveDuplicates, boolean shouldFilterPos) {
         if (StringUtils.isEmpty(text)) {
             return new HashSet<>();
         }
@@ -58,7 +55,7 @@ public class Annotator {
         Annotation document = new Annotation(text);
         pipeline.annotate(document);
 
-        Set<AnnotatedToken> tokens = new HashSet<>();
+        Collection<AnnotatedToken> tokens = getCollection(shouldRemoveDuplicates);
 
         List<CoreLabel> coreLabels = document.get(CoreAnnotations.TokensAnnotation.class);
         for (CoreLabel token : coreLabels) {
@@ -76,6 +73,11 @@ public class Annotator {
             }
         }
         return tokens;
+    }
+
+    private Collection<AnnotatedToken> getCollection(boolean shouldRemoveDuplicates) {
+        final int DEFAULT_COLLECTION_SIZE = 30;
+        return shouldRemoveDuplicates ? new HashSet<>(DEFAULT_COLLECTION_SIZE) : new ArrayList<>(DEFAULT_COLLECTION_SIZE);
     }
 
     private boolean isNounOrVerb(String posTag) {

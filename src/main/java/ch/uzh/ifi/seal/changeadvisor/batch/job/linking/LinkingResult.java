@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.Set;
+import java.util.Collection;
 
 @Document
 public class LinkingResult implements Comparable<LinkingResult> {
@@ -14,11 +14,11 @@ public class LinkingResult implements Comparable<LinkingResult> {
 
     private int clusterId;
 
-    private Set<String> reviews;
+    private Collection<String> reviews;
 
-    private Set<String> clusterBag;
+    private Collection<String> clusterBag;
 
-    private Set<String> codeComponentBag;
+    private Collection<String> codeComponentBag;
 
     private String codeComponentName;
 
@@ -27,7 +27,7 @@ public class LinkingResult implements Comparable<LinkingResult> {
     public LinkingResult() {
     }
 
-    public LinkingResult(int clusterId, Set<String> reviews, Set<String> clusterBag, Set<String> codeComponentBag, String codeComponentName, Double similarity) {
+    public LinkingResult(int clusterId, Collection<String> reviews, Collection<String> clusterBag, Collection<String> codeComponentBag, String codeComponentName, Double similarity) {
         this.clusterId = clusterId;
         this.reviews = reviews;
         this.clusterBag = clusterBag;
@@ -52,27 +52,27 @@ public class LinkingResult implements Comparable<LinkingResult> {
         this.clusterId = clusterId;
     }
 
-    public Set<String> getReviews() {
+    public Collection<String> getReviews() {
         return reviews;
     }
 
-    public void setReviews(Set<String> reviews) {
+    public void setReviews(Collection<String> reviews) {
         this.reviews = reviews;
     }
 
-    public Set<String> getClusterBag() {
+    public Collection<String> getClusterBag() {
         return clusterBag;
     }
 
-    public void setClusterBag(Set<String> clusterBag) {
+    public void setClusterBag(Collection<String> clusterBag) {
         this.clusterBag = clusterBag;
     }
 
-    public Set<String> getCodeComponentBag() {
+    public Collection<String> getCodeComponentBag() {
         return codeComponentBag;
     }
 
-    public void setCodeComponentBag(Set<String> codeComponentBag) {
+    public void setCodeComponentBag(Collection<String> codeComponentBag) {
         this.codeComponentBag = codeComponentBag;
     }
 

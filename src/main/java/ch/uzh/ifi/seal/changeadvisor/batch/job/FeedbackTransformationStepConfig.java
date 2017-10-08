@@ -89,7 +89,7 @@ public class FeedbackTransformationStepConfig {
         reader.setRepository(ardocRepository);
         reader.setMethodName("findByAppName");
         reader.setArguments(Lists.newArrayList(appName));
-        reader.setPageSize(10);
+        reader.setPageSize(100);
         Map<String, Sort.Direction> sort = new HashMap<>();
         sort.put("_id", Sort.Direction.ASC);
         reader.setSort(sort);
