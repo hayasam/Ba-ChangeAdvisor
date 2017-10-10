@@ -35,7 +35,11 @@ public class ChangeadvisorApplication implements CommandLineRunner {
     private final JobRepository jobRepository;
 
     @Autowired
-    public ChangeadvisorApplication(CodeElementRepository codeElementRepository, TopicRepository topicRepository, TopicAssignmentRepository topicAssignmentRepository, TransformedFeedbackRepository transformedFeedbackRepository, ArdocResultRepository ardocResultRepository, JobRepository jobRepository) {
+    public ChangeadvisorApplication(CodeElementRepository codeElementRepository, TopicRepository topicRepository,
+                                    TopicAssignmentRepository topicAssignmentRepository,
+                                    TransformedFeedbackRepository transformedFeedbackRepository,
+                                    ArdocResultRepository ardocResultRepository,
+                                    JobRepository jobRepository) {
         this.codeElementRepository = codeElementRepository;
         this.topicRepository = topicRepository;
         this.topicAssignmentRepository = topicAssignmentRepository;

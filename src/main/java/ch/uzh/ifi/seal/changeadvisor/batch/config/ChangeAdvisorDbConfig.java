@@ -5,7 +5,7 @@ import ch.uzh.ifi.seal.changeadvisor.batch.job.documentclustering.TopicRepositor
 import ch.uzh.ifi.seal.changeadvisor.batch.job.feedbackprocessing.TransformedFeedbackRepository;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.linking.LinkingResultRepository;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.tfidf.LabelRepository;
-import ch.uzh.ifi.seal.changeadvisor.schedule.ScheduleInfoRepository;
+import ch.uzh.ifi.seal.changeadvisor.project.ProjectRepository;
 import ch.uzh.ifi.seal.changeadvisor.source.model.CodeElementRepository;
 import ch.uzh.ifi.seal.changeadvisor.source.model.SourceCodeDirectoryRepository;
 import com.mongodb.Mongo;
@@ -26,7 +26,7 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 @EnableMongoRepositories(basePackageClasses =
         {CodeElementRepository.class, SourceCodeDirectoryRepository.class, TopicRepository.class,
                 TransformedFeedbackRepository.class, ArdocResultRepository.class, LinkingResultRepository.class,
-                LabelRepository.class, ScheduleInfoRepository.class}, mongoTemplateRef = "mongoOperations")
+                LabelRepository.class, ProjectRepository.class}, mongoTemplateRef = "mongoOperations")
 public class ChangeAdvisorDbConfig extends AbstractRepoConfig {
 
     @Bean
