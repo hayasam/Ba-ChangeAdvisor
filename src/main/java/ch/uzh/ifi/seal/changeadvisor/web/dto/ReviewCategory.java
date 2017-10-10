@@ -1,6 +1,6 @@
 package ch.uzh.ifi.seal.changeadvisor.web.dto;
 
-import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResult;
+import ch.uzh.ifi.seal.changeadvisor.batch.job.feedbackprocessing.TransformedFeedback;
 import ch.uzh.ifi.seal.changeadvisor.tfidf.*;
 import com.google.common.collect.ImmutableSet;
 
@@ -15,16 +15,16 @@ public class ReviewCategory {
 
     private static final String WHITESPACE = " ";
 
-    private final Set<ArdocResult> reviews;
+    private final Set<TransformedFeedback> reviews;
 
     private final String category;
 
-    public ReviewCategory(Collection<ArdocResult> reviews, String category) {
+    public ReviewCategory(Collection<TransformedFeedback> reviews, String category) {
         this.reviews = ImmutableSet.copyOf(reviews);
         this.category = category;
     }
 
-    public Set<ArdocResult> getReviews() {
+    public Set<TransformedFeedback> getReviews() {
         return reviews;
     }
 
@@ -53,7 +53,7 @@ public class ReviewCategory {
     }
 
     private String aggregateReviewsIntoDocument() {
-        List<String> sentences = reviews.stream().map(ArdocResult::getSentence).collect(Collectors.toList());
+        List<String> sentences = reviews.stream().map(TransformedFeedback::getTransformedSentence).collect(Collectors.toList());
         return String.join(WHITESPACE, sentences);
     }
 }

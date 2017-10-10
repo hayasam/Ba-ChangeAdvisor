@@ -1,6 +1,7 @@
 package ch.uzh.ifi.seal.changeadvisor.batch.job.feedbackprocessing;
 
 import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResult;
+import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.Review;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -20,6 +21,8 @@ public class TransformedFeedback {
 
     private Collection<String> bagOfWords;
 
+    private String transformedSentence;
+
     private LocalDateTime timestamp;
 
     public TransformedFeedback() {
@@ -28,6 +31,7 @@ public class TransformedFeedback {
     public TransformedFeedback(ArdocResult ardocResult, Collection<String> tokens) {
         this.ardocResult = ardocResult;
         this.bagOfWords = tokens;
+        this.transformedSentence = String.join(" ", tokens);
         this.timestamp = LocalDateTime.now();
     }
 
@@ -59,6 +63,14 @@ public class TransformedFeedback {
         return ardocResult.getCategory();
     }
 
+    public String getTransformedSentence() {
+        return transformedSentence;
+    }
+
+    public Review getReview() {
+        return ardocResult.getReview();
+    }
+
     public void setId(String id) {
         this.id = id;
     }
@@ -73,6 +85,10 @@ public class TransformedFeedback {
 
     public void setTimestamp(LocalDateTime timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public void setTransformedSentence(String transformedSentence) {
+        this.transformedSentence = transformedSentence;
     }
 
     @Override

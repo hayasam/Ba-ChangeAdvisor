@@ -3,6 +3,7 @@ package ch.uzh.ifi.seal.changeadvisor.service;
 import ch.uzh.ifi.seal.changeadvisor.ChangeadvisorApplication;
 import ch.uzh.ifi.seal.changeadvisor.MongoTestConfig;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewDistributionReport;
+import org.apache.log4j.Logger;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,12 +16,16 @@ import org.springframework.test.context.junit4.SpringRunner;
 @ActiveProfiles("test")
 public class ReviewAggregationServiceTest {
 
+    private static final Logger logger = Logger.getLogger(ReviewAggregationServiceTest.class);
+
     @Autowired
     private ReviewAggregationService service;
 
     @Test
     public void groupyBy() throws Exception {
         ReviewDistributionReport reviewCategories = service.groupByCategories("com.frostwire.android");
+        logger.info(reviewCategories.toString());
+
     }
 
 }

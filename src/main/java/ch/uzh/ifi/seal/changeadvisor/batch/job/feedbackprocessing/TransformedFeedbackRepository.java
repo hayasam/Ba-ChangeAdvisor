@@ -15,4 +15,6 @@ public interface TransformedFeedbackRepository extends MongoRepository<Transform
     List<TransformedFeedback> findAllByArdocResultCategoryIn(Collection<String> categories);
 
     List<TransformedFeedback> findByArdocResultAppNameAndArdocResultCategoryIn(String appName, Collection<String> categories);
+
+    List<TransformedFeedback> findByArdocResultAppNameAndArdocResultCategoryAndTransformedSentenceContainingIgnoreCase(String appName, String category, String label);
 }

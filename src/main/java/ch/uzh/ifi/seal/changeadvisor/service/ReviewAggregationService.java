@@ -1,8 +1,8 @@
 package ch.uzh.ifi.seal.changeadvisor.service;
 
 
-import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResult;
-import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResultRepository;
+import ch.uzh.ifi.seal.changeadvisor.batch.job.feedbackprocessing.TransformedFeedback;
+import ch.uzh.ifi.seal.changeadvisor.batch.job.feedbackprocessing.TransformedFeedbackRepository;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.Review;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.tfidf.Label;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.tfidf.LabelRepository;
@@ -39,28 +39,37 @@ public class ReviewAggregationService {
 
     private final TfidfService tfidfService;
 
-    private final ArdocResultRepository ardocRepository;
+    private final TransformedFeedbackRepository transformedFeedbackRepository;
 
     private final LabelRepository labelRepository;
 
     @Autowired
     public ReviewAggregationService(MongoTemplate mongoOperations, TfidfService tfidfService,
-                                    ArdocResultRepository ardocRepository, LabelRepository labelRepository) {
+                                    TransformedFeedbackRepository transformedFeedbackRepository, LabelRepository labelRepository) {
         this.mongoOperations = mongoOperations;
         this.tfidfService = tfidfService;
-        this.ardocRepository = ardocRepository;
+        this.transformedFeedbackRepository = transformedFeedbackRepository;
         this.labelRepository = labelRepository;
     }
 
+    /**
+     * Generates a category distribution report.
+     * Groups reviews by ardoc category.
+     *
+     * @param appName application for which we want to generate a report.
+     * @return distribution report.
+     * @see ReviewDistributionReport
+     * @see ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResult#category
+     */
     public ReviewDistributionReport groupByCategories(final String appName) {
-        TypedAggregation<ArdocResult> categoryAggregation = Aggregation.newAggregation(ArdocResult.class,
-                Aggregation.match(Criteria.where("appName").is(appName)),
-                Aggregation.group("category").first("category").as("category") // set group by field and save it as 'category' in resulting object.
+        TypedAggregation<TransformedFeedback> categoryAggregation = Aggregation.newAggregation(TransformedFeedback.class,
+                Aggregation.match(Criteria.where("ardocResult.appName").is(appName)),
+                Aggregation.group("ardocResult.category").first("ardocResult.category").as("category") // set group by field and save it as 'category' in resulting object.
                         .push("$$ROOT").as("reviews") // push entire document to field 'reviews' in ReviewCategory.
         );
 
         AggregationResults<ReviewCategory> groupResults =
-                mongoOperations.aggregate(categoryAggregation, ArdocResult.class, ReviewCategory.class);
+                mongoOperations.aggregate(categoryAggregation, TransformedFeedback.class, ReviewCategory.class);
 
         return new ReviewDistributionReport(groupResults.getMappedResults());
     }
@@ -83,12 +92,11 @@ public class ReviewAggregationService {
         logger.info(String.format("Fetching reviews for top %d labels: %s", dto.getLimit(), labels));
         List<LabelWithReviews> labelWithReviews = new ArrayList<>(labels.size());
         for (Label label : labels) {
-            List<ArdocResult> ardocResults =
-                    ardocRepository.findByAppNameAndCategoryAndSentenceContainingIgnoreCase(dto.getApp(), dto.getCategory(), label.getLabel());
+            List<TransformedFeedback> feedback = transformedFeedbackRepository.findByArdocResultAppNameAndArdocResultCategoryAndTransformedSentenceContainingIgnoreCase(dto.getApp(), dto.getCategory(), label.getLabel());
             // Two ardoc results could be mapped to the same review, so in this step we remove duplicate reviews.
-            List<Review> reviews = new ArrayList<>(ardocResults.stream().map(ArdocResult::getReview).collect(Collectors.toSet()));
+            List<Review> reviews = feedback.stream().map(TransformedFeedback::getReview).distinct().collect(Collectors.toList());
             java.util.Collections.sort(reviews);
-            labelWithReviews.add(new LabelWithReviews(label.getLabel(), reviews));
+            labelWithReviews.add(new LabelWithReviews(label, reviews));
         }
 
         return labelWithReviews;
@@ -113,7 +121,6 @@ public class ReviewAggregationService {
         List<Label> tokensWithScore = getNgramTokensWithScore(reviewsByCategory, dto);
 
         Collections.sort(tokensWithScore, Collections.reverseOrder());
-        logger.info(tokensWithScore.size());
 
         // WRITER
         final int limit = dto.getLimit();

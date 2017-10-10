@@ -105,6 +105,7 @@ public class FeedbackTransformationStepConfig {
                 .escapeSpecialChars()
 //                .withAutoCorrect(new EnglishSpellChecker())
                 .withContractionExpander()
+                .removeDuplicates(false) // For label computing we want to keep duplicates in order to keep the original sentence structure (specially for ngrams)
                 .singularize()
                 .removeStopWords()
                 .posFilter()
