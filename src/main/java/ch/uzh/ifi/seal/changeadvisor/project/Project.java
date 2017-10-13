@@ -1,6 +1,7 @@
 package ch.uzh.ifi.seal.changeadvisor.project;
 
 import ch.uzh.ifi.seal.changeadvisor.source.model.SourceCodeDirectory;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -9,7 +10,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 @Document
-public class Project {
+public class Project implements Comparable<Project> {
 
     @Id
     private String id;
@@ -75,6 +76,10 @@ public class Project {
         this.cronSchedule = cronSchedule;
     }
 
+    public boolean hasValidCronExpression() {
+        return checkCronExpression(cronSchedule);
+    }
+
     /**
      * A cron expression can either be empty (manual triggering of review import)
      * or it has to be a valid cron expression.
@@ -124,5 +129,10 @@ public class Project {
         result = 31 * result + (path != null ? path.hashCode() : 0);
         result = 31 * result + (remoteUrl != null ? remoteUrl.hashCode() : 0);
         return result;
+    }
+
+    @Override
+    public int compareTo(@NotNull Project o) {
+        return appName.compareTo(o.appName);
     }
 }

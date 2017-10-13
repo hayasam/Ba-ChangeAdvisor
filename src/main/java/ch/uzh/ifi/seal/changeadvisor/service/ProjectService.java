@@ -4,7 +4,7 @@ import ch.uzh.ifi.seal.changeadvisor.project.Project;
 import ch.uzh.ifi.seal.changeadvisor.project.ProjectRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
+import java.util.List;
 
 @Service
 public class ProjectService {
@@ -19,8 +19,12 @@ public class ProjectService {
         return repository.existsByAppName(appName);
     }
 
-    public Collection<Project> findAll() {
+    public List<Project> findAll() {
         return repository.findAll();
+    }
+
+    public Project findById(final String projectId) {
+        return repository.findOne(projectId);
     }
 
     public Project findByAppName(final String appName) {
