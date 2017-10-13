@@ -9,7 +9,6 @@ import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.ReviewRepository;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.tfidf.LabelRepository;
 import ch.uzh.ifi.seal.changeadvisor.project.ProjectRepository;
 import ch.uzh.ifi.seal.changeadvisor.source.model.CodeElementRepository;
-import ch.uzh.ifi.seal.changeadvisor.source.model.SourceCodeDirectoryRepository;
 import com.mongodb.Mongo;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
@@ -23,7 +22,7 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 
 @Configuration
 @EnableMongoRepositories(basePackageClasses =
-        {CodeElementRepository.class, SourceCodeDirectoryRepository.class, TopicRepository.class,
+        {CodeElementRepository.class, TopicRepository.class,
                 TransformedFeedbackRepository.class, ArdocResultRepository.class, LinkingResultRepository.class,
                 LabelRepository.class, ReviewRepository.class, ProjectRepository.class})
 public class MongoTestConfig extends AbstractRepoConfig {

@@ -15,6 +15,10 @@ public class ProjectService {
         this.repository = repository;
     }
 
+    public boolean projectExists(final String appName) {
+        return repository.existsByAppName(appName);
+    }
+
     public Collection<Project> findAll() {
         return repository.findAll();
     }

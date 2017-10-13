@@ -1,8 +1,8 @@
 package ch.uzh.ifi.seal.changeadvisor.source;
 
 import ch.uzh.ifi.seal.changeadvisor.batch.job.SourceComponentsTransformationStepConfig;
-import ch.uzh.ifi.seal.changeadvisor.source.model.SourceCodeDirectory;
-import ch.uzh.ifi.seal.changeadvisor.source.model.SourceCodeDirectoryRepository;
+import ch.uzh.ifi.seal.changeadvisor.project.Project;
+import ch.uzh.ifi.seal.changeadvisor.service.ProjectService;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.SourceCodeDirectoryDto;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -12,8 +12,6 @@ import org.springframework.batch.core.launch.support.RunIdIncrementer;
 import org.springframework.batch.core.listener.ExecutionContextPromotionListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.Optional;
 
 @Component
 public class SourceImportJobFactory {
@@ -26,16 +24,16 @@ public class SourceImportJobFactory {
 
     private final JobBuilderFactory jobBuilderFactory;
 
-    private final SourceCodeDirectoryRepository repository;
-
     private final SourceComponentsTransformationStepConfig sourceComponentsTransformationStepConfig;
 
+    private final ProjectService projectService;
+
     @Autowired
-    public SourceImportJobFactory(StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory, SourceCodeDirectoryRepository repository, SourceComponentsTransformationStepConfig sourceComponentsTransformationStepConfig) {
+    public SourceImportJobFactory(StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory, SourceComponentsTransformationStepConfig sourceComponentsTransformationStepConfig, ProjectService projectService) {
         this.stepBuilderFactory = stepBuilderFactory;
         this.jobBuilderFactory = jobBuilderFactory;
-        this.repository = repository;
         this.sourceComponentsTransformationStepConfig = sourceComponentsTransformationStepConfig;
+        this.projectService = projectService;
     }
 
     public Job importAndProcessingJob(SourceCodeDirectoryDto dto) {
@@ -56,7 +54,7 @@ public class SourceImportJobFactory {
     }
 
     private Step sourceImport(SourceCodeDirectoryDto dto) {
-        SourceImportTasklet importTasklet = new SourceImportTasklet(dto, repository);
+        SourceImportTasklet importTasklet = new SourceImportTasklet(dto, projectService);
         return stepBuilderFactory.get(STEP_NAME)
                 .allowStartIfComplete(true)
                 .tasklet(importTasklet)
@@ -65,11 +63,8 @@ public class SourceImportJobFactory {
     }
 
     private Step sourceProcessing(final String appName) {
-        Optional<SourceCodeDirectory> projectDirectory = repository.findByProjectName(appName);
-        if (projectDirectory.isPresent()) {
-            return sourceComponentsTransformationStepConfig.extractBagOfWords(projectDirectory.get().getPath());
-        }
-        throw new IllegalArgumentException(String.format("No project imported for app name %s", appName));
+        Project project = projectService.findByAppName(appName);
+        return sourceComponentsTransformationStepConfig.extractBagOfWords(project.getPath());
     }
 
     private Step sourceProcessing() {

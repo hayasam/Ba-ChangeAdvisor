@@ -60,7 +60,7 @@ public class GitSourceCodeImporter implements SourceCodeImporter {
         logger.info(String.format(CLONING_REPOSITORY, projectName, REMOTE_URL, projectPath.getPath()));
         try (Git result = cloneRepo(REMOTE_URL, projectPath)) {
             logger.info(String.format(CLONED_REPOSITORY, result.getRepository().getDirectory()));
-            return SourceCodeDirectory.of(projectName, projectPath.getAbsolutePath(), REMOTE_URL);
+            return new SourceCodeDirectory(projectName, projectPath.getAbsolutePath(), REMOTE_URL);
         } catch (TransportException e) {
             throw new RuntimeException(String.format(NO_CREDENTIALS_OR_NOT_FOUND, REMOTE_URL), e);
         } catch (GitAPIException e) {

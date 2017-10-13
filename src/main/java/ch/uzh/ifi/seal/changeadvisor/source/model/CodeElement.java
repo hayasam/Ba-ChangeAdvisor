@@ -21,6 +21,8 @@ public class CodeElement implements Comparable<CodeElement> {
     @Id
     private String id;
 
+    private String appName;
+
     private String fullyQualifiedClassName;
 
     private Collection<String> bag;

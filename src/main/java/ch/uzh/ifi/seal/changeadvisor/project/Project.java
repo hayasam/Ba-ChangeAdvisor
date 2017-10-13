@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.changeadvisor.project;
 
+import ch.uzh.ifi.seal.changeadvisor.source.model.SourceCodeDirectory;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -22,7 +23,7 @@ public class Project {
 
     private String cronSchedule;
 
-    Project() {
+    public Project() {
     }
 
     public Project(String appName, String path, String remoteUrl, String cronSchedule) {
@@ -85,6 +86,15 @@ public class Project {
         return StringUtils.isEmpty(expression) || CronSequenceGenerator.isValidExpression(expression);
     }
 
+    public void setSourceCodeDirectory(SourceCodeDirectory directory) {
+        this.path = directory.getPath();
+        this.remoteUrl = directory.getRemoteUrl();
+    }
+
+    public SourceCodeDirectory asSourceCodeDirectory() {
+        return new SourceCodeDirectory(appName, path);
+    }
+
     @Override
     public String toString() {
         return "Project{" +
@@ -94,5 +104,25 @@ public class Project {
                 ", remoteUrl='" + remoteUrl + '\'' +
                 ", cronSchedule='" + cronSchedule + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Project project = (Project) o;
+
+        if (appName != null ? !appName.equals(project.appName) : project.appName != null) return false;
+        if (path != null ? !path.equals(project.path) : project.path != null) return false;
+        return remoteUrl != null ? remoteUrl.equals(project.remoteUrl) : project.remoteUrl == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = appName != null ? appName.hashCode() : 0;
+        result = 31 * result + (path != null ? path.hashCode() : 0);
+        result = 31 * result + (remoteUrl != null ? remoteUrl.hashCode() : 0);
+        return result;
     }
 }

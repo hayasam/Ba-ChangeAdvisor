@@ -1,6 +1,6 @@
 package ch.uzh.ifi.seal.changeadvisor.batch.job.sourcecode;
 
-import ch.uzh.ifi.seal.changeadvisor.source.model.SourceCodeDirectory;
+import ch.uzh.ifi.seal.changeadvisor.project.Project;
 import ch.uzh.ifi.seal.changeadvisor.source.parser.bean.ClassBean;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.annotation.BeforeStep;
@@ -28,7 +28,7 @@ public class FSDeferredProjectReader implements FileSystemReader {
     @SuppressWarnings("unused")
     @BeforeStep
     public void setProjectRootPath(StepExecution stepExecution) {
-        SourceCodeDirectory directory = getDirectoryFromStepExecutionContext(stepExecution);
+        Project directory = getDirectoryFromStepExecutionContext(stepExecution);
         setProjectRootPath(directory.getPath());
     }
 
@@ -37,12 +37,12 @@ public class FSDeferredProjectReader implements FileSystemReader {
         reader.setProjectRootPath(path);
     }
 
-    private SourceCodeDirectory getDirectoryFromStepExecutionContext(StepExecution stepExecution) {
-        Object directory = stepExecution.getJobExecution().getExecutionContext().get(DIRECTORY_KEY);
-        if (directory == null || !SourceCodeDirectory.class.isInstance(directory)) {
-            throw new IllegalArgumentException(String.format("Couldn't find directory in Step Context. Found %s", directory));
+    private Project getDirectoryFromStepExecutionContext(StepExecution stepExecution) {
+        Object project = stepExecution.getJobExecution().getExecutionContext().get(DIRECTORY_KEY);
+        if (project == null || !Project.class.isInstance(project)) {
+            throw new IllegalArgumentException(String.format("Couldn't find project in Step Context. Found %s", project));
         }
-        return (SourceCodeDirectory) directory;
+        return (Project) project;
     }
 
     @Override

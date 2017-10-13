@@ -1,11 +1,6 @@
 package ch.uzh.ifi.seal.changeadvisor.source.model;
 
-import org.springframework.data.mongodb.core.mapping.Document;
-
-@Document
 public class SourceCodeDirectory {
-
-    private String id;
 
     private String projectName;
 
@@ -13,21 +8,16 @@ public class SourceCodeDirectory {
 
     private String remoteUrl;
 
-    public SourceCodeDirectory() {
+    public SourceCodeDirectory(String projectName, String path, String remoteUrl) {
+        this.projectName = projectName;
+        this.path = path;
+        this.remoteUrl = remoteUrl;
     }
 
     public SourceCodeDirectory(String projectName, String path) {
         this.projectName = projectName;
         this.path = path;
         this.remoteUrl = "";
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
     }
 
     public String getProjectName() {
@@ -78,11 +68,5 @@ public class SourceCodeDirectory {
         int result = projectName != null ? projectName.hashCode() : 0;
         result = 31 * result + (path != null ? path.hashCode() : 0);
         return result;
-    }
-
-    public static SourceCodeDirectory of(String projectName, String path, String remoteUrl) {
-        SourceCodeDirectory directory = new SourceCodeDirectory(projectName, path);
-        directory.setRemoteUrl(remoteUrl);
-        return directory;
     }
 }

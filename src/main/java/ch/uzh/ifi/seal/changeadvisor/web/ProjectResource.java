@@ -3,10 +3,7 @@ package ch.uzh.ifi.seal.changeadvisor.web;
 import ch.uzh.ifi.seal.changeadvisor.project.Project;
 import ch.uzh.ifi.seal.changeadvisor.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class ProjectResource {
@@ -24,7 +21,7 @@ public class ProjectResource {
     }
 
     @PostMapping("/project")
-    public Project saveProject(Project project) {
+    public Project saveProject(@RequestBody Project project) {
         return service.save(project);
     }
 }

@@ -8,4 +8,5 @@ public interface ProjectRepository extends MongoRepository<Project, String> {
 
     Project findByAppName(String appName);
 
+    boolean existsByAppName(String appName);
 }

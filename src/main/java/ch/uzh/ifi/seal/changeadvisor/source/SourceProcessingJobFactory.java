@@ -1,6 +1,6 @@
 package ch.uzh.ifi.seal.changeadvisor.source;
 
-import ch.uzh.ifi.seal.changeadvisor.source.model.SourceCodeDirectoryRepository;
+import ch.uzh.ifi.seal.changeadvisor.service.ProjectService;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.SourceCodeDirectoryDto;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -21,13 +21,13 @@ public class SourceProcessingJobFactory {
 
     private final JobBuilderFactory jobBuilderFactory;
 
-    private final SourceCodeDirectoryRepository repository;
+    private final ProjectService projectService;
 
     @Autowired
-    public SourceProcessingJobFactory(StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory, SourceCodeDirectoryRepository repository) {
+    public SourceProcessingJobFactory(StepBuilderFactory stepBuilderFactory, JobBuilderFactory jobBuilderFactory, ProjectService projectService) {
         this.stepBuilderFactory = stepBuilderFactory;
         this.jobBuilderFactory = jobBuilderFactory;
-        this.repository = repository;
+        this.projectService = projectService;
     }
 
     public Job job(SourceCodeDirectoryDto dto) {
@@ -39,7 +39,7 @@ public class SourceProcessingJobFactory {
     }
 
     private Step sourceImport(SourceCodeDirectoryDto dto) {
-        SourceImportTasklet importTasklet = new SourceImportTasklet(dto, repository);
+        SourceImportTasklet importTasklet = new SourceImportTasklet(dto, projectService);
         return stepBuilderFactory.get(STEP_NAME)
                 .allowStartIfComplete(true)
                 .tasklet(importTasklet)

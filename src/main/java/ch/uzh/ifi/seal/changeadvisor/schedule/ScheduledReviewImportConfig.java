@@ -4,10 +4,12 @@ import ch.uzh.ifi.seal.changeadvisor.project.Project;
 import ch.uzh.ifi.seal.changeadvisor.service.FailedToRunJobException;
 import ch.uzh.ifi.seal.changeadvisor.service.ProjectService;
 import ch.uzh.ifi.seal.changeadvisor.service.ReviewImportService;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.TriggerContext;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.scheduling.support.CronTrigger;
@@ -22,7 +24,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 @Component
-//@EnableScheduling
+@EnableScheduling
 public class ScheduledReviewImportConfig implements SchedulingConfigurer {
 
     private static final Logger logger = Logger.getLogger(ScheduledReviewImportConfig.class);
@@ -49,12 +51,14 @@ public class ScheduledReviewImportConfig implements SchedulingConfigurer {
         taskRegistrar.setScheduler(taskExecutor());
 
         Collection<Project> projects = projectService.findAll();
-        projects.forEach(project ->
+        projects.forEach(project -> {
+            if (!StringUtils.isEmpty(project.getCronSchedule())) {
                 taskRegistrar
                         .addTriggerTask(
                                 () -> startReviewImport(project.getAppName()),
-                                triggerContext -> setNextExecution(triggerContext, project.getCronSchedule()))
-        );
+                                triggerContext -> setNextExecution(triggerContext, project.getCronSchedule()));
+            }
+        });
     }
 
     private Map<String, Object> createReviewImportParams(final String projectName) {
