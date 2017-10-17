@@ -10,9 +10,7 @@ import ch.uzh.ifi.seal.changeadvisor.tfidf.AbstractNGram;
 import ch.uzh.ifi.seal.changeadvisor.tfidf.Corpus;
 import ch.uzh.ifi.seal.changeadvisor.tfidf.Document;
 import ch.uzh.ifi.seal.changeadvisor.tfidf.TfidfService;
-import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewCategory;
-import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewDistributionReport;
-import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewsByTopLabelsDto;
+import ch.uzh.ifi.seal.changeadvisor.web.dto.*;
 import edu.emory.mathcs.backport.java.util.Collections;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,7 +80,7 @@ public class ReviewAggregationService {
      *            (e.g. how many labels and for which app)
      * @return reviews for the top N labels.
      */
-    public List<LabelWithReviews> reviewsByTopNLabels(ReviewsByTopLabelsDto dto) {
+    public List<LabelWithReviews> reviewsByTopNLabelsByCategory(ReviewsByTopLabelsDto dto) {
         List<Label> labels = labelRepository.findByAppNameAndCategoryAndNgramSizeOrderByScoreDesc(dto.getApp(), dto.getCategory(), dto.getNgrams());
         final int limit = dto.getLimit();
         if (dto.hasLimit() && limit < labels.size()) {
@@ -95,6 +93,33 @@ public class ReviewAggregationService {
             List<TransformedFeedback> feedback = transformedFeedbackRepository.findByArdocResultAppNameAndArdocResultCategoryAndTransformedSentenceContainingIgnoreCase(dto.getApp(), dto.getCategory(), label.getLabel());
             // Two ardoc results could be mapped to the same review, so in this step we remove duplicate reviews.
             List<Review> reviews = feedback.stream().map(TransformedFeedback::getReview).distinct().collect(Collectors.toList());
+            labelWithReviews.add(new LabelWithReviews(label, reviews));
+        }
+
+        return labelWithReviews;
+    }
+
+    /**
+     * Retrieves the reviews based on the top N labels.
+     * Fetches all reviews which contain these top labels.
+     *
+     * @param dto object representing the parameters we use to compute the top N labels
+     *            (e.g. how many labels and for which app)
+     * @return reviews for the top N labels.
+     */
+    public List<LabelWithReviews> reviewsByTopNLabels(ReviewsByTopLabelsDto dto) {
+        List<Label> labels = labelRepository.findByAppNameAndNgramSizeOrderByScoreDesc(dto.getApp(), dto.getNgrams());
+        final int limit = dto.getLimit();
+        if (dto.hasLimit() && limit < labels.size()) {
+            labels = labels.subList(0, dto.getLimit());
+        }
+
+        logger.info(String.format("Fetching reviews for top %d labels: %s", dto.getLimit(), labels));
+        List<LabelWithReviews> labelWithReviews = new ArrayList<>(labels.size());
+        for (Label label : labels) {
+            List<TransformedFeedback> feedback = transformedFeedbackRepository.findByArdocResultAppNameAndTransformedSentenceContainingIgnoreCase(dto.getApp(), label.getLabel());
+            // Two ardoc results could be mapped to the same review, so in this step we remove duplicate reviews.
+            List<ReviewWithCategory> reviews = feedback.stream().map(f -> new ReviewWithCategory(f.getReview(), f.getCategory())).distinct().collect(Collectors.toList());
             java.util.Collections.sort(reviews);
             labelWithReviews.add(new LabelWithReviews(label, reviews));
         }

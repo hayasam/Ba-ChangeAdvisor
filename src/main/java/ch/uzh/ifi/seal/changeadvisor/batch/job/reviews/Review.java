@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.changeadvisor.batch.job.reviews;
 
+import ch.uzh.ifi.seal.changeadvisor.batch.job.HasReview;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -7,7 +8,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.util.Date;
 
 @Document(collection = "Review")
-public class Review implements Comparable<Review> {
+public class Review implements Comparable<Review>, HasReview {
 
     @Id
     private String id;
@@ -43,6 +44,7 @@ public class Review implements Comparable<Review> {
         return appName;
     }
 
+    @Override
     public String getReviewText() {
         return reviewText;
     }

@@ -5,7 +5,7 @@ import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResult;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.Review;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.ReviewRepository;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.tfidf.Label;
-import ch.uzh.ifi.seal.changeadvisor.service.*;
+import ch.uzh.ifi.seal.changeadvisor.web.dto.LabelWithReviews;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewAnalysisDto;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewDistributionReport;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewsByTopLabelsDto;
@@ -14,7 +14,6 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.Collection;
@@ -106,6 +105,11 @@ public class ReviewController {
     @PostMapping(path = "reviews/labels")
     public List<LabelWithReviews> reviewsByTopNLabels(@RequestBody ReviewsByTopLabelsDto dto) {
         return aggregationService.reviewsByTopNLabels(dto);
+    }
+
+    @PostMapping(path = "reviews/labels/category")
+    public List<LabelWithReviews> reviewsByTopNLabelsByCategory(@RequestBody ReviewsByTopLabelsDto dto) {
+        return aggregationService.reviewsByTopNLabelsByCategory(dto);
     }
 
     @PostMapping(path = "reviews/labeling")

@@ -10,5 +10,7 @@ public interface LabelRepository extends MongoRepository<Label, String> {
 
     void deleteAllByAppName(String appName);
 
+    List<Label> findByAppNameAndNgramSizeOrderByScoreDesc(String appName, Integer ngramSize);
+
     List<Label> findByAppNameAndCategoryAndNgramSizeOrderByScoreDesc(String appName, String category, Integer ngramSize);
 }
