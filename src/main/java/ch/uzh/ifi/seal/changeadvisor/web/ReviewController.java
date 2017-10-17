@@ -5,6 +5,10 @@ import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResult;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.Review;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.ReviewRepository;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.tfidf.Label;
+import ch.uzh.ifi.seal.changeadvisor.service.ArdocService;
+import ch.uzh.ifi.seal.changeadvisor.service.FailedToRunJobException;
+import ch.uzh.ifi.seal.changeadvisor.service.ReviewAggregationService;
+import ch.uzh.ifi.seal.changeadvisor.service.ReviewImportService;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.LabelWithReviews;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewAnalysisDto;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewDistributionReport;
@@ -14,6 +18,7 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.Collection;
