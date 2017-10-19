@@ -134,4 +134,32 @@ public class ArdocResult {
                 ", timestamp=" + timestamp +
                 '}';
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ArdocResult that = (ArdocResult) o;
+
+        if (classification != that.classification) return false;
+        if (sentimentClass != that.sentimentClass) return false;
+        if (appName != null ? !appName.equals(that.appName) : that.appName != null) return false;
+        if (heuristic != null ? !heuristic.equals(that.heuristic) : that.heuristic != null) return false;
+        if (sentence != null ? !sentence.equals(that.sentence) : that.sentence != null) return false;
+        if (category != null ? !category.equals(that.category) : that.category != null) return false;
+        return review != null ? review.equals(that.review) : that.review == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = appName != null ? appName.hashCode() : 0;
+        result = 31 * result + (heuristic != null ? heuristic.hashCode() : 0);
+        result = 31 * result + classification;
+        result = 31 * result + (sentence != null ? sentence.hashCode() : 0);
+        result = 31 * result + (category != null ? category.hashCode() : 0);
+        result = 31 * result + sentimentClass;
+        result = 31 * result + (review != null ? review.hashCode() : 0);
+        return result;
+    }
 }

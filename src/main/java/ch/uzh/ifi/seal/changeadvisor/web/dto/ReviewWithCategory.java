@@ -56,6 +56,30 @@ public class ReviewWithCategory implements Comparable<ReviewWithCategory>, HasRe
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ReviewWithCategory that = (ReviewWithCategory) o;
+
+        if (numberOfStars != that.numberOfStars) return false;
+        if (reviewId != null ? !reviewId.equals(that.reviewId) : that.reviewId != null) return false;
+        if (reviewDate != null ? !reviewDate.equals(that.reviewDate) : that.reviewDate != null) return false;
+        if (review != null ? !review.equals(that.review) : that.review != null) return false;
+        return category != null ? category.equals(that.category) : that.category == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = reviewId != null ? reviewId.hashCode() : 0;
+        result = 31 * result + (reviewDate != null ? reviewDate.hashCode() : 0);
+        result = 31 * result + (review != null ? review.hashCode() : 0);
+        result = 31 * result + numberOfStars;
+        result = 31 * result + (category != null ? category.hashCode() : 0);
+        return result;
+    }
+
+    @Override
     public int compareTo(@NotNull ReviewWithCategory o) {
         return review.compareTo(o.review);
     }

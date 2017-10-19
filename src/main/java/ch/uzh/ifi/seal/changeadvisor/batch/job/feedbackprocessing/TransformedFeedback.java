@@ -98,4 +98,24 @@ public class TransformedFeedback {
                 ", bagOfWords=" + bagOfWords +
                 '}';
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        TransformedFeedback that = (TransformedFeedback) o;
+
+        if (ardocResult != null ? !ardocResult.equals(that.ardocResult) : that.ardocResult != null) return false;
+        if (bagOfWords != null ? !bagOfWords.equals(that.bagOfWords) : that.bagOfWords != null) return false;
+        return transformedSentence != null ? transformedSentence.equals(that.transformedSentence) : that.transformedSentence == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = ardocResult != null ? ardocResult.hashCode() : 0;
+        result = 31 * result + (bagOfWords != null ? bagOfWords.hashCode() : 0);
+        result = 31 * result + (transformedSentence != null ? transformedSentence.hashCode() : 0);
+        return result;
+    }
 }
