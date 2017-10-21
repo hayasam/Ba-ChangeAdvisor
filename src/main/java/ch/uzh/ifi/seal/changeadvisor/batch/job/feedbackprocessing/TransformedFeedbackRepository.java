@@ -18,5 +18,5 @@ public interface TransformedFeedbackRepository extends MongoRepository<Transform
 
     List<TransformedFeedback> findByArdocResultAppNameAndTransformedSentenceContainingIgnoreCase(String appName, String label);
 
-    List<TransformedFeedback> findByArdocResultAppNameAndArdocResultCategoryAndTransformedSentenceContainingIgnoreCase(String appName, String category, String label);
+    List<TransformedFeedback> findDistinctByArdocResultAppNameAndArdocResultCategoryAndTransformedSentenceContainingIgnoreCase(String appName, String category, String label);
 }

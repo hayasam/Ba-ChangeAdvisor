@@ -27,6 +27,14 @@ public class ChangeAdvisorLinker implements Linker {
             .removeTokensShorterThan(4)
             .build();
 
+    public void setSimilarityMetric(SimilarityMetric similarityMetric) {
+        this.similarityMetric = similarityMetric;
+    }
+
+    public void setCorpusProcessor(CorpusProcessor corpusProcessor) {
+        this.corpusProcessor = corpusProcessor;
+    }
+
     @Override
     public List<LinkingResult> process(Collection<TopicAssignment> assignments, Collection<CodeElement> codeElements) {
         Assert.notNull(similarityMetric, "No similarity metric set!");
@@ -85,7 +93,6 @@ public class ChangeAdvisorLinker implements Linker {
             Set<String> clusterBag = new HashSet<>();
             Set<String> originalReviews = new HashSet<>();
 
-            // Find candidates
             findCandidates(assignments, codeElements, candidates, clusterBag, originalReviews);
 
             final Collection<String> clusterCleanedBag = corpusProcessor.transform(clusterBag);
@@ -129,7 +136,8 @@ public class ChangeAdvisorLinker implements Linker {
         return Optional.empty();
     }
 
-    private void findCandidates(Collection<TopicAssignment> assignments, Collection<CodeElement> elements, Collection<CodeElement> candidates, Set<String> clusterBag, Set<String> originalReviews) {
+    private void findCandidates(Collection<TopicAssignment> assignments, Collection<CodeElement> elements,
+                                Collection<CodeElement> candidates, Set<String> clusterBag, Set<String> originalReviews) {
         for (TopicAssignment review : assignments) {
             Set<String> reviewWords = review.getBag();
 

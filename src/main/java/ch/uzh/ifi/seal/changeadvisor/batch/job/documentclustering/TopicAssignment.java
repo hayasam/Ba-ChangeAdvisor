@@ -1,9 +1,11 @@
 package ch.uzh.ifi.seal.changeadvisor.batch.job.documentclustering;
 
+import com.google.common.collect.Sets;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.Set;
 
 /**
@@ -26,9 +28,9 @@ public class TopicAssignment {
     TopicAssignment() {
     }
 
-    public TopicAssignment(String originalSentence, Set<String> bag, int topic) {
+    public TopicAssignment(String originalSentence, Collection<String> bag, int topic) {
         this.originalSentence = originalSentence;
-        this.bag = bag;
+        this.bag = Sets.newHashSet(bag);
         this.topic = topic;
         timestamp = LocalDateTime.now();
     }
@@ -49,7 +51,7 @@ public class TopicAssignment {
     }
 
     public Set<String> getBag() {
-        return bag;
+        return Sets.newHashSet(bag);
     }
 
     public int getTopic() {

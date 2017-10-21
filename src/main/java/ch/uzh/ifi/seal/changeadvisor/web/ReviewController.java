@@ -2,6 +2,7 @@ package ch.uzh.ifi.seal.changeadvisor.web;
 
 
 import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResult;
+import ch.uzh.ifi.seal.changeadvisor.batch.job.linking.LinkingResult;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.Review;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.ReviewRepository;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.tfidf.Label;
@@ -121,5 +122,10 @@ public class ReviewController {
     public long reviewLabeling(@RequestBody ReviewAnalysisDto dto) throws FailedToRunJobException {
         JobExecution jobExecution = reviewImportService.reviewLabeling(dto);
         return jobExecution.getJobId();
+    }
+
+    @PostMapping(path = "reviews/linking")
+    public List<LinkingResult> link(@RequestBody ReviewsByTopLabelsDto dto, @RequestParam("label") String label) {
+        return aggregationService.link(label, dto);
     }
 }
