@@ -7,6 +7,7 @@ import ch.uzh.ifi.seal.changeadvisor.batch.job.linking.ChangeAdvisorLinker;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.linking.LinkingResult;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.tfidf.Label;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.tfidf.LabelRepository;
+import ch.uzh.ifi.seal.changeadvisor.source.model.CodeElement;
 import ch.uzh.ifi.seal.changeadvisor.source.model.CodeElementRepository;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewsByTopLabelsDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,17 +36,29 @@ public class LabelLinkerService {
     }
 
     /**
-     * Retrieves the reviews based on the top N labels.
-     * Fetches all reviews which contain these top labels.
+     * Runs the ChangeAdvisor linker with the reviews fetched from the label and code elements.
      *
-     * @param dto object representing the parameters we use to compute the top N labels
-     *            (e.g. how many labels and for which app)
-     * @return reviews for the top N labels.
+     * @param dto object containing the app name and category for reviews.
+     * @return changeadvisor linking results.
      */
     public List<LinkingResult> link(String token, ReviewsByTopLabelsDto dto) {
-        Label label = labelRepository.findByAppNameAndCategoryAndToken(dto.getApp(), dto.getCategory(), token);
-        List<TransformedFeedback> feedback = transformedFeedbackRepository.findDistinctByArdocResultAppNameAndArdocResultCategoryAndTransformedSentenceContainingIgnoreCase(dto.getApp(), dto.getCategory(), label.getLabel());
-        List<TopicAssignment> topicAssignments = feedback.stream().map(f -> new TopicAssignment(f.getSentence(), f.getBagOfWords(), 1)).collect(Collectors.toList());
-        return linker.process(1, topicAssignments, codeElementRepository.findAll());
+        List<TransformedFeedback> feedback = getFeedbackCorrespondingToLabel(token, dto.getApp(), dto.getCategory());
+        List<TopicAssignment> topicAssignments = transformedFeedbackToTopicAssignment(feedback);
+        List<CodeElement> codeElements = codeElementRepository.findByAppName(dto.getApp());
+        return linker.process(1, topicAssignments, codeElements);
+    }
+
+    private List<TransformedFeedback> getFeedbackCorrespondingToLabel(final String token, final String appName, final String category) {
+        Label label = labelRepository.findByAppNameAndCategoryAndToken(appName, category, token);
+        return transformedFeedbackRepository
+                .findDistinctByArdocResultAppNameAndArdocResultCategoryAndTransformedSentenceContainingIgnoreCase(
+                        appName, category, label.getLabel());
+    }
+
+    private List<TopicAssignment> transformedFeedbackToTopicAssignment(List<TransformedFeedback> feedback) {
+        return feedback
+                .stream()
+                .map(f -> new TopicAssignment(f.getSentence(), f.getBagOfWords(), 1))
+                .collect(Collectors.toList());
     }
 }

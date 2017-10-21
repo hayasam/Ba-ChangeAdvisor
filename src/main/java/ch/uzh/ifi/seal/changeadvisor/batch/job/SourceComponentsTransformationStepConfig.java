@@ -36,7 +36,8 @@ public class SourceComponentsTransformationStepConfig {
     private final MongoTemplate mongoTemplate;
 
     @Autowired
-    public SourceComponentsTransformationStepConfig(StepBuilderFactory stepBuilderFactory, FSProjectParser projectParser, MongoTemplate mongoTemplate) {
+    public SourceComponentsTransformationStepConfig(StepBuilderFactory stepBuilderFactory,
+                                                    FSProjectParser projectParser, MongoTemplate mongoTemplate) {
         this.stepBuilderFactory = stepBuilderFactory;
         this.projectParser = projectParser;
         this.mongoTemplate = mongoTemplate;
@@ -55,7 +56,7 @@ public class SourceComponentsTransformationStepConfig {
     public Step extractBagOfWordsDeferredPath() {
         return stepBuilderFactory.get(STEP_NAME)
                 .allowStartIfComplete(true)
-                .<ClassBean, CodeElement>chunk(10)
+                .<ClassBean, CodeElement>chunk(100)
                 .reader(deferredReader())
                 .processor(processor())
                 .writer(mongoWriter())
@@ -75,9 +76,8 @@ public class SourceComponentsTransformationStepConfig {
         return reader;
     }
 
-    @Bean
     public SourceCodeProcessor processor() {
-        CorpusProcessor processor = new CorpusProcessor.Builder()
+        CorpusProcessor corpusProcessor = new CorpusProcessor.Builder()
                 .escapeSpecialChars()
                 .withComposedIdentifierSplit()
 //                .withAutoCorrect(new EnglishSpellChecker()) // Warning huge performance impact!
@@ -88,7 +88,7 @@ public class SourceComponentsTransformationStepConfig {
                 .stem()
                 .removeTokensShorterThan(3)
                 .build();
-        return new SourceCodeProcessor(5, processor);
+        return new SourceCodeProcessor(5, corpusProcessor);
     }
 
     @Bean

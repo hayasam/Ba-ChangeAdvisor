@@ -106,7 +106,7 @@ public class ChangeAdvisorLinkerTest {
         List<CodeElement> elements = new ArrayList<>();
         while ((line = reader.readNext()) != null) {
             if (!line[2].isEmpty()) {
-                elements.add(new CodeElement(line[0], Sets.newHashSet(line[2].split(" "))));
+                elements.add(new CodeElement("", line[0], Sets.newHashSet(line[2].split(" "))));
             }
         }
         return elements;
@@ -156,9 +156,9 @@ public class ChangeAdvisorLinkerTest {
 
     @Test
     public void codeComponentWordMap() throws Exception {
-        CodeElement c1 = new CodeElement("HelloWorld", Sets.newHashSet("hello", "world"));
-        CodeElement c2 = new CodeElement("HelloWorld2", Sets.newHashSet("System", "out"));
-        CodeElement c3 = new CodeElement(null, null);
+        CodeElement c1 = new CodeElement("", "HelloWorld", Sets.newHashSet("hello", "world"));
+        CodeElement c2 = new CodeElement("", "HelloWorld2", Sets.newHashSet("System", "out"));
+        CodeElement c3 = new CodeElement("", null, null);
         ArrayList<CodeElement> codeElements = Lists.newArrayList(c1, c2, c3);
 
         Map<CodeElement, Collection<String>> codeElementSetMap = linker.codeComponentWordMap(codeElements);

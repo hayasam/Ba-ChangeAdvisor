@@ -32,7 +32,8 @@ public class CodeElement implements Comparable<CodeElement> {
     CodeElement() {
     }
 
-    public CodeElement(String fullyQualifiedClassName, Collection<String> bag) {
+    public CodeElement(String appName, String fullyQualifiedClassName, Collection<String> bag) {
+        this.appName = appName;
         this.fullyQualifiedClassName = fullyQualifiedClassName;
         this.bag = bag;
     }
@@ -43,6 +44,10 @@ public class CodeElement implements Comparable<CodeElement> {
 
     public Collection<String> getBag() {
         return bag;
+    }
+
+    public String getAppName() {
+        return appName;
     }
 
     /**

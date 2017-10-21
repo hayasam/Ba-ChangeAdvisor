@@ -38,7 +38,7 @@ public class CodeElementRepositoryTest {
 
     @Test
     public void test() throws Exception {
-        CodeElement codeElement = new CodeElement("HelloWorld", Sets.newHashSet("hello", "world"));
+        CodeElement codeElement = new CodeElement("", "HelloWorld", Sets.newHashSet("hello", "world"));
         codeElement = repository.save(codeElement);
 
 
