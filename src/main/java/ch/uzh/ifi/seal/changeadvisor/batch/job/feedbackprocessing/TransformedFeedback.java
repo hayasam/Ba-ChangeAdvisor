@@ -2,6 +2,7 @@ package ch.uzh.ifi.seal.changeadvisor.batch.job.feedbackprocessing;
 
 import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResult;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.Review;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -12,7 +13,7 @@ import java.util.Collection;
  * Created by alex on 20.07.2017.
  */
 @Document
-public class TransformedFeedback {
+public class TransformedFeedback implements Comparable<TransformedFeedback> {
 
     @Id
     private String id;
@@ -117,5 +118,10 @@ public class TransformedFeedback {
         result = 31 * result + (bagOfWords != null ? bagOfWords.hashCode() : 0);
         result = 31 * result + (transformedSentence != null ? transformedSentence.hashCode() : 0);
         return result;
+    }
+
+    @Override
+    public int compareTo(@NotNull TransformedFeedback o) {
+        return ardocResult.getReviewDate().compareTo(o.getArdocResult().getReviewDate());
     }
 }

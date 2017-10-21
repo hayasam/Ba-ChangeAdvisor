@@ -28,6 +28,13 @@ public class Review implements Comparable<Review>, HasReview {
         this.appName = appName;
     }
 
+    public Review(String appName, String reviewText, Date reviewDate, int numberOfStars) {
+        this.appName = appName;
+        this.reviewText = reviewText;
+        this.reviewDate = reviewDate;
+        this.numberOfStars = numberOfStars;
+    }
+
     public Review(String id, String appName, String reviewText, Date reviewDate, int numberOfStars) {
         this.id = id;
         this.appName = appName;
