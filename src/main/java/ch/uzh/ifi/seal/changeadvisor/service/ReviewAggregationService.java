@@ -1,15 +1,11 @@
 package ch.uzh.ifi.seal.changeadvisor.service;
 
 
-import ch.uzh.ifi.seal.changeadvisor.batch.job.documentclustering.TopicAssignment;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.feedbackprocessing.TransformedFeedback;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.feedbackprocessing.TransformedFeedbackRepository;
-import ch.uzh.ifi.seal.changeadvisor.batch.job.linking.ChangeAdvisorLinker;
-import ch.uzh.ifi.seal.changeadvisor.batch.job.linking.LinkingResult;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.Review;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.tfidf.Label;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.tfidf.LabelRepository;
-import ch.uzh.ifi.seal.changeadvisor.source.model.CodeElementRepository;
 import ch.uzh.ifi.seal.changeadvisor.tfidf.AbstractNGram;
 import ch.uzh.ifi.seal.changeadvisor.tfidf.Corpus;
 import ch.uzh.ifi.seal.changeadvisor.tfidf.Document;
@@ -45,16 +41,14 @@ public class ReviewAggregationService {
 
     private final LabelRepository labelRepository;
 
-    private final CodeElementRepository codeElementRepository;
-
     @Autowired
     public ReviewAggregationService(MongoTemplate mongoOperations, TfidfService tfidfService,
-                                    TransformedFeedbackRepository transformedFeedbackRepository, LabelRepository labelRepository, CodeElementRepository codeElementRepository) {
+                                    TransformedFeedbackRepository transformedFeedbackRepository,
+                                    LabelRepository labelRepository) {
         this.mongoOperations = mongoOperations;
         this.tfidfService = tfidfService;
         this.transformedFeedbackRepository = transformedFeedbackRepository;
         this.labelRepository = labelRepository;
-        this.codeElementRepository = codeElementRepository;
     }
 
     /**
@@ -178,22 +172,5 @@ public class ReviewAggregationService {
             categoryDocumentMap.put(reviewCategory.getCategory(), reviewCategory.asDocument(ngramSize));
         }
         return categoryDocumentMap;
-    }
-
-    /**
-     * Retrieves the reviews based on the top N labels.
-     * Fetches all reviews which contain these top labels.
-     *
-     * @param dto object representing the parameters we use to compute the top N labels
-     *            (e.g. how many labels and for which app)
-     * @return reviews for the top N labels.
-     */
-    public List<LinkingResult> link(String token, ReviewsByTopLabelsDto dto) {
-        Label label = labelRepository.findByAppNameAndCategoryAndToken(dto.getApp(), dto.getCategory(), token);
-        List<TransformedFeedback> feedback = transformedFeedbackRepository.findDistinctByArdocResultAppNameAndArdocResultCategoryAndTransformedSentenceContainingIgnoreCase(dto.getApp(), dto.getCategory(), label.getLabel());
-        List<TopicAssignment> topicAssignments = feedback.stream().map(f -> new TopicAssignment(f.getSentence(), f.getBagOfWords(), 1)).collect(Collectors.toList());
-        ChangeAdvisorLinker linker = new ChangeAdvisorLinker();
-        List<LinkingResult> results = linker.process(1, topicAssignments, codeElementRepository.findAll());
-        return results;
     }
 }

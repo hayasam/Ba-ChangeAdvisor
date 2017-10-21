@@ -6,10 +6,7 @@ import ch.uzh.ifi.seal.changeadvisor.batch.job.linking.LinkingResult;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.Review;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.ReviewRepository;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.tfidf.Label;
-import ch.uzh.ifi.seal.changeadvisor.service.ArdocService;
-import ch.uzh.ifi.seal.changeadvisor.service.FailedToRunJobException;
-import ch.uzh.ifi.seal.changeadvisor.service.ReviewAggregationService;
-import ch.uzh.ifi.seal.changeadvisor.service.ReviewImportService;
+import ch.uzh.ifi.seal.changeadvisor.service.*;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.LabelWithReviews;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewAnalysisDto;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewDistributionReport;
@@ -39,12 +36,15 @@ public class ReviewController {
 
     private final ReviewAggregationService aggregationService;
 
+    private final LabelLinkerService labelLinkerService;
+
     @Autowired
-    public ReviewController(ReviewImportService reviewImportService, ReviewRepository repository, ArdocService ardocService, ReviewAggregationService service) {
+    public ReviewController(ReviewImportService reviewImportService, ReviewRepository repository, ArdocService ardocService, ReviewAggregationService service, LabelLinkerService labelLinkerService) {
         this.reviewImportService = reviewImportService;
         this.repository = repository;
         this.ardocService = ardocService;
         this.aggregationService = service;
+        this.labelLinkerService = labelLinkerService;
     }
 
     @PostMapping(path = "reviews")
@@ -126,6 +126,6 @@ public class ReviewController {
 
     @PostMapping(path = "reviews/linking")
     public List<LinkingResult> link(@RequestBody ReviewsByTopLabelsDto dto, @RequestParam("label") String label) {
-        return aggregationService.link(label, dto);
+        return labelLinkerService.link(label, dto);
     }
 }
