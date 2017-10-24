@@ -18,6 +18,8 @@ public class Project implements Comparable<Project> {
     @Indexed(unique = true)
     private String appName;
 
+    private String googlePlayId;
+
     private String path;
 
     private String remoteUrl;
@@ -80,6 +82,14 @@ public class Project implements Comparable<Project> {
         return checkCronExpression(cronSchedule);
     }
 
+    public String getGooglePlayId() {
+        return googlePlayId;
+    }
+
+    public void setGooglePlayId(String googlePlayId) {
+        this.googlePlayId = googlePlayId;
+    }
+
     /**
      * A cron expression can either be empty (manual triggering of review import)
      * or it has to be a valid cron expression.
@@ -105,6 +115,7 @@ public class Project implements Comparable<Project> {
         return "Project{" +
                 "id='" + id + '\'' +
                 ", appName='" + appName + '\'' +
+                ", googlePlayId='" + googlePlayId + '\'' +
                 ", path='" + path + '\'' +
                 ", remoteUrl='" + remoteUrl + '\'' +
                 ", cronSchedule='" + cronSchedule + '\'' +
@@ -119,6 +130,8 @@ public class Project implements Comparable<Project> {
         Project project = (Project) o;
 
         if (appName != null ? !appName.equals(project.appName) : project.appName != null) return false;
+        if (googlePlayId != null ? !googlePlayId.equals(project.googlePlayId) : project.googlePlayId != null)
+            return false;
         if (path != null ? !path.equals(project.path) : project.path != null) return false;
         return remoteUrl != null ? remoteUrl.equals(project.remoteUrl) : project.remoteUrl == null;
     }
@@ -126,6 +139,7 @@ public class Project implements Comparable<Project> {
     @Override
     public int hashCode() {
         int result = appName != null ? appName.hashCode() : 0;
+        result = 31 * result + (googlePlayId != null ? googlePlayId.hashCode() : 0);
         result = 31 * result + (path != null ? path.hashCode() : 0);
         result = 31 * result + (remoteUrl != null ? remoteUrl.hashCode() : 0);
         return result;
