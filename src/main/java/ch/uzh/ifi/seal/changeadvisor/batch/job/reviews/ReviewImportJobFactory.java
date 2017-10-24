@@ -4,6 +4,8 @@ import ch.uzh.ifi.seal.changeadvisor.batch.job.ArdocStepConfig;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.DocumentClusteringStepConfig;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.FeedbackTransformationStepConfig;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.TermFrequencyInverseDocumentFrequencyStepConfig;
+import ch.uzh.ifi.seal.changeadvisor.project.Project;
+import ch.uzh.ifi.seal.changeadvisor.project.ProjectRepository;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewAnalysisDto;
 import com.google.common.collect.Lists;
 import org.apache.log4j.Logger;
@@ -42,21 +44,25 @@ public class ReviewImportJobFactory {
 
     private final TermFrequencyInverseDocumentFrequencyStepConfig tfidfStepConfig;
 
+    private final ProjectRepository projectRepository;
+
     @Autowired
-    public ReviewImportJobFactory(StepBuilderFactory stepBuilderFactory, JobBuilderFactory reviewImportJobBuilder, ArdocStepConfig ardocConfig, FeedbackTransformationStepConfig feedbackTransformationStepConfig, DocumentClusteringStepConfig documentClusteringStepConfig, TermFrequencyInverseDocumentFrequencyStepConfig tfidfStepConfig) {
+    public ReviewImportJobFactory(StepBuilderFactory stepBuilderFactory, JobBuilderFactory reviewImportJobBuilder, ArdocStepConfig ardocConfig, FeedbackTransformationStepConfig feedbackTransformationStepConfig, DocumentClusteringStepConfig documentClusteringStepConfig, TermFrequencyInverseDocumentFrequencyStepConfig tfidfStepConfig, ProjectRepository projectRepository) {
         this.stepBuilderFactory = stepBuilderFactory;
         this.jobBuilderFactory = reviewImportJobBuilder;
         this.ardocConfig = ardocConfig;
         this.feedbackTransformationStepConfig = feedbackTransformationStepConfig;
         this.documentClusteringStepConfig = documentClusteringStepConfig;
         this.tfidfStepConfig = tfidfStepConfig;
+        this.projectRepository = projectRepository;
     }
 
     public Job job(Map<String, Object> params) {
         String app = getApp(params).orElseThrow(() -> new IllegalArgumentException("Apps to parse cannot be empty."));
+        Project project = projectRepository.findByAppName(app);
         return jobBuilderFactory.get(REVIEW_IMPORT)
                 .incrementer(new RunIdIncrementer())
-                .flow(reviewImport(Lists.newArrayList(app), params))
+                .flow(reviewImport(Lists.newArrayList(project.getGooglePlayId()), params))
                 .next(ardocConfig.ardocAnalysis(app))
                 .next(feedbackTransformationStepConfig.transformFeedback(app))
                 .next(documentClusteringStepConfig.documentsClustering(app))
