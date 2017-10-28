@@ -8,6 +8,7 @@ import ch.uzh.ifi.seal.changeadvisor.project.Project;
 import ch.uzh.ifi.seal.changeadvisor.project.ProjectRepository;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewAnalysisDto;
 import com.google.common.collect.Lists;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -58,8 +59,8 @@ public class ReviewImportJobFactory {
     }
 
     public Job job(Map<String, Object> params) {
-        String app = getApp(params).orElseThrow(() -> new IllegalArgumentException("Apps to parse cannot be empty."));
-        Project project = projectRepository.findByAppName(app);
+        Project project = getApp(params).orElseThrow(() -> new IllegalArgumentException("No project found."));
+        final String app = project.getAppName();
         return jobBuilderFactory.get(REVIEW_IMPORT)
                 .incrementer(new RunIdIncrementer())
                 .flow(reviewImport(Lists.newArrayList(project.getGooglePlayId()), params))
@@ -72,9 +73,13 @@ public class ReviewImportJobFactory {
     }
 
     @SuppressWarnings("unchecked")
-    private Optional<String> getApp(Map<String, Object> params) {
+    private Optional<Project> getApp(Map<String, Object> params) {
         String apps = (String) params.get("apps");
-        return Optional.ofNullable(apps);
+        String id = (String) params.get("id");
+        if (!StringUtils.isEmpty(apps)) {
+            return Optional.ofNullable(projectRepository.findByAppName(apps));
+        }
+        return Optional.ofNullable(projectRepository.findOne(id));
     }
 
     private Step reviewImport(ArrayList<String> apps, Map<String, Object> params) {

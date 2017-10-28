@@ -19,19 +19,19 @@ public class ProjectResource {
         this.service = service;
     }
 
-    @GetMapping("/project")
+    @GetMapping("/projects")
     public List<Project> getProjects() {
         List<Project> projects = service.findAll();
         Collections.sort(projects);
         return projects;
     }
 
-    @GetMapping("/project/{projectId}")
+    @GetMapping("/projects/{projectId}")
     public Project getProjectById(@PathVariable("projectId") final String projectId) {
         return service.findById(projectId);
     }
 
-    @PostMapping("/project")
+    @PostMapping("/projects")
     public ResponseEntity<Project> saveProject(@RequestBody Project project) {
         if (project == null || !project.hasValidCronExpression()) {
             return ResponseEntity.badRequest().body(project);

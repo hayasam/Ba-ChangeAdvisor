@@ -6,6 +6,7 @@ import ch.uzh.ifi.seal.changeadvisor.batch.job.linking.LinkingResult;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.Review;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.ReviewRepository;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.tfidf.Label;
+import ch.uzh.ifi.seal.changeadvisor.project.Project;
 import ch.uzh.ifi.seal.changeadvisor.service.*;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.LabelWithReviews;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewAnalysisDto;
@@ -38,19 +39,22 @@ public class ReviewController {
 
     private final LabelLinkerService labelLinkerService;
 
+    private final ProjectService projectService;
+
     @Autowired
-    public ReviewController(ReviewImportService reviewImportService, ReviewRepository repository, ArdocService ardocService, ReviewAggregationService service, LabelLinkerService labelLinkerService) {
+    public ReviewController(ReviewImportService reviewImportService, ReviewRepository repository, ArdocService ardocService, ReviewAggregationService service, LabelLinkerService labelLinkerService, ProjectService projectService) {
         this.reviewImportService = reviewImportService;
         this.repository = repository;
         this.ardocService = ardocService;
         this.aggregationService = service;
         this.labelLinkerService = labelLinkerService;
+        this.projectService = projectService;
     }
 
     @PostMapping(path = "reviews")
     public long reviewImport(@RequestBody Map<String, Object> params) throws FailedToRunJobException {
         Assert.notEmpty(params, "Empty or null parameters. Need at least list of apps.");
-        Assert.isTrue(params.containsKey("apps"), "Request has to contain list of apps.");
+        Assert.isTrue(params.containsKey("apps") || params.containsKey("id"), "Request has to contain list of apps.");
         logger.info(String.format("Creating review import job and starting process with parameters %s.", params));
         JobExecution jobExecution = reviewImportService.reviewImport(params);
         return jobExecution.getJobId();
@@ -96,6 +100,12 @@ public class ReviewController {
         logger.info(String.format("Starting reviews clustering job for app %s!", dto.getApp()));
         JobExecution jobExecution = reviewImportService.reviewClustering(dto);
         return jobExecution.getJobId();
+    }
+
+    @GetMapping(path = "reviews/{projectId}/distribution")
+    public ReviewDistributionReport report(@PathVariable("projectId") String projectId) {
+        Project project = projectService.findById(projectId);
+        return aggregationService.groupByCategories(project.getAppName());
     }
 
     @PostMapping(path = "reviews/distribution")
