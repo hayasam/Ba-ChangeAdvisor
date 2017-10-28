@@ -1,7 +1,6 @@
 package ch.uzh.ifi.seal.changeadvisor.batch.config;
 
 import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.ReviewNoOpMarker;
-import com.mongodb.Mongo;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import org.springframework.context.annotation.Bean;
@@ -30,7 +29,7 @@ public class ReviewsDbConfiguration extends AbstractRepoConfig {
     }
 
     @Override
-    public Mongo mongo() throws Exception {
+    public MongoClient mongo() throws Exception {
         final MongoClientURI mongoClientURI = new MongoClientURI(reviewsDataSource().getMongodb().getUri());
         return new MongoClient(mongoClientURI.getHosts().get(0), reviewsDataSource().getMongodb().getPort());
     }

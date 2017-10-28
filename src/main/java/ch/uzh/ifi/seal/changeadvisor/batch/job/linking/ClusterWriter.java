@@ -22,6 +22,6 @@ public class ClusterWriter implements ItemWriter<List<LinkingResult>> {
 
     @Override
     public void write(List<? extends List<LinkingResult>> items) throws Exception {
-        items.forEach(repository::save);
+        items.forEach(repository::saveAll);
     }
 }

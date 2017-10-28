@@ -47,6 +47,7 @@ public class ArdocService {
     }
 
     public ArdocResult getLastAnalyzed(final String app) {
-        return repository.findFirstByAppNameOrderByReview_ReviewDateDesc(app).orElse(null);
+        List<ArdocResult> res = repository.findTop1ByAppNameOrderByReview_ReviewDateDesc(app);
+        return res.get(0);
     }
 }

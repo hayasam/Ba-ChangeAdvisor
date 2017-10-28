@@ -1,12 +1,14 @@
 package ch.uzh.ifi.seal.changeadvisor.web;
 
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ExecutionReport;
+import ch.uzh.ifi.seal.changeadvisor.web.dto.StepExecutionReport;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -48,16 +50,18 @@ public class JobHolder {
      *
      * @param jobId id of jobExecution.
      * @return collection of reports of execution steps for the wanted job.
-     * @see ExecutionReport
+     * @see StepExecutionReport
      */
-    public Collection<ExecutionReport> executionReportForJob(Long jobId) {
+    public ExecutionReport executionReportForJob(Long jobId) {
         if (jobId != null && hasJob(jobId)) {
             JobExecution job = getJob(jobId);
+            String jobName = job.getJobInstance().getJobName();
             Collection<StepExecution> stepExecutions = job.getStepExecutions();
-            return stepExecutions
+            List<StepExecutionReport> stepReports = stepExecutions
                     .stream()
-                    .map(ExecutionReport::of)
+                    .map(StepExecutionReport::of)
                     .collect(Collectors.toList());
+            return new ExecutionReport(jobName, stepReports);
         }
         throw new IllegalArgumentException(String.format("No job found for job id: %d", jobId));
     }

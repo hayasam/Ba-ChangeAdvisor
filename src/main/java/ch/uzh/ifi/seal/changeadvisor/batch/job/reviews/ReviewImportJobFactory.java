@@ -79,7 +79,7 @@ public class ReviewImportJobFactory {
         if (!StringUtils.isEmpty(apps)) {
             return Optional.ofNullable(projectRepository.findByAppName(apps));
         }
-        return Optional.ofNullable(projectRepository.findOne(id));
+        return projectRepository.findById(id);
     }
 
     private Step reviewImport(ArrayList<String> apps, Map<String, Object> params) {

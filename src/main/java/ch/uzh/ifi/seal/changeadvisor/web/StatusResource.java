@@ -7,8 +7,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Collection;
-
 @RestController
 public class StatusResource {
 
@@ -21,7 +19,7 @@ public class StatusResource {
 
     @GetMapping(path = "status/{jobId}")
     @ResponseBody
-    public Collection<ExecutionReport> reviewAnalysis(@PathVariable(name = "jobId") Long jobId) {
+    public ExecutionReport reviewAnalysis(@PathVariable(name = "jobId") Long jobId) {
         return jobHolder.executionReportForJob(jobId);
     }
 }

@@ -16,9 +16,9 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
-import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.aggregation.TypedAggregation;
 import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.util.CloseableIterator;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -65,12 +65,17 @@ public class ReviewAggregationService {
                 Aggregation.match(Criteria.where("ardocResult.appName").is(appName)),
                 Aggregation.group("ardocResult.category").first("ardocResult.category").as("category") // set group by field and save it as 'category' in resulting object.
                         .push("$$ROOT").as("reviews") // push entire document to field 'reviews' in ReviewCategory.
-        );
+        ).withOptions(Aggregation.newAggregationOptions().allowDiskUse(true).build());
 
-        AggregationResults<ReviewCategory> groupResults =
-                mongoOperations.aggregate(categoryAggregation, TransformedFeedback.class, ReviewCategory.class);
-
-        return new ReviewDistributionReport(groupResults.getMappedResults());
+        CloseableIterator<ReviewCategory> groupResults =
+                mongoOperations.aggregateStream(categoryAggregation, TransformedFeedback.class, ReviewCategory.class);
+        List<ReviewCategory> categories = new ArrayList<>();
+        while (groupResults.hasNext()) {
+            ReviewCategory category = groupResults.next();
+            categories.add(category);
+        }
+        return new ReviewDistributionReport(categories);
+//        return new ReviewDistributionReport(groupResults.getMappedResults());
     }
 
     /**

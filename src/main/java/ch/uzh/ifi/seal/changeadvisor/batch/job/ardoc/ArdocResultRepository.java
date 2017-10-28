@@ -6,7 +6,6 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface ArdocResultRepository extends MongoRepository<ArdocResult, String> {
@@ -15,7 +14,7 @@ public interface ArdocResultRepository extends MongoRepository<ArdocResult, Stri
 
     List<ArdocResult> findByAppNameOrderByReview_ReviewDateDesc(String appName);
 
-    Optional<ArdocResult> findFirstByAppNameOrderByReview_ReviewDateDesc(String appName);
+    List<ArdocResult> findTop1ByAppNameOrderByReview_ReviewDateDesc(String appName);
 
     Page<ArdocResult> findByAppName(String appName, Pageable pageable);
 

@@ -35,11 +35,11 @@ public class ReviewAggregationServiceTest {
         ReviewCategory informationGiving = reviewCategories.findForCategory("INFORMATION GIVING");
         ReviewCategory other = reviewCategories.findForCategory("OTHER");
 
-        Assert.assertThat(featureRequest.size(), is(130));
-        Assert.assertThat(informationSeeking.size(), is(19));
-        Assert.assertThat(problemDiscovery.size(), is(189));
-        Assert.assertThat(informationGiving.size(), is(158));
-        Assert.assertThat(other.size(), is(1091));
+        Assert.assertThat(featureRequest.size(), is(136));
+        Assert.assertThat(informationSeeking.size(), is(22));
+        Assert.assertThat(problemDiscovery.size(), is(206));
+        Assert.assertThat(informationGiving.size(), is(169));
+        Assert.assertThat(other.size(), is(1162));
     }
 
 }

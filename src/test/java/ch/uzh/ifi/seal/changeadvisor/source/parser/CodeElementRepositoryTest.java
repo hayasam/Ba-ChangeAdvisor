@@ -42,7 +42,7 @@ public class CodeElementRepositoryTest {
         codeElement = repository.save(codeElement);
 
 
-        CodeElement element = repository.findOne(codeElement.getId());
+        CodeElement element = repository.findById(codeElement.getId()).get();
         Assert.assertThat(element, is(codeElement));
     }
 }

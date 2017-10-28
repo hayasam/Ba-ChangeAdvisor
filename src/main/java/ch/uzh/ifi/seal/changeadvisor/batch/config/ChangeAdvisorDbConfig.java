@@ -7,7 +7,6 @@ import ch.uzh.ifi.seal.changeadvisor.batch.job.linking.LinkingResultRepository;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.tfidf.LabelRepository;
 import ch.uzh.ifi.seal.changeadvisor.project.ProjectRepository;
 import ch.uzh.ifi.seal.changeadvisor.source.model.CodeElementRepository;
-import com.mongodb.Mongo;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import org.springframework.boot.autoconfigure.mongo.MongoProperties;
@@ -45,7 +44,7 @@ public class ChangeAdvisorDbConfig extends AbstractRepoConfig {
     }
 
     @Override
-    public Mongo mongo() throws Exception {
+    public MongoClient mongo() throws Exception {
         return new MongoClient(primaryDataSource().getHost(), primaryDataSource().getPort());
     }
 

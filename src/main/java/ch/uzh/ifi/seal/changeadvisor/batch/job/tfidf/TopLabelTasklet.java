@@ -39,7 +39,7 @@ public class TopLabelTasklet implements Tasklet {
                         new ReviewsByTopLabelsDto(appName, category.getCategory(), MAX_LABELS_TO_COMPUTE, i);
 
                 List<Label> labels = service.topNLabels(dto);
-                repository.save(labels);
+                repository.saveAll(labels);
             }
         }
 

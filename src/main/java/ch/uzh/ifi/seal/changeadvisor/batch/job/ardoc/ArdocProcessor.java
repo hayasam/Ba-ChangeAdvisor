@@ -3,6 +3,9 @@ package ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc;
 import org.apache.log4j.Logger;
 import org.ardoc.Parser;
 import org.ardoc.UnknownCombinationException;
+import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.annotation.BeforeStep;
+import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemProcessor;
 
 /**
@@ -19,6 +22,8 @@ public class ArdocProcessor implements ItemProcessor<String, ArdocResults> {
 
     private int counter = 0;
 
+    private ExecutionContext executionContext;
+
     @Override
     public ArdocResults process(String item) throws UnknownCombinationException {
         ArdocResults result = new ArdocResults(null, parser.extract(ARDOC_METHODS, item));
@@ -29,7 +34,18 @@ public class ArdocProcessor implements ItemProcessor<String, ArdocResults> {
     private void trackProgress() {
         counter += 1;
         if (counter % 10 == 0) {
-            logger.info(String.format("Ardoc: Finished processing %d lines.", counter));
+            String progressMessage = String.format("Ardoc: Finished processing %d lines.", counter);
+            logger.info(progressMessage);
+            writeIntoExecutionContext(progressMessage);
         }
+    }
+
+    @BeforeStep
+    public void beforeStep(StepExecution stepExecution) {
+        executionContext = stepExecution.getExecutionContext();
+    }
+
+    private <T> void writeIntoExecutionContext(T progress) {
+        executionContext.put("ardoc.progress", progress);
     }
 }

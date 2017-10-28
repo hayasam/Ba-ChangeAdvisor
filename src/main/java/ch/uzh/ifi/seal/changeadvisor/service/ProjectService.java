@@ -24,7 +24,7 @@ public class ProjectService {
     }
 
     public Project findById(final String projectId) {
-        return repository.findOne(projectId);
+        return repository.findById(projectId).orElseThrow(IllegalArgumentException::new);
     }
 
     public Project findByAppName(final String appName) {

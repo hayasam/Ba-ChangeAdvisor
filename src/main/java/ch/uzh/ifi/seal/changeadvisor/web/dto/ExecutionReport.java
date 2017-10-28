@@ -1,116 +1,53 @@
 package ch.uzh.ifi.seal.changeadvisor.web.dto;
 
-import org.springframework.batch.core.StepExecution;
+import com.google.common.collect.ImmutableList;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Map;
+import java.util.List;
 
 public class ExecutionReport {
 
-    private SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
-    private String stepName;
+    private List<StepExecutionReport> stepReports;
 
-    private Date startTime;
+    private final String jobName;
 
-    private Date endTime;
+    private final String startTime;
 
-    private Date lastUpdated;
+    private final String endTime;
 
-    private String detailMessage;
+    private final String lastUpdated;
 
-    private String exitCode;
+    public ExecutionReport(String jobName, List<StepExecutionReport> stepReports) {
+        this.jobName = jobName;
+        this.stepReports = stepReports;
 
-    public ExecutionReport() {
+        StepExecutionReport firstReport = stepReports.get(0);
+        this.startTime = firstReport.getStartTime();
+
+        StepExecutionReport lastReport = stepReports.get(stepReports.size() - 1);
+        this.endTime = lastReport.getEndTime();
+        this.lastUpdated = lastReport.getLastUpdated();
     }
 
-    public ExecutionReport(String stepName, Date startTime, Date endTime, Date lastUpdated, String detailMessage, String exitCode) {
-        this.stepName = stepName;
-        this.startTime = startTime;
-        this.endTime = endTime;
-        this.lastUpdated = lastUpdated;
-        this.detailMessage = detailMessage;
-        this.exitCode = exitCode;
+    public String getJobName() {
+        return jobName;
     }
 
-    public String getStepName() {
-        return stepName;
-    }
-
-    public void setStepName(String stepName) {
-        this.stepName = stepName;
+    public List<StepExecutionReport> getStepReports() {
+        return ImmutableList.copyOf(stepReports);
     }
 
     public String getStartTime() {
-        return format.format(startTime);
-    }
-
-    public void setStartTime(Date startTime) {
-        this.startTime = startTime;
+        return startTime;
     }
 
     public String getEndTime() {
-        if (endTime == null) {
-            return "Pending";
-        }
-        return format.format(endTime);
-    }
-
-    public void setEndTime(Date endTime) {
-        this.endTime = endTime;
+        return endTime;
     }
 
     public String getLastUpdated() {
-        if (lastUpdated == null) {
-            return "Pending";
-        }
-        return format.format(lastUpdated);
-    }
-
-    public void setLastUpdated(Date lastUpdated) {
-        this.lastUpdated = lastUpdated;
-    }
-
-    public String getDetailMessage() {
-        return detailMessage;
-    }
-
-    public void setDetailMessage(String detailMessage) {
-        this.detailMessage = detailMessage;
-    }
-
-    public String getExitCode() {
-        return exitCode;
-    }
-
-    public void setExitCode(String exitCode) {
-        this.exitCode = exitCode;
-    }
-
-    public static ExecutionReport of(StepExecution stepExecution) {
-        String message = "";
-        if (hasFailureInContext(stepExecution)) {
-            message = stepExecution.getFailureExceptions().get(0).getMessage();
-        }
-        if (hasProgressInContext(stepExecution)) {
-            Map<String, Integer> progressMap = getProgressFromContext(stepExecution);
-            message = progressMap.toString();
-        }
-        return new ExecutionReport(stepExecution.getStepName(), stepExecution.getStartTime(),
-                stepExecution.getEndTime(), stepExecution.getLastUpdated(), message, stepExecution.getExitStatus().getExitCode());
-    }
-
-    private static boolean hasFailureInContext(StepExecution stepExecution) {
-        return !stepExecution.getFailureExceptions().isEmpty();
-    }
-
-    private static boolean hasProgressInContext(StepExecution stepExecution) {
-        return stepExecution.getExecutionContext().containsKey("extractor.progress");
-    }
-
-    @SuppressWarnings("unchecked")
-    private static Map<String, Integer> getProgressFromContext(StepExecution stepExecution) {
-        return (Map<String, Integer>) stepExecution.getExecutionContext().get("extractor.progress");
+        return lastUpdated;
     }
 }

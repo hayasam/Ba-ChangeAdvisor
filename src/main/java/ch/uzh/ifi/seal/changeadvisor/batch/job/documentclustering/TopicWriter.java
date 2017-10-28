@@ -40,7 +40,7 @@ public class TopicWriter implements ItemWriter<TopicClusteringResult> {
         TopicClusteringResult topicClusteringResult = items.get(0);
         Collection<TopicAssignment> assignments = topicClusteringResult.getAssignments();
         List<Topic> topics = topicClusteringResult.getTopics();
-        assignmentRepository.save(assignments);
-        topicRepository.save(topics);
+        assignmentRepository.saveAll(assignments);
+        topicRepository.saveAll(topics);
     }
 }

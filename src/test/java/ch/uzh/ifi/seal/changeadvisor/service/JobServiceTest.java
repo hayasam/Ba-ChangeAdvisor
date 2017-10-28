@@ -11,8 +11,10 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.launch.JobLauncher;
 
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class JobServiceTest {
 
@@ -25,6 +27,9 @@ public class JobServiceTest {
     @Mock
     private Job job;
 
+    @Mock
+    private JobExecution jobExecution;
+
     @InjectMocks
     private JobService service;
 
@@ -36,6 +41,9 @@ public class JobServiceTest {
     @Test
     public void run() throws Exception {
         JobParameters parameters = service.parametersWithCurrentTimestamp();
+
+        when(launcher.run(eq(job), any(JobParameters.class))).thenReturn(jobExecution);
+
         service.run(job, parameters);
         verify(launcher).run(job, parameters);
         verify(jobHolder).addJob(any(JobExecution.class));
