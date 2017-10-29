@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -136,6 +137,8 @@ public class ReviewController {
 
     @PostMapping(path = "reviews/linking")
     public List<LinkingResult> link(@RequestBody ReviewsByTopLabelsDto dto, @RequestParam("label") String label) {
-        return labelLinkerService.link(label, dto);
+        List<LinkingResult> results = labelLinkerService.link(label, dto);
+        results.sort(Comparator.comparing(LinkingResult::getSimilarity).reversed().thenComparing(LinkingResult::getCodeComponentName));
+        return results;
     }
 }
