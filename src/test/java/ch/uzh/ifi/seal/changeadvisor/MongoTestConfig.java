@@ -24,7 +24,7 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 @EnableMongoRepositories(basePackageClasses =
         {CodeElementRepository.class, TopicRepository.class,
                 TransformedFeedbackRepository.class, ArdocResultRepository.class, LinkingResultRepository.class,
-                LabelRepository.class, ReviewRepository.class, ProjectRepository.class})
+                LabelRepository.class, ReviewRepository.class, ProjectRepository.class}, mongoTemplateRef = "testMongoTemplate")
 public class MongoTestConfig extends AbstractRepoConfig {
 
     @Bean
@@ -49,7 +49,7 @@ public class MongoTestConfig extends AbstractRepoConfig {
     }
 
     @Bean
-    public MongoTemplate mongoTemplate() {
+    public MongoTemplate testMongoTemplate() {
         return new MongoTemplate(mongoDbFactory());
     }
 }
