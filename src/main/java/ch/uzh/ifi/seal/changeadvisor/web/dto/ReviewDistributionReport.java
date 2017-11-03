@@ -3,28 +3,28 @@ package ch.uzh.ifi.seal.changeadvisor.web.dto;
 import com.google.common.collect.ImmutableSet;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
 
-public class ReviewDistributionReport implements Iterable<ReviewCategory> {
+public class ReviewDistributionReport implements Iterable<ReviewCategoryReport> {
 
-    private Set<ReviewCategory> distribution;
+    private Set<ReviewCategoryReport> distribution;
 
-    public ReviewDistributionReport(Collection<ReviewCategory> distribution) {
+    public ReviewDistributionReport(Iterable<? extends ReviewCategoryReport> distribution) {
         this.distribution = ImmutableSet.copyOf(distribution);
     }
 
-    public int getTotalReviews() {
-        return distribution.stream().mapToInt(ReviewCategory::size).sum();
+    @SuppressWarnings("unused")
+    public int getTotalReviewCount() {
+        return distribution.stream().mapToInt(ReviewCategoryReport::getReviewCount).sum();
     }
 
-    public Set<ReviewCategory> getDistribution() {
+    public Set<ReviewCategoryReport> getDistribution() {
         return distribution;
     }
 
     public boolean hasCategory(final String category) {
-        for (ReviewCategory reviewCategory : this) {
+        for (ReviewCategoryReport reviewCategory : this) {
             if (reviewCategory.getCategory().equalsIgnoreCase(category)) {
                 return true;
             }
@@ -32,8 +32,8 @@ public class ReviewDistributionReport implements Iterable<ReviewCategory> {
         return false;
     }
 
-    public ReviewCategory findForCategory(final String category) {
-        for (ReviewCategory reviewCategory : this) {
+    public ReviewCategoryReport findForCategory(final String category) {
+        for (ReviewCategoryReport reviewCategory : this) {
             if (reviewCategory.getCategory().equalsIgnoreCase(category)) {
                 return reviewCategory;
             }
@@ -43,9 +43,8 @@ public class ReviewDistributionReport implements Iterable<ReviewCategory> {
 
     @NotNull
     @Override
-    public Iterator<ReviewCategory> iterator() {
+    public Iterator<ReviewCategoryReport> iterator() {
         return distribution.iterator();
     }
-
 
 }

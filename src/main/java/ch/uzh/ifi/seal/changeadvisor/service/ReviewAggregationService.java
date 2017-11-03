@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.UncategorizedMongoDbException;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.aggregation.TypedAggregation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.util.CloseableIterator;
@@ -55,6 +56,28 @@ public class ReviewAggregationService {
 
     /**
      * Generates a category distribution report.
+     * Groups reviews by ardoc category but returns only the count of each category.
+     *
+     * @param appName application for which we want to generate a report.
+     * @return distribution report.
+     * @see ReviewDistributionReport
+     * @see ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResult#category
+     */
+    public ReviewDistributionReport groupByCategoriesCountOnly(final String appName) {
+        TypedAggregation<TransformedFeedback> categoryAggregation = Aggregation.newAggregation(TransformedFeedback.class,
+                Aggregation.match(Criteria.where("ardocResult.appName").is(appName)),
+                Aggregation.group("ardocResult.category").first("ardocResult.category").as("category")
+                        .count().as("reviewCount")
+        );
+
+        AggregationResults<ReviewCategoryCountOnly> groupResults =
+                mongoOperations.aggregate(categoryAggregation, TransformedFeedback.class, ReviewCategoryCountOnly.class);
+
+        return new ReviewDistributionReport(groupResults.getMappedResults());
+    }
+
+    /**
+     * Generates a category distribution report.
      * Groups reviews by ardoc category.
      *
      * @param appName application for which we want to generate a report.
@@ -62,6 +85,7 @@ public class ReviewAggregationService {
      * @see ReviewDistributionReport
      * @see ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResult#category
      */
+
     public ReviewDistributionReport groupByCategories(final String appName) {
         List<ReviewCategory> categories;
         try {
@@ -200,8 +224,8 @@ public class ReviewAggregationService {
 
     private Map<String, Document> mapReviewsToDocuments(ReviewDistributionReport reviewDistribution, final int ngramSize) {
         Map<String, Document> categoryDocumentMap = new HashMap<>();
-        for (ReviewCategory reviewCategory : reviewDistribution) {
-            categoryDocumentMap.put(reviewCategory.getCategory(), reviewCategory.asDocument(ngramSize));
+        for (ReviewCategoryReport reviewCategory : reviewDistribution) {
+            categoryDocumentMap.put(reviewCategory.getCategory(), ((ReviewCategory) reviewCategory).asDocument(ngramSize));
         }
         return categoryDocumentMap;
     }

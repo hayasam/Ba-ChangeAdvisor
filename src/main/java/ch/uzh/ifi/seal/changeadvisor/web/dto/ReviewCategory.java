@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class ReviewCategory {
+public class ReviewCategory implements ReviewCategoryReport {
 
     private static final Tokenizer tokenizer = new Tokenizer();
 
@@ -30,6 +30,7 @@ public class ReviewCategory {
         return reviews;
     }
 
+    @Override
     public String getCategory() {
         return category;
     }
@@ -38,7 +39,8 @@ public class ReviewCategory {
         return reviews.size();
     }
 
-    public int getReviewSize() {
+    @Override
+    public int getReviewCount() {
         return size();
     }
 

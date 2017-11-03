@@ -6,9 +6,8 @@ import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResult;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResultRepository;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.feedbackprocessing.TransformedFeedback;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.feedbackprocessing.TransformedFeedbackRepository;
-import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewCategory;
+import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewCategoryReport;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewDistributionReport;
-import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,8 +29,6 @@ import static org.hamcrest.core.Is.is;
 @SpringBootTest(classes = {ChangeadvisorApplication.class, MongoTestConfig.class})
 @ActiveProfiles("test")
 public class ReviewAggregationServiceTest {
-
-    private static final Logger logger = Logger.getLogger(ReviewAggregationServiceTest.class);
 
     private ReviewAggregationService service;
 
@@ -86,20 +83,34 @@ public class ReviewAggregationServiceTest {
 
     @Test
     public void groupyBy() throws Exception {
-
         ReviewDistributionReport reviewCategories = service.groupByCategories(APP_NAME);
-        logger.info(reviewCategories.toString());
-        ReviewCategory featureRequest = reviewCategories.findForCategory("FEATURE REQUEST");
-        ReviewCategory informationSeeking = reviewCategories.findForCategory("INFORMATION SEEKING");
-        ReviewCategory problemDiscovery = reviewCategories.findForCategory("PROBLEM DISCOVERY");
-        ReviewCategory informationGiving = reviewCategories.findForCategory("INFORMATION GIVING");
-        ReviewCategory other = reviewCategories.findForCategory("OTHER");
+        ReviewCategoryReport featureRequest = reviewCategories.findForCategory("FEATURE REQUEST");
+        ReviewCategoryReport informationSeeking = reviewCategories.findForCategory("INFORMATION SEEKING");
+        ReviewCategoryReport problemDiscovery = reviewCategories.findForCategory("PROBLEM DISCOVERY");
+        ReviewCategoryReport informationGiving = reviewCategories.findForCategory("INFORMATION GIVING");
+        ReviewCategoryReport other = reviewCategories.findForCategory("OTHER");
 
-        Assert.assertThat(featureRequest.size(), is(this.featureReq.size()));
-        Assert.assertThat(informationSeeking.size(), is(this.infoSeeking.size()));
-        Assert.assertThat(problemDiscovery.size(), is(this.problem.size()));
-        Assert.assertThat(informationGiving.size(), is(this.infoG.size()));
-        Assert.assertThat(other.size(), is(this.other.size()));
+        Assert.assertThat(featureRequest.getReviewCount(), is(this.featureReq.size()));
+        Assert.assertThat(informationSeeking.getReviewCount(), is(this.infoSeeking.size()));
+        Assert.assertThat(problemDiscovery.getReviewCount(), is(this.problem.size()));
+        Assert.assertThat(informationGiving.getReviewCount(), is(this.infoG.size()));
+        Assert.assertThat(other.getReviewCount(), is(this.other.size()));
+    }
+
+    @Test
+    public void groupyByCountOnly() throws Exception {
+        ReviewDistributionReport reviewCategories = service.groupByCategoriesCountOnly(APP_NAME);
+        ReviewCategoryReport featureRequest = reviewCategories.findForCategory("FEATURE REQUEST");
+        ReviewCategoryReport informationSeeking = reviewCategories.findForCategory("INFORMATION SEEKING");
+        ReviewCategoryReport problemDiscovery = reviewCategories.findForCategory("PROBLEM DISCOVERY");
+        ReviewCategoryReport informationGiving = reviewCategories.findForCategory("INFORMATION GIVING");
+        ReviewCategoryReport other = reviewCategories.findForCategory("OTHER");
+
+        Assert.assertThat(featureRequest.getReviewCount(), is(this.featureReq.size()));
+        Assert.assertThat(informationSeeking.getReviewCount(), is(this.infoSeeking.size()));
+        Assert.assertThat(problemDiscovery.getReviewCount(), is(this.problem.size()));
+        Assert.assertThat(informationGiving.getReviewCount(), is(this.infoG.size()));
+        Assert.assertThat(other.getReviewCount(), is(this.other.size()));
     }
 
 }

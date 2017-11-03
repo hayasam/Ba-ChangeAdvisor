@@ -104,8 +104,11 @@ public class ReviewController {
     }
 
     @GetMapping(path = "reviews/{projectId}/distribution")
-    public ReviewDistributionReport report(@PathVariable("projectId") String projectId) {
+    public ReviewDistributionReport report(@PathVariable("projectId") String projectId, @RequestParam("countOnly") boolean countOnly) {
         Project project = projectService.findById(projectId);
+        if (countOnly) {
+            return aggregationService.groupByCategoriesCountOnly(project.getAppName());
+        }
         return aggregationService.groupByCategories(project.getAppName());
     }
 

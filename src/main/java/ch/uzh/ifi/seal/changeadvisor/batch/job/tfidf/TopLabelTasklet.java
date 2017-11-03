@@ -1,7 +1,7 @@
 package ch.uzh.ifi.seal.changeadvisor.batch.job.tfidf;
 
 import ch.uzh.ifi.seal.changeadvisor.service.ReviewAggregationService;
-import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewCategory;
+import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewCategoryReport;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewDistributionReport;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewsByTopLabelsDto;
 import org.springframework.batch.core.StepContribution;
@@ -33,7 +33,7 @@ public class TopLabelTasklet implements Tasklet {
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
         repository.deleteAllByAppName(appName);
         ReviewDistributionReport reviewCategories = service.groupByCategories(appName);
-        for (ReviewCategory category : reviewCategories) {
+        for (ReviewCategoryReport category : reviewCategories) {
             for (int i = 1; i < MAX_NGRAM_SIZE; i++) {
                 ReviewsByTopLabelsDto dto =
                         new ReviewsByTopLabelsDto(appName, category.getCategory(), MAX_LABELS_TO_COMPUTE, i);
