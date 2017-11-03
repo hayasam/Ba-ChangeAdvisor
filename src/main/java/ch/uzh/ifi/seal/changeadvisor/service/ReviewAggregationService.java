@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.UncategorizedMongoDbException;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.aggregation.TypedAggregation;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -64,11 +65,16 @@ public class ReviewAggregationService {
      * @see ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResult#category
      */
     public ReviewDistributionReport groupByCategoriesCountOnly(final String appName) {
-        TypedAggregation<TransformedFeedback> categoryAggregation = Aggregation.newAggregation(TransformedFeedback.class,
-                Aggregation.match(Criteria.where("ardocResult.appName").is(appName)),
-                Aggregation.group("ardocResult.category").first("ardocResult.category").as("category")
-                        .count().as("reviewCount")
-        );
+        AggregationOperation match = Aggregation.match(Criteria.where("ardocResult.appName").is(appName));
+        AggregationOperation group = Aggregation.group("ardocResult.category").count().as("reviewCount");
+        AggregationOperation projection = Aggregation.project().and("_id").as("category").and("reviewCount").as("reviewCount");
+
+        TypedAggregation<TransformedFeedback> categoryAggregation =
+                Aggregation.newAggregation(TransformedFeedback.class,
+                        match,
+                        group,
+                        projection
+                );
 
         AggregationResults<ReviewCategoryCountOnly> groupResults =
                 mongoOperations.aggregate(categoryAggregation, TransformedFeedback.class, ReviewCategoryCountOnly.class);
