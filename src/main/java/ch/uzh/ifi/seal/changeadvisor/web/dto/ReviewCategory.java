@@ -2,6 +2,7 @@ package ch.uzh.ifi.seal.changeadvisor.web.dto;
 
 import ch.uzh.ifi.seal.changeadvisor.batch.job.feedbackprocessing.TransformedFeedback;
 import ch.uzh.ifi.seal.changeadvisor.tfidf.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.ImmutableSet;
 
 import java.util.Collection;
@@ -24,6 +25,7 @@ public class ReviewCategory {
         this.category = category;
     }
 
+    @JsonIgnore
     public Set<TransformedFeedback> getReviews() {
         return reviews;
     }
@@ -55,5 +57,13 @@ public class ReviewCategory {
     private String aggregateReviewsIntoDocument() {
         List<String> sentences = reviews.stream().map(TransformedFeedback::getTransformedSentence).collect(Collectors.toList());
         return String.join(WHITESPACE, sentences);
+    }
+
+    @Override
+    public String toString() {
+        return "ReviewCategory{" +
+                "category='" + category + '\'' +
+                "count=" + size() +
+                '}';
     }
 }

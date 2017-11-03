@@ -11,9 +11,11 @@ import ch.uzh.ifi.seal.changeadvisor.tfidf.Corpus;
 import ch.uzh.ifi.seal.changeadvisor.tfidf.Document;
 import ch.uzh.ifi.seal.changeadvisor.tfidf.TfidfService;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.*;
+import com.google.common.collect.ImmutableSet;
 import edu.emory.mathcs.backport.java.util.Collections;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.UncategorizedMongoDbException;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.TypedAggregation;
@@ -22,16 +24,16 @@ import org.springframework.data.util.CloseableIterator;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class ReviewAggregationService {
 
     private static final Logger logger = Logger.getLogger(ReviewAggregationService.class);
+
+    private static final Set<String> ardocCategories = ImmutableSet
+            .of("FEATURE REQUEST", "INFORMATION SEEKING", "INFORMATION GIVING", "PROBLEM DISCOVERY", "OTHER");
 
     private final MongoTemplate mongoOperations;
 
@@ -61,21 +63,39 @@ public class ReviewAggregationService {
      * @see ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResult#category
      */
     public ReviewDistributionReport groupByCategories(final String appName) {
-        TypedAggregation<TransformedFeedback> categoryAggregation = Aggregation.newAggregation(TransformedFeedback.class,
-                Aggregation.match(Criteria.where("ardocResult.appName").is(appName)),
-                Aggregation.group("ardocResult.category").first("ardocResult.category").as("category") // set group by field and save it as 'category' in resulting object.
-                        .push("$$ROOT").as("reviews") // push entire document to field 'reviews' in ReviewCategory.
-        ).withOptions(Aggregation.newAggregationOptions().allowDiskUse(true).build());
+        List<ReviewCategory> categories;
+        try {
+            TypedAggregation<TransformedFeedback> categoryAggregation = Aggregation.newAggregation(TransformedFeedback.class,
+                    Aggregation.match(Criteria.where("ardocResult.appName").is(appName)),
+                    Aggregation.group("ardocResult.category").first("ardocResult.category").as("category") // set group by field and save it as 'category' in resulting object.
+                            .push("$$ROOT").as("reviews") // push entire document to field 'reviews' in ReviewCategory.
+            ).withOptions(Aggregation.newAggregationOptions().cursorBatchSize(1).allowDiskUse(true).build());
 
-        CloseableIterator<ReviewCategory> groupResults =
-                mongoOperations.aggregateStream(categoryAggregation, TransformedFeedback.class, ReviewCategory.class);
-        List<ReviewCategory> categories = new ArrayList<>();
-        while (groupResults.hasNext()) {
-            ReviewCategory category = groupResults.next();
-            categories.add(category);
+            CloseableIterator<ReviewCategory> groupResults =
+                    mongoOperations.aggregateStream(categoryAggregation, TransformedFeedback.class, ReviewCategory.class); // In case the resulting doc is > 16MB it will throw error.
+
+            categories = new ArrayList<>();
+            while (groupResults.hasNext()) {
+                ReviewCategory category = groupResults.next();
+                categories.add(category);
+            }
+
+            return new ReviewDistributionReport(categories);
+        } catch (UncategorizedMongoDbException e) {
+            logger.error("Reached BSON memory limits. Running queries one by one...", e);
+
+            categories = new ArrayList<>();
+            for (String category : ardocCategories) {
+                List<TransformedFeedback> reviews =
+                        transformedFeedbackRepository.findAllByArdocResultCategoryAndArdocResultAppName(category, appName);
+
+                ReviewCategory reviewCategory = new ReviewCategory(reviews, category);
+                categories.add(reviewCategory);
+            }
+
         }
+
         return new ReviewDistributionReport(categories);
-//        return new ReviewDistributionReport(groupResults.getMappedResults());
     }
 
     /**
@@ -87,11 +107,9 @@ public class ReviewAggregationService {
      * @return reviews for the top N labels.
      */
     public List<LabelWithReviews> reviewsByTopNLabelsByCategory(ReviewsByTopLabelsDto dto) {
-        List<Label> labels = labelRepository.findByAppNameAndCategoryAndNgramSizeOrderByScoreDesc(dto.getApp(), dto.getCategory(), dto.getNgrams());
         final int limit = dto.getLimit();
-        if (dto.hasLimit() && limit < labels.size()) {
-            labels = labels.subList(0, dto.getLimit());
-        }
+        List<Label> labels = labelRepository.findByAppNameAndCategoryAndNgramSizeOrderByScoreDesc(dto.getApp(), dto.getCategory(), dto.getNgrams());
+        labels = getLabelsUpTo(labels, limit);
 
         logger.info(String.format("Fetching reviews for top %d labels: %s", dto.getLimit(), labels));
         List<LabelWithReviews> labelWithReviews = new ArrayList<>(labels.size());
@@ -105,6 +123,17 @@ public class ReviewAggregationService {
         return labelWithReviews;
     }
 
+    private List<Label> getLabelsUpTo(List<Label> labels, final int limit) {
+        final int labelCount = labels.size();
+        List<Label> labelsUpTo;
+        if (limit <= labelCount) {
+            labelsUpTo = labels.subList(0, limit);
+        } else {
+            labelsUpTo = labels.subList(0, Math.min(10, labelCount));
+        }
+        return labelsUpTo;
+    }
+
     /**
      * Retrieves the reviews based on the top N labels.
      * Fetches all reviews which contain these top labels.
@@ -114,11 +143,9 @@ public class ReviewAggregationService {
      * @return reviews for the top N labels.
      */
     public List<LabelWithReviews> reviewsByTopNLabels(ReviewsByTopLabelsDto dto) {
-        List<Label> labels = labelRepository.findByAppNameAndNgramSizeOrderByScoreDesc(dto.getApp(), dto.getNgrams());
         final int limit = dto.getLimit();
-        if (dto.hasLimit() && limit < labels.size()) {
-            labels = labels.subList(0, dto.getLimit());
-        }
+        List<Label> labels = labelRepository.findByAppNameAndNgramSizeOrderByScoreDesc(dto.getApp(), dto.getNgrams());
+        labels = getLabelsUpTo(labels, limit);
 
         logger.info(String.format("Fetching reviews for top %d labels: %s", dto.getLimit(), labels));
         List<LabelWithReviews> labelWithReviews = new ArrayList<>(labels.size());
@@ -155,7 +182,7 @@ public class ReviewAggregationService {
 
         // WRITER
         final int limit = dto.getLimit();
-        if (!dto.hasLimit() || limit >= tokensWithScore.size()) {
+        if (limit >= tokensWithScore.size()) {
             return tokensWithScore;
         }
         return tokensWithScore.subList(0, limit);

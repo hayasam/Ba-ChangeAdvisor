@@ -12,6 +12,8 @@ import java.util.List;
 @Repository
 public interface TransformedFeedbackRepository extends MongoRepository<TransformedFeedback, String> {
 
+    List<TransformedFeedback> findAllByArdocResultCategoryAndArdocResultAppName(String category, String appName);
+
     List<TransformedFeedback> findAllByArdocResultAppName(String appName);
 
     List<TransformedFeedback> findAllByArdocResultCategoryIn(Collection<String> categories);
@@ -21,4 +23,7 @@ public interface TransformedFeedbackRepository extends MongoRepository<Transform
     List<TransformedFeedback> findByArdocResultAppNameAndTransformedSentenceContainingIgnoreCase(String appName, String label);
 
     List<TransformedFeedback> findDistinctByArdocResultAppNameAndArdocResultCategoryAndTransformedSentenceContainingIgnoreCase(String appName, String category, String label);
+
+
+    int deleteByArdocResultAppName(String appNAme);
 }
