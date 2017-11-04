@@ -23,7 +23,7 @@ public class SourceCodeProcessor implements ItemProcessor<ClassBean, CodeElement
 
     private static final Logger logger = Logger.getLogger(SourceCodeProcessor.class);
 
-    private final int THRESHOLD;
+    private final int threshold;
 
     private CorpusProcessor corpusProcessor;
 
@@ -31,13 +31,10 @@ public class SourceCodeProcessor implements ItemProcessor<ClassBean, CodeElement
 
     private CodeElementRepository codeElementRepository;
 
-    public SourceCodeProcessor(final int threshold, CorpusProcessor corpusProcessor) {
-        this.THRESHOLD = threshold;
-        this.corpusProcessor = corpusProcessor;
-    }
-
-    public SourceCodeProcessor(int THRESHOLD, CorpusProcessor corpusProcessor, CodeElementRepository codeElementRepository) {
-        this.THRESHOLD = THRESHOLD;
+    public SourceCodeProcessor(int threshold, CorpusProcessor corpusProcessor, CodeElementRepository codeElementRepository) {
+        this.threshold = threshold;
+        Assert.notNull(corpusProcessor, "CorpusProcessor cannot be null.");
+        Assert.notNull(codeElementRepository, "CodeElementRepository cannot be null.");
         this.corpusProcessor = corpusProcessor;
         this.codeElementRepository = codeElementRepository;
     }
@@ -49,10 +46,7 @@ public class SourceCodeProcessor implements ItemProcessor<ClassBean, CodeElement
         appName = directory.getAppName();
         Assert.isTrue(!StringUtils.isEmpty(appName), "Didn't find any project name in step context!");
         logger.info(String.format("Found app name [%s] in step context.", appName));
-
-        if (codeElementRepository != null) {
-            codeElementRepository.deleteByAppName(appName);
-        }
+        codeElementRepository.deleteByAppName(appName);
     }
 
     private Project getDirectoryFromStepExecutionContext(StepExecution stepExecution) {
@@ -73,6 +67,6 @@ public class SourceCodeProcessor implements ItemProcessor<ClassBean, CodeElement
     }
 
     private boolean isBelowThreshold(Collection<String> bag) {
-        return bag.size() < THRESHOLD;
+        return bag.size() < threshold;
     }
 }

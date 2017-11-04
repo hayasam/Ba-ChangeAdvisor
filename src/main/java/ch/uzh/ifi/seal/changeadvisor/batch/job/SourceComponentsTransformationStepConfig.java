@@ -5,6 +5,7 @@ import ch.uzh.ifi.seal.changeadvisor.batch.job.sourcecode.FSProjectReader;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.sourcecode.SourceCodeProcessor;
 import ch.uzh.ifi.seal.changeadvisor.preprocessing.CorpusProcessor;
 import ch.uzh.ifi.seal.changeadvisor.source.model.CodeElement;
+import ch.uzh.ifi.seal.changeadvisor.source.model.CodeElementRepository;
 import ch.uzh.ifi.seal.changeadvisor.source.parser.FSProjectParser;
 import ch.uzh.ifi.seal.changeadvisor.source.parser.bean.ClassBean;
 import org.springframework.batch.core.Step;
@@ -35,12 +36,16 @@ public class SourceComponentsTransformationStepConfig {
 
     private final MongoTemplate mongoTemplate;
 
+    private final CodeElementRepository codeElementRepository;
+
     @Autowired
     public SourceComponentsTransformationStepConfig(StepBuilderFactory stepBuilderFactory,
-                                                    FSProjectParser projectParser, MongoTemplate mongoTemplate) {
+                                                    FSProjectParser projectParser, MongoTemplate mongoTemplate,
+                                                    CodeElementRepository codeElementRepository) {
         this.stepBuilderFactory = stepBuilderFactory;
         this.projectParser = projectParser;
         this.mongoTemplate = mongoTemplate;
+        this.codeElementRepository = codeElementRepository;
     }
 
     public Step extractBagOfWords(String projectPath) {
@@ -88,7 +93,7 @@ public class SourceComponentsTransformationStepConfig {
                 .stem()
                 .removeTokensShorterThan(3)
                 .build();
-        return new SourceCodeProcessor(5, corpusProcessor);
+        return new SourceCodeProcessor(5, corpusProcessor, codeElementRepository);
     }
 
     @Bean
