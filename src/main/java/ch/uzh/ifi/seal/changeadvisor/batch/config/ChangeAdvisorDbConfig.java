@@ -44,13 +44,13 @@ public class ChangeAdvisorDbConfig extends AbstractRepoConfig {
     }
 
     @Override
-    public MongoClient mongo() throws Exception {
+    public MongoClient mongo() {
         return new MongoClient(primaryDataSource().getHost(), primaryDataSource().getPort());
     }
 
     @Bean(name = {"mongoOperations"})
     @Override
-    public MongoTemplate mongoTemplate() throws Exception {
+    public MongoTemplate mongoTemplate() {
         return new MongoTemplate(mongo(), getDatabaseName());
     }
 }

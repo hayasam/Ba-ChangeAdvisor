@@ -15,15 +15,15 @@ public abstract class AbstractRepoConfig {
 
     protected abstract MongoClientURI getPropertiesMongoUri();
 
-    public abstract Mongo mongo() throws Exception;
+    public abstract Mongo mongo();
 
     @Bean
-    public MongoTemplate mongoTemplate() throws Exception {
+    public MongoTemplate mongoTemplate() {
         return new MongoTemplate(mongoDbFactory());
     }
 
     @Bean
-    public MongoDbFactory mongoDbFactory() throws Exception {
+    public MongoDbFactory mongoDbFactory() {
         return new SimpleMongoDbFactory(getPropertiesMongoUri());
     }
 }

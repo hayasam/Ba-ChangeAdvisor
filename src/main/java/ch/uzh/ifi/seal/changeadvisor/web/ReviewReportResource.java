@@ -33,7 +33,6 @@ public class ReviewReportResource {
     @GetMapping(path = "reviews/{projectId}/distribution")
     public ResponseEntity<ReviewDistributionReport> distributionReport(@PathVariable("projectId") String projectId, @RequestParam("countOnly") boolean countOnly) {
         Optional<Project> project = projectService.findById(projectId);
-        project.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
 
         if (project.isPresent()) {
             ReviewDistributionReport report;

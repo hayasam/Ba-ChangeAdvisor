@@ -44,7 +44,7 @@ public class MongoTestConfig extends AbstractRepoConfig {
     }
 
     @Override
-    public Mongo mongo() throws Exception {
+    public Mongo mongo() {
         return new MongoClient(null, 27017);
     }
 

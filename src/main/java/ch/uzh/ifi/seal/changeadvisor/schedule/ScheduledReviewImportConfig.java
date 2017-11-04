@@ -29,7 +29,7 @@ public class ScheduledReviewImportConfig implements SchedulingConfigurer {
 
     private static final Logger logger = Logger.getLogger(ScheduledReviewImportConfig.class);
 
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     private final ReviewImportService reviewImportService;
 

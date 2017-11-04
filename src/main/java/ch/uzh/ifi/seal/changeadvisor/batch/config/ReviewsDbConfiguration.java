@@ -29,14 +29,14 @@ public class ReviewsDbConfiguration extends AbstractRepoConfig {
     }
 
     @Override
-    public MongoClient mongo() throws Exception {
+    public MongoClient mongo() {
         final MongoClientURI mongoClientURI = new MongoClientURI(reviewsDataSource().getMongodb().getUri());
         return new MongoClient(mongoClientURI.getHosts().get(0), reviewsDataSource().getMongodb().getPort());
     }
 
     @Bean(name = {"reviewsOperations"})
     @Override
-    public MongoTemplate mongoTemplate() throws Exception {
+    public MongoTemplate mongoTemplate() {
         return new MongoTemplate(mongo(), getDatabaseName());
     }
 }
