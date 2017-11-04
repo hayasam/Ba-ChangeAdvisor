@@ -5,12 +5,11 @@ import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResult;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.linking.LinkingResult;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.Review;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.ReviewRepository;
-import ch.uzh.ifi.seal.changeadvisor.batch.job.tfidf.Label;
-import ch.uzh.ifi.seal.changeadvisor.project.Project;
-import ch.uzh.ifi.seal.changeadvisor.service.*;
-import ch.uzh.ifi.seal.changeadvisor.web.dto.LabelWithReviews;
+import ch.uzh.ifi.seal.changeadvisor.service.ArdocService;
+import ch.uzh.ifi.seal.changeadvisor.service.FailedToRunJobException;
+import ch.uzh.ifi.seal.changeadvisor.service.LabelLinkerService;
+import ch.uzh.ifi.seal.changeadvisor.service.ReviewImportService;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewAnalysisDto;
-import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewDistributionReport;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewsByTopLabelsDto;
 import org.apache.log4j.Logger;
 import org.springframework.batch.core.JobExecution;
@@ -36,20 +35,15 @@ public class ReviewController {
 
     private final ArdocService ardocService;
 
-    private final ReviewAggregationService aggregationService;
-
     private final LabelLinkerService labelLinkerService;
 
-    private final ProjectService projectService;
-
     @Autowired
-    public ReviewController(ReviewImportService reviewImportService, ReviewRepository repository, ArdocService ardocService, ReviewAggregationService service, LabelLinkerService labelLinkerService, ProjectService projectService) {
+    public ReviewController(ReviewImportService reviewImportService, ReviewRepository repository,
+                            ArdocService ardocService, LabelLinkerService labelLinkerService) {
         this.reviewImportService = reviewImportService;
         this.repository = repository;
         this.ardocService = ardocService;
-        this.aggregationService = service;
         this.labelLinkerService = labelLinkerService;
-        this.projectService = projectService;
     }
 
     @PostMapping(path = "reviews")
@@ -101,35 +95,6 @@ public class ReviewController {
         logger.info(String.format("Starting reviews clustering job for app %s!", dto.getApp()));
         JobExecution jobExecution = reviewImportService.reviewClustering(dto);
         return jobExecution.getJobId();
-    }
-
-    @GetMapping(path = "reviews/{projectId}/distribution")
-    public ReviewDistributionReport report(@PathVariable("projectId") String projectId, @RequestParam("countOnly") boolean countOnly) {
-        Project project = projectService.findById(projectId);
-        if (countOnly) {
-            return aggregationService.groupByCategoriesCountOnly(project.getAppName());
-        }
-        return aggregationService.groupByCategories(project.getAppName());
-    }
-
-    @PostMapping(path = "reviews/distribution")
-    public ReviewDistributionReport report(@RequestBody @Valid ReviewAnalysisDto dto) {
-        return aggregationService.groupByCategories(dto.getApp());
-    }
-
-    @PostMapping(path = "reviews/top")
-    public List<Label> topNLabels(@RequestBody ReviewsByTopLabelsDto dto) {
-        return aggregationService.topNLabels(dto);
-    }
-
-    @PostMapping(path = "reviews/labels")
-    public List<LabelWithReviews> reviewsByTopNLabels(@RequestBody ReviewsByTopLabelsDto dto) {
-        return aggregationService.reviewsByTopNLabels(dto);
-    }
-
-    @PostMapping(path = "reviews/labels/category")
-    public List<LabelWithReviews> reviewsByTopNLabelsByCategory(@RequestBody ReviewsByTopLabelsDto dto) {
-        return aggregationService.reviewsByTopNLabelsByCategory(dto);
     }
 
     @PostMapping(path = "reviews/labeling")
