@@ -9,7 +9,6 @@ import ch.uzh.ifi.seal.changeadvisor.project.ProjectRepository;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewAnalysisDto;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
@@ -24,8 +23,6 @@ import java.util.Optional;
 
 @Component
 public class ReviewImportJobFactory {
-
-    private static final Logger logger = Logger.getLogger(ReviewImportJobFactory.class);
 
     private static final String REVIEW_IMPORT = "reviewImport";
 

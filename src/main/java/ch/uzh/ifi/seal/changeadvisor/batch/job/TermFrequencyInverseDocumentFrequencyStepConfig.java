@@ -1,14 +1,10 @@
 package ch.uzh.ifi.seal.changeadvisor.batch.job;
 
-import ch.uzh.ifi.seal.changeadvisor.batch.job.tfidf.Label;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.tfidf.LabelRepository;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.tfidf.TopLabelTasklet;
 import ch.uzh.ifi.seal.changeadvisor.service.ReviewAggregationService;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
-import org.springframework.batch.item.ItemProcessor;
-import org.springframework.batch.item.ItemReader;
-import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -34,18 +30,6 @@ public class TermFrequencyInverseDocumentFrequencyStepConfig {
         return stepBuilderFactory.get(STEP_NAME)
                 .tasklet(labeler(appName))
                 .build();
-    }
-
-    private ItemReader<String> reader(String appName) {
-        return null;
-    }
-
-    private ItemProcessor<String, Label> computeTfidf(String appName) {
-        return null;
-    }
-
-    private ItemWriter<Label> writer(String appName) {
-        return null;
     }
 
     private TopLabelTasklet labeler(final String appName) {

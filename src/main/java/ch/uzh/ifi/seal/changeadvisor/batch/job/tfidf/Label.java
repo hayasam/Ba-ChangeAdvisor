@@ -50,7 +50,7 @@ public class Label implements Comparable<Label> {
     }
 
     public String getLabel() {
-        return token;
+        return getToken();
     }
 
     public double getScore() {

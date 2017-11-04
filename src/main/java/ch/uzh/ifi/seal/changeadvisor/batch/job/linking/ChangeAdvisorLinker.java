@@ -142,8 +142,6 @@ public class ChangeAdvisorLinker implements Linker {
             Set<String> reviewWords = review.getBag();
 
             for (CodeElement codeElement : elements) {
-
-                //Set<String> intersection = Sets.intersection(reviewWords, codeElement.getBag());
                 Collection<String> intersection = intersection(reviewWords, codeElement.getBag());
                 if (!intersection.isEmpty()) {
                     clusterBag.addAll(review.getBag());
@@ -166,7 +164,6 @@ public class ChangeAdvisorLinker implements Linker {
             Set<String> reviewWords = review.getBag();
 
             for (Map.Entry<CodeElement, Collection<String>> codeElement : codeComponentWords.entrySet()) {
-                //Set<String> intersection = Sets.intersection(reviewWords, codeElement.getValue());
                 Collection<String> intersection = intersection(reviewWords, codeElement.getValue());
 
                 if (!intersection.isEmpty()) {

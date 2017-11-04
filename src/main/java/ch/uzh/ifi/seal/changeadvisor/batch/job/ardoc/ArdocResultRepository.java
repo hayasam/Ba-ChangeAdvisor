@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@SuppressWarnings("unused")
 @Repository
 public interface ArdocResultRepository extends MongoRepository<ArdocResult, String> {
 
