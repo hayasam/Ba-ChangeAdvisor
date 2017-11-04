@@ -37,6 +37,11 @@ public class ReviewAggregationService {
     private static final Set<String> ardocCategories = ImmutableSet
             .of("FEATURE REQUEST", "INFORMATION SEEKING", "INFORMATION GIVING", "PROBLEM DISCOVERY", "OTHER");
 
+    private static final String APPNAME_FIELD = "ardocResult.appName";
+    private static final String CATEGORY_FIELD = "ardocResult.category";
+    private static final String REVIEW_COUNT_ALIAS = "reviewCount";
+    private static final String CATEGORY_ALIAS = "category";
+
     private final MongoTemplate mongoOperations;
 
     private final TfidfService tfidfService;
@@ -65,9 +70,10 @@ public class ReviewAggregationService {
      * @see ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResult#category
      */
     public ReviewDistributionReport groupByCategoriesCountOnly(final String appName) {
-        AggregationOperation match = Aggregation.match(Criteria.where("ardocResult.appName").is(appName));
-        AggregationOperation group = Aggregation.group("ardocResult.category").count().as("reviewCount");
-        AggregationOperation projection = Aggregation.project().and("_id").as("category").and("reviewCount").as("reviewCount");
+        AggregationOperation match = Aggregation.match(Criteria.where(APPNAME_FIELD).is(appName));
+        AggregationOperation group = Aggregation.group(CATEGORY_FIELD).count().as(REVIEW_COUNT_ALIAS);
+        AggregationOperation projection = Aggregation.project().and("_id").as(CATEGORY_ALIAS)
+                .and(REVIEW_COUNT_ALIAS).as(REVIEW_COUNT_ALIAS);
 
         TypedAggregation<TransformedFeedback> categoryAggregation =
                 Aggregation.newAggregation(TransformedFeedback.class,
@@ -96,8 +102,8 @@ public class ReviewAggregationService {
         List<ReviewCategory> categories;
         try {
             TypedAggregation<TransformedFeedback> categoryAggregation = Aggregation.newAggregation(TransformedFeedback.class,
-                    Aggregation.match(Criteria.where("ardocResult.appName").is(appName)),
-                    Aggregation.group("ardocResult.category").first("ardocResult.category").as("category") // set group by field and save it as 'category' in resulting object.
+                    Aggregation.match(Criteria.where(APPNAME_FIELD).is(appName)),
+                    Aggregation.group(CATEGORY_FIELD).first(CATEGORY_FIELD).as(CATEGORY_ALIAS) // set group by field and save it as 'category' in resulting object.
                             .push("$$ROOT").as("reviews") // push entire document to field 'reviews' in ReviewCategory.
             ).withOptions(Aggregation.newAggregationOptions().cursorBatchSize(1).allowDiskUse(true).build());
 

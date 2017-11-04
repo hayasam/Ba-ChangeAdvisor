@@ -6,7 +6,6 @@ import ch.uzh.ifi.seal.changeadvisor.service.ProjectService;
 import ch.uzh.ifi.seal.changeadvisor.service.SourceCodeService;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.SourceCodeDirectoryDto;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.log4j.Logger;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
@@ -18,8 +17,6 @@ import javax.validation.Valid;
 
 @RestController
 public class SourceCodeController {
-
-    private static final Logger logger = Logger.getLogger(SourceCodeController.class);
 
     private final SourceCodeService sourceCodeService;
 

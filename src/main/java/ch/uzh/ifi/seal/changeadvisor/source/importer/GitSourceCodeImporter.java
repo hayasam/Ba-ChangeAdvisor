@@ -36,6 +36,8 @@ public class GitSourceCodeImporter implements SourceCodeImporter {
 
     private String projectName;
 
+    private String projectDirectoryPath;
+
     private CredentialsProvider credentialsProvider;
 
     GitSourceCodeImporter(SourceCodeDirectoryDto dto) {
@@ -45,13 +47,15 @@ public class GitSourceCodeImporter implements SourceCodeImporter {
         final String username = dto.getUsername() != null ? dto.getUsername() : "";
         final String password = dto.getPassword() != null ? dto.getPassword() : "";
         credentialsProvider = new UsernamePasswordCredentialsProvider(username, password);
+
+        this.projectDirectoryPath = String.format("%s/%s", IMPORTED_CODE_FOLDER.getName(), projectName);
     }
 
     @Override
     public SourceCodeDirectory importSource() {
         final String REMOTE_URL = getURLFromPath();
         final String projectName = StringUtils.isEmpty(this.projectName) ? getProjectNameFromPath() : this.projectName;
-        final File projectPath = new File(IMPORTED_CODE_FOLDER.getName() + "/" + projectName);
+        final File projectPath = new File(projectDirectoryPath);
 
         if (projectPath.exists()) {
             clearDirectory(projectPath);
@@ -62,9 +66,9 @@ public class GitSourceCodeImporter implements SourceCodeImporter {
             logger.info(String.format(CLONED_REPOSITORY, result.getRepository().getDirectory()));
             return new SourceCodeDirectory(projectName, projectPath.getAbsolutePath(), REMOTE_URL);
         } catch (TransportException e) {
-            throw new RuntimeException(String.format(NO_CREDENTIALS_OR_NOT_FOUND, REMOTE_URL), e);
+            throw new GitCloneException(String.format(NO_CREDENTIALS_OR_NOT_FOUND, REMOTE_URL), e);
         } catch (GitAPIException e) {
-            throw new RuntimeException(String.format(FAILED_TO_CLONE, REMOTE_URL), e);
+            throw new GitCloneException(String.format(FAILED_TO_CLONE, REMOTE_URL), e);
         }
     }
 
@@ -73,7 +77,7 @@ public class GitSourceCodeImporter implements SourceCodeImporter {
             FileUtils.deleteDirectory(path);
         } catch (IOException e) {
             logger.error("Failed to delete directory");
-            throw new RuntimeException("Failed to delete directory", e);
+            throw new ProjectDirectoryClearException("Failed to delete directory", e);
         }
     }
 
@@ -95,5 +99,17 @@ public class GitSourceCodeImporter implements SourceCodeImporter {
             return matcher.group(1);
         }
         throw new IllegalArgumentException("No *.git pattern found");
+    }
+
+    public static class GitCloneException extends RuntimeException {
+        GitCloneException(String message, Throwable cause) {
+            super(message, cause);
+        }
+    }
+
+    public static class ProjectDirectoryClearException extends RuntimeException {
+        ProjectDirectoryClearException(String message, Throwable cause) {
+            super(message, cause);
+        }
     }
 }

@@ -109,7 +109,6 @@ public class CorpusProcessor {
             tokens.removeIf(this::isTooShort);
         }
 
-        //return tokens.stream().map(AnnotatedToken::getToken).collect(Collectors.toSet());
         return annotatedTokensToStringTokens(tokens);
     }
 

@@ -2,12 +2,10 @@ package ch.uzh.ifi.seal.changeadvisor.web.dto;
 
 import com.google.common.collect.ImmutableList;
 
-import java.text.SimpleDateFormat;
 import java.util.List;
 
+@SuppressWarnings("unused")
 public class ExecutionReport {
-
-    private final SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     private List<StepExecutionReport> stepReports;
 

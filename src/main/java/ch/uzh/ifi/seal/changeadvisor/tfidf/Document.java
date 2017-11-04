@@ -6,23 +6,23 @@ import java.util.List;
 
 public class Document {
 
-    private List<AbstractNGram> document;
+    private List<AbstractNGram> documentNgrams;
 
-    public Document(List<AbstractNGram> document) {
-        this.document = document;
+    public Document(List<AbstractNGram> documentNgrams) {
+        this.documentNgrams = documentNgrams;
     }
 
     public int size() {
-        return document.size();
+        return documentNgrams.size();
     }
 
     public double frequency(AbstractNGram token) {
-        if (document.isEmpty()) {
+        if (documentNgrams.isEmpty()) {
             return 0.0;
         }
 
         double count = 0;
-        for (AbstractNGram word : document) {
+        for (AbstractNGram word : documentNgrams) {
             if (word.equals(token)) {
                 count += 1;
             }
@@ -31,14 +31,14 @@ public class Document {
     }
 
     public boolean contains(AbstractNGram token) {
-        return document.contains(token);
+        return documentNgrams.contains(token);
     }
 
     public List<AbstractNGram> tokens() {
-        return document;
+        return documentNgrams;
     }
 
     public List<AbstractNGram> uniqueTokens() {
-        return new ArrayList<>(new HashSet<>(document));
+        return new ArrayList<>(new HashSet<>(documentNgrams));
     }
 }

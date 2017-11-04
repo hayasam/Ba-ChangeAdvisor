@@ -28,7 +28,7 @@ public class ClassVisitorTest {
 
         String packageName = cu.getPackageDeclaration().map(NodeWithName::getNameAsString).orElse("default");
         List<ClassBean> classes = ClassVisitor.getClasses(packageName, cu);
-        Assert.assertEquals(classes.size(), 1);
+        Assert.assertEquals(1, classes.size());
         Assert.assertThat(classes.get(0).getClassName(), is("BTDownload"));
         Assert.assertThat(classes.get(0).getFullyQualifiedClassName(), is("com.frostwire.bittorrent.BTDownload"));
     }

@@ -65,6 +65,6 @@ public class AsymmetricDiceIndexTest {
         Set<String> doc7 = Sets.newHashSet(Splitter.on(" ").omitEmptyStrings().trimResults().splitToList("datum lack connect wife mobil home rerout page click wait freez phone exit minut screen search reset time instal farm onald night play quick song coupl download polici allow chang pleas fault loader market "));
 
         double similarity = asymmetricDiceIndex.similarity(doc5, doc7);
-        Assert.assertEquals(similarity, 0.529411765, 0.001);
+        Assert.assertEquals(0.529411765, similarity, 0.001);
     }
 }

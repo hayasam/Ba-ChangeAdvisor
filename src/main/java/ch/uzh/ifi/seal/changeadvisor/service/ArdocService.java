@@ -7,7 +7,6 @@ import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.ReviewRepository;
 import org.apache.log4j.Logger;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
 import java.util.List;
 
 @Service
@@ -22,11 +21,6 @@ public class ArdocService {
     public ArdocService(ArdocResultRepository repository, ReviewRepository reviewRepository) {
         this.repository = repository;
         this.reviewRepository = reviewRepository;
-    }
-
-    public Collection<ArdocResult> getResults(final String app) {
-        List<ArdocResult> byReviewAppName = repository.findByAppName(app);
-        return byReviewAppName;
     }
 
     public List<Review> getReviewsSinceLastAnalyzed(final String app) {
