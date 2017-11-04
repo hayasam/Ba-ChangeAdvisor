@@ -6,6 +6,7 @@ import ch.uzh.ifi.seal.changeadvisor.service.ProjectService;
 import ch.uzh.ifi.seal.changeadvisor.service.ReviewAggregationService;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.LabelWithReviews;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewDistributionReport;
+import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewTimeSeriesData;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewsByTopLabelsDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,8 +27,10 @@ public class ReviewReportResource {
     }
 
     @GetMapping(path = "reviews/{projectId}/time")
-    public void reviewTimeSeries(@PathVariable("projectId") String projectId) {
+    public List<ReviewTimeSeriesData> reviewTimeSeries(@PathVariable("projectId") String projectId) {
         Optional<Project> project = projectService.findById(projectId);
+        List<ReviewTimeSeriesData> report = project.map(p -> aggregationService.timeSeries(p.getAppName())).orElseThrow(IllegalArgumentException::new);
+        return report;
     }
 
     @GetMapping(path = "reviews/{projectId}/distribution")

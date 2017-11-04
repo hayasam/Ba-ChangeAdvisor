@@ -22,6 +22,7 @@ import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.aggregation.TypedAggregation;
 import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.util.CloseableIterator;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -37,12 +38,16 @@ public class ReviewAggregationService {
     private static final Set<String> ardocCategories = ImmutableSet
             .of("FEATURE REQUEST", "INFORMATION SEEKING", "INFORMATION GIVING", "PROBLEM DISCOVERY", "OTHER");
 
+    private static final String REVIEW_APPNAME_FIELD = "appName";
     private static final String APPNAME_FIELD = "ardocResult.appName";
     private static final String CATEGORY_FIELD = "ardocResult.category";
+    private static final String REVIEW_DATE_FIELD = "reviewDate";
     private static final String REVIEW_COUNT_ALIAS = "reviewCount";
     private static final String CATEGORY_ALIAS = "category";
 
     private final MongoTemplate mongoOperations;
+
+    private final MongoTemplate reviewsOperations;
 
     private final TfidfService tfidfService;
 
@@ -51,13 +56,43 @@ public class ReviewAggregationService {
     private final LabelRepository labelRepository;
 
     @Autowired
-    public ReviewAggregationService(MongoTemplate mongoOperations, TfidfService tfidfService,
+    public ReviewAggregationService(MongoTemplate mongoOperations, MongoTemplate reviewsOperations, TfidfService tfidfService,
                                     TransformedFeedbackRepository transformedFeedbackRepository,
                                     LabelRepository labelRepository) {
         this.mongoOperations = mongoOperations;
+        this.reviewsOperations = reviewsOperations;
         this.tfidfService = tfidfService;
         this.transformedFeedbackRepository = transformedFeedbackRepository;
         this.labelRepository = labelRepository;
+    }
+
+    /**
+     * Generates a category distribution report.
+     * Groups reviews by ardoc category but returns only the count of each category.
+     *
+     * @param appName application for which we want to generate a report.
+     * @return distribution report.
+     * @see ReviewDistributionReport
+     * @see ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResult#category
+     */
+    public List<ReviewTimeSeriesData> timeSeries(final String appName) {
+        List<Review> all = reviewsOperations.find(Query.query(Criteria.where("appName").is("test.app")), Review.class);
+
+        AggregationOperation match = Aggregation.match(Criteria.where(REVIEW_APPNAME_FIELD).is(appName));
+        AggregationOperation group = Aggregation.group(REVIEW_DATE_FIELD).first(REVIEW_DATE_FIELD).as(REVIEW_DATE_FIELD) // set group by field and save it as 'category' in resulting object.
+                .push("numberOfStars").as("ratings");// push entire document to field 'reviews' in ReviewCategory.
+
+        TypedAggregation<Review> categoryAggregation = Aggregation.newAggregation(Review.class,
+                match,
+                group // push entire document to field 'reviews' in ReviewCategory.
+        );
+
+        AggregationResults<ReviewTimeSeriesData> groupResults =
+                reviewsOperations.aggregate(categoryAggregation, Review.class, ReviewTimeSeriesData.class);
+
+        List<ReviewTimeSeriesData> timeSeriesData = new ArrayList<>(groupResults.getMappedResults());
+        Collections.sort(timeSeriesData);
+        return timeSeriesData;
     }
 
     /**

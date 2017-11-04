@@ -18,4 +18,6 @@ public interface ReviewRepository extends MongoRepository<Review, String> {
     List<Review> findByAppNameAndReviewDateGreaterThanOrderByReviewDateDesc(String appName, Date reviewDate);
 
     List<Review> findByAppNameAndReviewTextContainingIgnoreCase(String appName, String label);
+
+    long deleteAllByAppName(String appName);
 }
