@@ -12,6 +12,8 @@ import java.util.List;
 @Repository
 public interface TransformedFeedbackRepository extends MongoRepository<TransformedFeedback, String> {
 
+    List<TransformedFeedback> findTop1ByArdocResultAppNameOrderByTimestampDesc(String appName);
+
     List<TransformedFeedback> findAllByArdocResultCategoryAndArdocResultAppName(String category, String appName);
 
     List<TransformedFeedback> findAllByArdocResultAppName(String appName);

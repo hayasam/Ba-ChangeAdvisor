@@ -6,6 +6,7 @@ import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResultsWriter;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.feedbackprocessing.FeedbackProcessor;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.feedbackprocessing.FeedbackWriter;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.feedbackprocessing.TransformedFeedback;
+import ch.uzh.ifi.seal.changeadvisor.batch.job.feedbackprocessing.TransformedFeedbackRepository;
 import ch.uzh.ifi.seal.changeadvisor.preprocessing.CorpusProcessor;
 import com.google.common.collect.Lists;
 import org.springframework.batch.core.Step;
@@ -23,7 +24,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -44,11 +47,16 @@ public class FeedbackTransformationStepConfig {
 
     private final ArdocResultRepository ardocRepository;
 
+    private final TransformedFeedbackRepository transformedFeedbackRepository;
+
     @Autowired
-    public FeedbackTransformationStepConfig(StepBuilderFactory stepBuilderFactory, MongoTemplate mongoTemplate, ArdocResultRepository ardocRepository) {
+    public FeedbackTransformationStepConfig(StepBuilderFactory stepBuilderFactory, MongoTemplate mongoTemplate,
+                                            ArdocResultRepository ardocRepository,
+                                            TransformedFeedbackRepository transformedFeedbackRepository) {
         this.stepBuilderFactory = stepBuilderFactory;
         this.mongoTemplate = mongoTemplate;
         this.ardocRepository = ardocRepository;
+        this.transformedFeedbackRepository = transformedFeedbackRepository;
     }
 
     @Bean
@@ -85,13 +93,16 @@ public class FeedbackTransformationStepConfig {
     }
 
     private RepositoryItemReader<ArdocResult> feedbackRepositoryReader(final String appName) {
+        List<TransformedFeedback> topResult = transformedFeedbackRepository.findTop1ByArdocResultAppNameOrderByTimestampDesc(appName);
+        TransformedFeedback lastTransformedFeedback = topResult.size() == 1 ? topResult.get(0) : null;
+
         RepositoryItemReader<ArdocResult> reader = new RepositoryItemReader<>();
         reader.setRepository(ardocRepository);
-        reader.setMethodName("findByAppName");
-        reader.setArguments(Lists.newArrayList(appName));
+        reader.setMethodName("findByAppNameAndTimestampGreaterThan");
+        reader.setArguments(Lists.newArrayList(appName, lastTransformedFeedback != null ? lastTransformedFeedback.getArdocResult().getTimestamp() : LocalDateTime.now()));
         reader.setPageSize(100);
         Map<String, Sort.Direction> sort = new HashMap<>();
-        sort.put("_id", Sort.Direction.ASC);
+        sort.put("timestamp", Sort.Direction.ASC);
         reader.setSort(sort);
         return reader;
     }

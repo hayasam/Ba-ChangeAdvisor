@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -12,11 +13,13 @@ public interface ArdocResultRepository extends MongoRepository<ArdocResult, Stri
 
     List<ArdocResult> findByAppName(String appName);
 
+    Page<ArdocResult> findByAppName(String appName, Pageable pageable);
+
+    Page<ArdocResult> findByAppNameAndTimestampGreaterThan(String appName, LocalDateTime timestamp, Pageable pageable);
+
     List<ArdocResult> findByAppNameOrderByReview_ReviewDateDesc(String appName);
 
     List<ArdocResult> findTop1ByAppNameOrderByReview_ReviewDateDesc(String appName);
-
-    Page<ArdocResult> findByAppName(String appName, Pageable pageable);
 
     List<ArdocResult> findByAppNameAndCategoryAndSentenceContainingIgnoreCase(String appName, String category, String label);
 }
