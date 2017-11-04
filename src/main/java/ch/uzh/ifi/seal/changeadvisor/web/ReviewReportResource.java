@@ -29,7 +29,7 @@ public class ReviewReportResource {
     @GetMapping(path = "reviews/{projectId}/time")
     public List<ReviewTimeSeriesData> reviewTimeSeries(@PathVariable("projectId") String projectId) {
         Optional<Project> project = projectService.findById(projectId);
-        List<ReviewTimeSeriesData> report = project.map(p -> aggregationService.timeSeries(p.getAppName())).orElseThrow(IllegalArgumentException::new);
+        List<ReviewTimeSeriesData> report = project.map(p -> aggregationService.timeSeries(p.getGooglePlayId())).orElseThrow(IllegalArgumentException::new);
         return report;
     }
 
@@ -40,9 +40,9 @@ public class ReviewReportResource {
         if (project.isPresent()) {
             ReviewDistributionReport report;
             if (countOnly) {
-                report = aggregationService.groupByCategoriesCountOnly(project.get().getAppName());
+                report = aggregationService.groupByCategoriesCountOnly(project.get().getGooglePlayId());
             } else {
-                report = aggregationService.groupByCategories(project.get().getAppName());
+                report = aggregationService.groupByCategories(project.get().getGooglePlayId());
             }
             return ResponseEntity.ok(report);
         }
@@ -57,7 +57,7 @@ public class ReviewReportResource {
     @PostMapping(path = "reviews/labels")
     public ResponseEntity<List<LabelWithReviews>> reviewsByTopNLabels(@RequestBody ReviewsByTopLabelsDto dto) {
         Optional<Project> project = projectService.findById(dto.getApp());
-        Optional<List<LabelWithReviews>> labels = project.map(p -> aggregationService.reviewsByTopNLabels(new ReviewsByTopLabelsDto(p.getAppName(), dto.getCategory(), dto.getLimit(), dto.getNgrams())));
+        Optional<List<LabelWithReviews>> labels = project.map(p -> aggregationService.reviewsByTopNLabels(new ReviewsByTopLabelsDto(p.getGooglePlayId(), dto.getCategory(), dto.getLimit(), dto.getNgrams())));
         return labels.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 

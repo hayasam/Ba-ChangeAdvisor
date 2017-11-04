@@ -61,10 +61,10 @@ public class ReviewImportJobFactory {
         return jobBuilderFactory.get(REVIEW_IMPORT)
                 .incrementer(new RunIdIncrementer())
                 .flow(reviewImport(Lists.newArrayList(project.getGooglePlayId()), params))
-                .next(ardocConfig.ardocAnalysis(app))
-                .next(feedbackTransformationStepConfig.transformFeedback(app))
-                .next(documentClusteringStepConfig.documentsClustering(app))
-                .next(tfidfStepConfig.computeLabels(app))
+                .next(ardocConfig.ardocAnalysis(project.getGooglePlayId()))
+                .next(feedbackTransformationStepConfig.transformFeedback(project.getGooglePlayId()))
+                .next(documentClusteringStepConfig.documentsClustering(project.getGooglePlayId()))
+                .next(tfidfStepConfig.computeLabels(project.getGooglePlayId()))
                 .end()
                 .build();
     }
