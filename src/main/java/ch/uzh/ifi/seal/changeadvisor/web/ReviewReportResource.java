@@ -7,9 +7,11 @@ import ch.uzh.ifi.seal.changeadvisor.service.ReviewAggregationService;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.LabelWithReviews;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewDistributionReport;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewsByTopLabelsDto;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 public class ReviewReportResource {
@@ -23,13 +25,26 @@ public class ReviewReportResource {
         this.aggregationService = aggregationService;
     }
 
+    @GetMapping(path = "reviews/{projectId}/time")
+    public void reviewTimeSeries(@PathVariable("projectId") String projectId) {
+        Optional<Project> project = projectService.findById(projectId);
+    }
+
     @GetMapping(path = "reviews/{projectId}/distribution")
-    public ReviewDistributionReport distributionReport(@PathVariable("projectId") String projectId, @RequestParam("countOnly") boolean countOnly) {
-        Project project = projectService.findById(projectId);
-        if (countOnly) {
-            return aggregationService.groupByCategoriesCountOnly(project.getAppName());
+    public ResponseEntity<ReviewDistributionReport> distributionReport(@PathVariable("projectId") String projectId, @RequestParam("countOnly") boolean countOnly) {
+        Optional<Project> project = projectService.findById(projectId);
+        project.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+
+        if (project.isPresent()) {
+            ReviewDistributionReport report;
+            if (countOnly) {
+                report = aggregationService.groupByCategoriesCountOnly(project.get().getAppName());
+            } else {
+                report = aggregationService.groupByCategories(project.get().getAppName());
+            }
+            return ResponseEntity.ok(report);
         }
-        return aggregationService.groupByCategories(project.getAppName());
+        return ResponseEntity.notFound().build();
     }
 
     @PostMapping(path = "reviews/top")
@@ -38,8 +53,10 @@ public class ReviewReportResource {
     }
 
     @PostMapping(path = "reviews/labels")
-    public List<LabelWithReviews> reviewsByTopNLabels(@RequestBody ReviewsByTopLabelsDto dto) {
-        return aggregationService.reviewsByTopNLabels(dto);
+    public ResponseEntity<List<LabelWithReviews>> reviewsByTopNLabels(@RequestBody ReviewsByTopLabelsDto dto) {
+        Optional<Project> project = projectService.findById(dto.getApp());
+        Optional<List<LabelWithReviews>> labels = project.map(p -> aggregationService.reviewsByTopNLabels(new ReviewsByTopLabelsDto(p.getAppName(), dto.getCategory(), dto.getLimit(), dto.getNgrams())));
+        return labels.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping(path = "reviews/labels/category")

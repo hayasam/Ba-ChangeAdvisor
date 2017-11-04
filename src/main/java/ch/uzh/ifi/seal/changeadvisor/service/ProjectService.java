@@ -5,6 +5,7 @@ import ch.uzh.ifi.seal.changeadvisor.project.ProjectRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ProjectService {
@@ -23,8 +24,8 @@ public class ProjectService {
         return repository.findAll();
     }
 
-    public Project findById(final String projectId) {
-        return repository.findById(projectId).orElseThrow(IllegalArgumentException::new);
+    public Optional<Project> findById(final String projectId) {
+        return repository.findById(projectId);
     }
 
     public Project findByAppName(final String appName) {

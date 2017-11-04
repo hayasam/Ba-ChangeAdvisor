@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 public class ProjectResource {
@@ -27,8 +28,9 @@ public class ProjectResource {
     }
 
     @GetMapping("/projects/{projectId}")
-    public Project getProjectById(@PathVariable("projectId") final String projectId) {
-        return service.findById(projectId);
+    public ResponseEntity<Project> getProjectById(@PathVariable("projectId") final String projectId) {
+        Optional<Project> project = service.findById(projectId);
+        return project.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping("/projects")
