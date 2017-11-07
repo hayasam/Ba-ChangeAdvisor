@@ -10,9 +10,11 @@ import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
+import org.springframework.scheduling.support.CronSequenceGenerator;
 import org.springframework.stereotype.Component;
 
 import java.text.SimpleDateFormat;
@@ -54,42 +56,43 @@ public class ScheduledReviewImportConfig implements SchedulingConfigurer {
         configureTasks();
     }
 
-    public void configureTasks() {
+    private void configureTasks() {
         if (taskRegistrar == null) {
             throw new IllegalStateException("Task Registrar not configured for ScheduledReviewImportConfig! " +
                     "Cannot schedule review import.");
         }
 
         logger.info("Configuring next scheduled review imports.");
-
-        final Set<ReviewImportCronTask> cronTasks = new HashSet<>();
         Collection<Project> projects = projectService.findAll();
+
         projects.forEach(project -> {
+
             if (!StringUtils.isEmpty(project.getCronSchedule())) {
-                cronTasks
-                        .add(new ReviewImportCronTask(
-                                () -> startReviewImport(project),
-                                project.getCronSchedule(),
-                                project.getGooglePlayId()
-                        ));
+                Trigger nextExecutionTrigger = trigger(project.getId());
+                taskRegistrar.addTriggerTask(
+                        () -> startReviewImport(project),
+                        nextExecutionTrigger
+                );
             }
         });
-
-        taskRegistrar.setCronTasksList(new ArrayList<>(cronTasks));
-        taskRegistrar.afterPropertiesSet();
     }
 
     private void startReviewImport(final Project project) {
         try {
-            logger.info(String.format("The time is now %s. Starting review import.", dateFormat.format(new Date())));
+            logger.info(String.format("The time is now %s. Starting review import for [%s].", dateFormat.format(new Date()), project.getAppName()));
             Map<String, Object> params = createReviewImportParams(project);
             reviewImportService.reviewImport(params);
 
             ReviewsConfig mostRecentRun = new ReviewsConfig(new Date());
             project.setReviewsConfig(mostRecentRun);
-            projectService.save(project);
+            Optional<Project> updatedProject = projectService.findById(project.getId());
+            updatedProject.ifPresent(p -> {
+                p.setReviewsConfig(mostRecentRun);
+                projectService.save(p);
+            });
+
         } catch (FailedToRunJobException e) {
-            logger.error("Failed to start scheduled review import.", e);
+            logger.error(String.format("Failed to start scheduled review import for [%s].", project.getAppName()), e);
         }
     }
 
@@ -98,5 +101,19 @@ public class ScheduledReviewImportConfig implements SchedulingConfigurer {
         params.put("id", project.getId());
         params.put("limit", 5000);
         return params;
+    }
+
+    private Trigger trigger(final String projectId) {
+        return triggerContext -> {
+            Project project = projectService.findById(projectId).orElseThrow(IllegalArgumentException::new);
+            CronSequenceGenerator sequenceGenerator = new CronSequenceGenerator(project.getCronSchedule());
+
+            Date next = sequenceGenerator.next(new Date());
+            Calendar nextExecutionTime = new GregorianCalendar();
+            Date lastActualExecutionTime = triggerContext.lastActualExecutionTime();
+            nextExecutionTime.setTime(next);
+            logger.info(String.format("Setting next execution time for [%s]: %s", project.getGooglePlayId(), next));
+            return nextExecutionTime.getTime();
+        };
     }
 }

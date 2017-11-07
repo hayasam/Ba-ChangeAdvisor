@@ -30,6 +30,8 @@ public class ReviewImportJobFactory {
 
     private static final String STEP_NAME = "reviewImportStep";
 
+    private static final RunIdIncrementer RUN_ID_INCREMENTER = new RunIdIncrementer();
+
     private final StepBuilderFactory stepBuilderFactory;
 
     private final JobBuilderFactory jobBuilderFactory;
@@ -55,11 +57,11 @@ public class ReviewImportJobFactory {
         this.projectRepository = projectRepository;
     }
 
-    public Job job(Map<String, Object> params) {
+    synchronized public Job job(Map<String, Object> params) {
         Project project = getApp(params).orElseThrow(() -> new IllegalArgumentException("No project found."));
         final String googlePlayId = project.getGooglePlayId();
         return jobBuilderFactory.get(REVIEW_IMPORT)
-                .incrementer(new RunIdIncrementer())
+                .incrementer(RUN_ID_INCREMENTER)
                 .flow(reviewImport(Lists.newArrayList(googlePlayId), params))
                 .next(ardocConfig.ardocAnalysis(googlePlayId))
                 .next(feedbackTransformationStepConfig.transformFeedback(googlePlayId))
@@ -90,7 +92,7 @@ public class ReviewImportJobFactory {
     public Job reviewAnalysis(ReviewAnalysisDto dto) {
         String app = dto.getApp();
         return jobBuilderFactory.get(REVIEW_ANALYSIS)
-                .incrementer(new RunIdIncrementer())
+                .incrementer(RUN_ID_INCREMENTER)
                 .flow(ardocConfig.ardocAnalysis(app))
                 .next(feedbackTransformationStepConfig.transformFeedback(app))
                 .next(documentClusteringStepConfig.documentsClustering(app))
@@ -101,7 +103,7 @@ public class ReviewImportJobFactory {
     public Job reviewProcessing(ReviewAnalysisDto dto) {
         String app = dto.getApp();
         return jobBuilderFactory.get(REVIEW_ANALYSIS)
-                .incrementer(new RunIdIncrementer())
+                .incrementer(RUN_ID_INCREMENTER)
                 .flow(feedbackTransformationStepConfig.transformFeedback(app))
                 .next(documentClusteringStepConfig.documentsClustering(app))
                 .end()
@@ -111,7 +113,7 @@ public class ReviewImportJobFactory {
     public Job reviewClustering(ReviewAnalysisDto dto) {
         String app = dto.getApp();
         return jobBuilderFactory.get(REVIEW_ANALYSIS)
-                .incrementer(new RunIdIncrementer())
+                .incrementer(RUN_ID_INCREMENTER)
                 .flow(documentClusteringStepConfig.documentsClustering(app))
                 .end()
                 .build();
@@ -120,7 +122,7 @@ public class ReviewImportJobFactory {
     public Job labelReviews(ReviewAnalysisDto dto) {
         String app = dto.getApp();
         return jobBuilderFactory.get(REVIEW_ANALYSIS)
-                .incrementer(new RunIdIncrementer())
+                .incrementer(RUN_ID_INCREMENTER)
                 .flow(tfidfStepConfig.computeLabels(app))
                 .end()
                 .build();

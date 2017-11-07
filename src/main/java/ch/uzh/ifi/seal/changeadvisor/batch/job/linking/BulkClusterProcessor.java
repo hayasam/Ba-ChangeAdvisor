@@ -20,13 +20,10 @@ public class BulkClusterProcessor implements ItemProcessor<TopicClusteringResult
 
     private CodeElementRepository codeElementRepository;
 
-    private List<CodeElement> codeElements;
-
     @Autowired
     public BulkClusterProcessor(Linker changeAdvisorLinker, CodeElementRepository codeElementRepository) {
         this.linker = changeAdvisorLinker;
         this.codeElementRepository = codeElementRepository;
-        codeElements = getCodeElements();
     }
 
     private List<CodeElement> getCodeElements() {
@@ -35,6 +32,6 @@ public class BulkClusterProcessor implements ItemProcessor<TopicClusteringResult
 
     @Override
     public List<LinkingResult> process(TopicClusteringResult item) throws Exception {
-        return linker.process(item.getAssignments(), codeElements);
+        return linker.process(item.getAssignments(), getCodeElements());
     }
 }

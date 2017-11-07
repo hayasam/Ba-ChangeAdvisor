@@ -44,8 +44,6 @@ public class ProjectResource {
         }
 
         Project savedProject = service.save(project);
-
-        scheduledReviewImportConfig.configureTasks();
         return ResponseEntity.ok(savedProject);
     }
 }
