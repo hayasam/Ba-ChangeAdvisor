@@ -5,7 +5,6 @@ import ch.uzh.ifi.seal.changeadvisor.project.ReviewsConfig;
 import ch.uzh.ifi.seal.changeadvisor.service.FailedToRunJobException;
 import ch.uzh.ifi.seal.changeadvisor.service.ProjectService;
 import ch.uzh.ifi.seal.changeadvisor.service.ReviewImportService;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +12,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
+import org.springframework.scheduling.config.ScheduledTask;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
+import org.springframework.scheduling.config.TriggerTask;
 import org.springframework.scheduling.support.CronSequenceGenerator;
 import org.springframework.stereotype.Component;
 
@@ -36,10 +37,13 @@ public class ScheduledReviewImportConfig implements SchedulingConfigurer {
 
     private ScheduledTaskRegistrar taskRegistrar;
 
+    private Map<String, ScheduledTask> scheduledTasks;
+
     @Autowired
     public ScheduledReviewImportConfig(ReviewImportService reviewImportService, ProjectService projectService) {
         this.reviewImportService = reviewImportService;
         this.projectService = projectService;
+        this.scheduledTasks = new HashMap<>();
     }
 
     @Bean(destroyMethod = "shutdown")
@@ -57,24 +61,49 @@ public class ScheduledReviewImportConfig implements SchedulingConfigurer {
     }
 
     private void configureTasks() {
-        if (taskRegistrar == null) {
-            throw new IllegalStateException("Task Registrar not configured for ScheduledReviewImportConfig! " +
-                    "Cannot schedule review import.");
-        }
-
         logger.info("Configuring next scheduled review imports.");
         Collection<Project> projects = projectService.findAll();
 
-        projects.forEach(project -> {
-
-            if (!StringUtils.isEmpty(project.getCronSchedule())) {
-                Trigger nextExecutionTrigger = trigger(project.getId());
-                taskRegistrar.addTriggerTask(
-                        () -> startReviewImport(project),
-                        nextExecutionTrigger
-                );
+        for (Project project : projects) {
+            if (project.hasCronSchedule()) {
+                setSchedule(project);
             }
-        });
+        }
+    }
+
+    public void setSchedule(final Project project) {
+        logger.info(String.format("Updating schedule for [%s]", project.getAppName()));
+
+        final String projectId = project.getId();
+
+        TriggerTask task = triggerTask(project);
+        cancelScheduledTaskIfAnyExists(projectId);
+
+        ScheduledTask scheduledTask = taskRegistrar.scheduleTriggerTask(task);
+        scheduledTasks.put(projectId, scheduledTask);
+    }
+
+    private TriggerTask triggerTask(final Project project) {
+        Trigger nextExecutionTrigger = trigger(project.getId());
+        return new TriggerTask(
+                () -> startReviewImport(project),
+                nextExecutionTrigger
+        );
+    }
+
+    private Trigger trigger(final String projectId) {
+        return triggerContext -> {
+            Project project = projectService.findById(projectId).orElseThrow(IllegalArgumentException::new);
+
+            Date next = getNextExecutionTime(project.getCronSchedule());
+            logger.info(String.format("Setting next execution time for [%s]: %s", project.getGooglePlayId(), next));
+            return next;
+        };
+    }
+
+    private Date getNextExecutionTime(final String cronExpression) {
+        CronSequenceGenerator sequenceGenerator = new CronSequenceGenerator(cronExpression);
+        return sequenceGenerator.next(new Date());
     }
 
     private void startReviewImport(final Project project) {
@@ -103,17 +132,10 @@ public class ScheduledReviewImportConfig implements SchedulingConfigurer {
         return params;
     }
 
-    private Trigger trigger(final String projectId) {
-        return triggerContext -> {
-            Project project = projectService.findById(projectId).orElseThrow(IllegalArgumentException::new);
-            CronSequenceGenerator sequenceGenerator = new CronSequenceGenerator(project.getCronSchedule());
-
-            Date next = sequenceGenerator.next(new Date());
-            Calendar nextExecutionTime = new GregorianCalendar();
-            Date lastActualExecutionTime = triggerContext.lastActualExecutionTime();
-            nextExecutionTime.setTime(next);
-            logger.info(String.format("Setting next execution time for [%s]: %s", project.getGooglePlayId(), next));
-            return nextExecutionTime.getTime();
-        };
+    private void cancelScheduledTaskIfAnyExists(final String projectId) {
+        if (scheduledTasks.containsKey(projectId)) {
+            ScheduledTask previouslyScheduledTask = scheduledTasks.get(projectId);
+            previouslyScheduledTask.cancel();
+        }
     }
 }

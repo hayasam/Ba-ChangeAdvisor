@@ -76,6 +76,10 @@ public class Project implements Comparable<Project> {
         return cronSchedule;
     }
 
+    public boolean hasCronSchedule() {
+        return !StringUtils.isEmpty(cronSchedule);
+    }
+
     public void setCronSchedule(String cronSchedule) {
         this.cronSchedule = cronSchedule;
     }

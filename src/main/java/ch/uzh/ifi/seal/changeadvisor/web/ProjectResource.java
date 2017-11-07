@@ -43,7 +43,14 @@ public class ProjectResource {
             return ResponseEntity.badRequest().body(project);
         }
 
+        Optional<Project> previousProject = service.findById(project.getId());
         Project savedProject = service.save(project);
+
+        previousProject.ifPresent(p -> {
+            if (!p.getCronSchedule().equals(savedProject.getCronSchedule())) {
+                scheduledReviewImportConfig.setSchedule(project);
+            }
+        });
         return ResponseEntity.ok(savedProject);
     }
 }
