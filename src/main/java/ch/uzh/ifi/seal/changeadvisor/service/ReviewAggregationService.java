@@ -22,7 +22,6 @@ import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.aggregation.TypedAggregation;
 import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.util.CloseableIterator;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -76,15 +75,14 @@ public class ReviewAggregationService {
      * @see ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResult#category
      */
     public List<ReviewTimeSeriesData> timeSeries(final String appName) {
-        List<Review> all = reviewsOperations.find(Query.query(Criteria.where("appName").is("test.app")), Review.class);
-
         AggregationOperation match = Aggregation.match(Criteria.where(REVIEW_APPNAME_FIELD).is(appName));
         AggregationOperation group = Aggregation.group(REVIEW_DATE_FIELD).first(REVIEW_DATE_FIELD).as(REVIEW_DATE_FIELD) // set group by field and save it as 'category' in resulting object.
                 .push("numberOfStars").as("ratings");// push entire document to field 'reviews' in ReviewCategory.
 
-        TypedAggregation<Review> categoryAggregation = Aggregation.newAggregation(Review.class,
+        TypedAggregation<Review> categoryAggregation = Aggregation.newAggregation(
+                Review.class,
                 match,
-                group // push entire document to field 'reviews' in ReviewCategory.
+                group
         );
 
         AggregationResults<ReviewTimeSeriesData> groupResults =
