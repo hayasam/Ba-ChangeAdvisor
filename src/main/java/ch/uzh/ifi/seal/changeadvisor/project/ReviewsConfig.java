@@ -1,5 +1,8 @@
 package ch.uzh.ifi.seal.changeadvisor.project;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.io.Serializable;
 import java.util.Date;
 
@@ -8,7 +11,8 @@ public class ReviewsConfig implements Serializable {
 
     private final Date lastReviewImport;
 
-    public ReviewsConfig(Date lastReviewImport) {
+    @JsonCreator
+    public ReviewsConfig(@JsonProperty("lastReviewImport") Date lastReviewImport) {
         this.lastReviewImport = lastReviewImport;
     }
 
