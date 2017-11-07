@@ -1,6 +1,7 @@
 package ch.uzh.ifi.seal.changeadvisor.schedule;
 
 import ch.uzh.ifi.seal.changeadvisor.project.Project;
+import ch.uzh.ifi.seal.changeadvisor.project.ReviewsConfig;
 import ch.uzh.ifi.seal.changeadvisor.service.FailedToRunJobException;
 import ch.uzh.ifi.seal.changeadvisor.service.ProjectService;
 import ch.uzh.ifi.seal.changeadvisor.service.ReviewImportService;
@@ -9,11 +10,9 @@ import org.apache.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.scheduling.TriggerContext;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
-import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Component;
 
 import java.text.SimpleDateFormat;
@@ -85,6 +84,10 @@ public class ScheduledReviewImportConfig implements SchedulingConfigurer {
             logger.info(String.format("The time is now %s. Starting review import.", dateFormat.format(new Date())));
             Map<String, Object> params = createReviewImportParams(project);
             reviewImportService.reviewImport(params);
+
+            ReviewsConfig mostRecentRun = new ReviewsConfig(new Date());
+            project.setReviewsConfig(mostRecentRun);
+            projectService.save(project);
         } catch (FailedToRunJobException e) {
             logger.error("Failed to start scheduled review import.", e);
         }
@@ -95,10 +98,5 @@ public class ScheduledReviewImportConfig implements SchedulingConfigurer {
         params.put("id", project.getId());
         params.put("limit", 5000);
         return params;
-    }
-
-    private Date setNextExecution(TriggerContext triggerContext, final String cronExpression) {
-        CronTrigger trigger = new CronTrigger(cronExpression);
-        return trigger.nextExecutionTime(triggerContext);
     }
 }

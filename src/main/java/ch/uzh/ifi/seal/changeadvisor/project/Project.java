@@ -26,6 +26,8 @@ public class Project implements Comparable<Project> {
 
     private String cronSchedule;
 
+    private ReviewsConfig reviewsConfig;
+
     public Project() {
     }
 
@@ -88,6 +90,14 @@ public class Project implements Comparable<Project> {
 
     public void setGooglePlayId(String googlePlayId) {
         this.googlePlayId = googlePlayId;
+    }
+
+    public void setReviewsConfig(ReviewsConfig reviewsConfig) {
+        this.reviewsConfig = reviewsConfig;
+    }
+
+    public ReviewsConfig getReviewsConfig() {
+        return reviewsConfig;
     }
 
     /**
