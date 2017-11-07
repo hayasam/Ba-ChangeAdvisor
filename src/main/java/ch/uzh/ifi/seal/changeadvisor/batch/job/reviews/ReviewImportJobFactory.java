@@ -57,14 +57,14 @@ public class ReviewImportJobFactory {
 
     public Job job(Map<String, Object> params) {
         Project project = getApp(params).orElseThrow(() -> new IllegalArgumentException("No project found."));
-        final String app = project.getAppName();
+        final String googlePlayId = project.getGooglePlayId();
         return jobBuilderFactory.get(REVIEW_IMPORT)
                 .incrementer(new RunIdIncrementer())
-                .flow(reviewImport(Lists.newArrayList(project.getGooglePlayId()), params))
-                .next(ardocConfig.ardocAnalysis(project.getGooglePlayId()))
-                .next(feedbackTransformationStepConfig.transformFeedback(project.getGooglePlayId()))
-                .next(documentClusteringStepConfig.documentsClustering(project.getGooglePlayId()))
-                .next(tfidfStepConfig.computeLabels(project.getGooglePlayId()))
+                .flow(reviewImport(Lists.newArrayList(googlePlayId), params))
+                .next(ardocConfig.ardocAnalysis(googlePlayId))
+                .next(feedbackTransformationStepConfig.transformFeedback(googlePlayId))
+                .next(documentClusteringStepConfig.documentsClustering(googlePlayId))
+                .next(tfidfStepConfig.computeLabels(googlePlayId))
                 .end()
                 .build();
     }

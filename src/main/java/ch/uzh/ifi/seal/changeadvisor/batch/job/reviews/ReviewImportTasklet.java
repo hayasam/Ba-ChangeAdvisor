@@ -1,6 +1,7 @@
 package ch.uzh.ifi.seal.changeadvisor.batch.job.reviews;
 
 import config.ConfigurationManager;
+import org.apache.log4j.Logger;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
@@ -9,6 +10,8 @@ import org.springframework.batch.repeat.RepeatStatus;
 import java.util.ArrayList;
 
 public class ReviewImportTasklet implements Tasklet {
+
+    private static final Logger logger = Logger.getLogger(ReviewImportTasklet.class);
 
     private ArrayList<String> apps;
 
@@ -21,6 +24,8 @@ public class ReviewImportTasklet implements Tasklet {
 
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
+        logger.info(String.format("Starting review crawling for app %s with parameters: limit=%s; threads=%s", apps, config.getLimit(), config.getNumberOfThreadToUse()));
+        
         MonitorableExtractor extractor = new MonitorableExtractor(apps, config);
         extractor.extract();
 

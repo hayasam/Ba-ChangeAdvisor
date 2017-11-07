@@ -1,6 +1,7 @@
 package ch.uzh.ifi.seal.changeadvisor.web;
 
 import ch.uzh.ifi.seal.changeadvisor.project.Project;
+import ch.uzh.ifi.seal.changeadvisor.schedule.ScheduledReviewImportConfig;
 import ch.uzh.ifi.seal.changeadvisor.service.ProjectService;
 import edu.emory.mathcs.backport.java.util.Collections;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,9 +16,12 @@ public class ProjectResource {
 
     private final ProjectService service;
 
+    private final ScheduledReviewImportConfig scheduledReviewImportConfig;
+
     @Autowired
-    public ProjectResource(ProjectService service) {
+    public ProjectResource(ProjectService service, ScheduledReviewImportConfig scheduledReviewImportConfig) {
         this.service = service;
+        this.scheduledReviewImportConfig = scheduledReviewImportConfig;
     }
 
     @GetMapping("/projects")
@@ -40,6 +44,8 @@ public class ProjectResource {
         }
 
         Project savedProject = service.save(project);
+
+        scheduledReviewImportConfig.configureTasks();
         return ResponseEntity.ok(savedProject);
     }
 }

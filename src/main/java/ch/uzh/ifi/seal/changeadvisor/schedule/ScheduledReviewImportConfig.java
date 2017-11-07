@@ -6,6 +6,7 @@ import ch.uzh.ifi.seal.changeadvisor.service.ProjectService;
 import ch.uzh.ifi.seal.changeadvisor.service.ReviewImportService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.TriggerContext;
@@ -16,10 +17,7 @@ import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.stereotype.Component;
 
 import java.text.SimpleDateFormat;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -35,6 +33,8 @@ public class ScheduledReviewImportConfig implements SchedulingConfigurer {
 
     private final ProjectService projectService;
 
+    private ScheduledTaskRegistrar taskRegistrar;
+
     @Autowired
     public ScheduledReviewImportConfig(ReviewImportService reviewImportService, ProjectService projectService) {
         this.reviewImportService = reviewImportService;
@@ -47,35 +47,54 @@ public class ScheduledReviewImportConfig implements SchedulingConfigurer {
     }
 
     @Override
-    public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
-        taskRegistrar.setScheduler(taskExecutor());
+    public void configureTasks(@NotNull ScheduledTaskRegistrar taskRegistrar) {
+        if (this.taskRegistrar == null) {
+            this.taskRegistrar = taskRegistrar;
+        }
+        this.taskRegistrar.setScheduler(taskExecutor());
+        configureTasks();
+    }
 
+    public void configureTasks() {
+        if (taskRegistrar == null) {
+            throw new IllegalStateException("Task Registrar not configured for ScheduledReviewImportConfig! " +
+                    "Cannot schedule review import.");
+        }
+
+        logger.info("Configuring next scheduled review imports.");
+
+        final Set<ReviewImportCronTask> cronTasks = new HashSet<>();
         Collection<Project> projects = projectService.findAll();
         projects.forEach(project -> {
             if (!StringUtils.isEmpty(project.getCronSchedule())) {
-                taskRegistrar
-                        .addTriggerTask(
-                                () -> startReviewImport(project.getAppName()),
-                                triggerContext -> setNextExecution(triggerContext, project.getCronSchedule()));
+                cronTasks
+                        .add(new ReviewImportCronTask(
+                                () -> startReviewImport(project),
+                                project.getCronSchedule(),
+                                project.getGooglePlayId()
+                        ));
             }
         });
+
+        taskRegistrar.setCronTasksList(new ArrayList<>(cronTasks));
+        taskRegistrar.afterPropertiesSet();
     }
 
-    private Map<String, Object> createReviewImportParams(final String projectName) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("apps", projectName);
-        params.put("limit", 1000);
-        return params;
-    }
-
-    private void startReviewImport(final String appName) {
+    private void startReviewImport(final Project project) {
         try {
             logger.info(String.format("The time is now %s. Starting review import.", dateFormat.format(new Date())));
-            Map<String, Object> params = createReviewImportParams(appName);
+            Map<String, Object> params = createReviewImportParams(project);
             reviewImportService.reviewImport(params);
         } catch (FailedToRunJobException e) {
             logger.error("Failed to start scheduled review import.", e);
         }
+    }
+
+    private Map<String, Object> createReviewImportParams(final Project project) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("id", project.getId());
+        params.put("limit", 5000);
+        return params;
     }
 
     private Date setNextExecution(TriggerContext triggerContext, final String cronExpression) {
