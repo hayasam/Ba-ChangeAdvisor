@@ -96,6 +96,8 @@ public class ScheduledReviewImportConfig implements SchedulingConfigurer {
             Project project = projectService.findById(projectId).orElseThrow(IllegalArgumentException::new);
 
             Date next = getNextExecutionTime(project.getCronSchedule());
+            project.setReviewsConfig(ReviewsConfig.of(project.getReviewsConfig(), next));
+            projectService.save(project);
             logger.info(String.format("Setting next execution time for [%s]: %s", project.getGooglePlayId(), next));
             return next;
         };
@@ -112,7 +114,7 @@ public class ScheduledReviewImportConfig implements SchedulingConfigurer {
             Map<String, Object> params = createReviewImportParams(project);
             reviewImportService.reviewImport(params);
 
-            ReviewsConfig mostRecentRun = new ReviewsConfig(new Date());
+            ReviewsConfig mostRecentRun = new ReviewsConfig(new Date(), project.getReviewsConfig().getNextReviewImport());
             project.setReviewsConfig(mostRecentRun);
             Optional<Project> updatedProject = projectService.findById(project.getId());
             updatedProject.ifPresent(p -> {

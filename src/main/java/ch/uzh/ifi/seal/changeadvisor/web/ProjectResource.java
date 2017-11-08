@@ -51,6 +51,7 @@ public class ProjectResource {
                 scheduledReviewImportConfig.setSchedule(project);
             }
         });
-        return ResponseEntity.ok(savedProject);
+        Optional<Project> updatedProject = service.findById(project.getId());
+        return updatedProject.map(ResponseEntity::ok).orElse(ResponseEntity.badRequest().body(project));
     }
 }

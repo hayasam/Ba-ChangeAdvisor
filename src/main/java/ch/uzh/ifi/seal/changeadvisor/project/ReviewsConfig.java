@@ -11,19 +11,31 @@ public class ReviewsConfig implements Serializable {
 
     private final Date lastReviewImport;
 
+    private final Date nextReviewImport;
+
     @JsonCreator
-    public ReviewsConfig(@JsonProperty("lastReviewImport") Date lastReviewImport) {
+    public ReviewsConfig(@JsonProperty("lastReviewImport") Date lastReviewImport, @JsonProperty("nextReviewImport") Date nextReviewImport) {
         this.lastReviewImport = lastReviewImport;
+        this.nextReviewImport = nextReviewImport;
     }
 
     public Date getLastReviewImport() {
         return lastReviewImport;
     }
 
+    public Date getNextReviewImport() {
+        return nextReviewImport;
+    }
+
+    public static ReviewsConfig of(ReviewsConfig config, Date nextReviewImport) {
+        return new ReviewsConfig(config.lastReviewImport, nextReviewImport);
+    }
+
     @Override
     public String toString() {
         return "ReviewsConfig{" +
                 "lastReviewImport=" + lastReviewImport +
+                ", nextReviewImport=" + nextReviewImport +
                 '}';
     }
 }
