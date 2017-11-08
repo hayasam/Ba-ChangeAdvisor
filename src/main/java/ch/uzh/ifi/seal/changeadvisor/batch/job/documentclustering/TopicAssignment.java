@@ -1,5 +1,6 @@
 package ch.uzh.ifi.seal.changeadvisor.batch.job.documentclustering;
 
+import ch.uzh.ifi.seal.changeadvisor.batch.job.linking.LinkableReview;
 import com.google.common.collect.Sets;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -12,7 +13,7 @@ import java.util.Set;
  * Created by alex on 24.07.2017.
  */
 @Document
-public class TopicAssignment {
+public class TopicAssignment implements LinkableReview {
 
     @Id
     private String id;
@@ -46,10 +47,12 @@ public class TopicAssignment {
         return id;
     }
 
+    @Override
     public String getOriginalSentence() {
         return originalSentence;
     }
 
+    @Override
     public Set<String> getBag() {
         return Sets.newHashSet(bag);
     }

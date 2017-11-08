@@ -1,19 +1,22 @@
 package ch.uzh.ifi.seal.changeadvisor.batch.job.feedbackprocessing;
 
 import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResult;
+import ch.uzh.ifi.seal.changeadvisor.batch.job.linking.LinkableReview;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.Review;
+import com.google.common.collect.ImmutableSet;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Set;
 
 /**
  * Created by alex on 20.07.2017.
  */
 @Document
-public class TransformedFeedback implements Comparable<TransformedFeedback> {
+public class TransformedFeedback implements LinkableReview, Comparable<TransformedFeedback> {
 
     @Id
     private String id;
@@ -90,6 +93,16 @@ public class TransformedFeedback implements Comparable<TransformedFeedback> {
 
     public void setTransformedSentence(String transformedSentence) {
         this.transformedSentence = transformedSentence;
+    }
+
+    @Override
+    public Set<String> getBag() {
+        return ImmutableSet.copyOf(getBagOfWords());
+    }
+
+    @Override
+    public String getOriginalSentence() {
+        return getSentence();
     }
 
     @Override

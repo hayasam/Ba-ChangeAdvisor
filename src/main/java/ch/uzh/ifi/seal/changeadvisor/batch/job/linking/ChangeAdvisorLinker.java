@@ -82,7 +82,7 @@ public class ChangeAdvisorLinker implements Linker {
     }
 
     @Override
-    public List<LinkingResult> process(int topicId, Collection<TopicAssignment> assignments, Collection<CodeElement> codeElements) {
+    public List<LinkingResult> process(int topicId, Collection<? extends LinkableReview> assignments, Collection<CodeElement> codeElements) {
         Assert.notNull(similarityMetric, "No similarity metric set!");
 
         List<LinkingResult> results = new ArrayList<>(assignments.size());
@@ -136,9 +136,9 @@ public class ChangeAdvisorLinker implements Linker {
         return Optional.empty();
     }
 
-    private void findCandidates(Collection<TopicAssignment> assignments, Collection<CodeElement> elements,
+    private void findCandidates(Collection<? extends LinkableReview> assignments, Collection<CodeElement> elements,
                                 Collection<CodeElement> candidates, Set<String> clusterBag, Set<String> originalReviews) {
-        for (TopicAssignment review : assignments) {
+        for (LinkableReview review : assignments) {
             Set<String> reviewWords = review.getBag();
 
             for (CodeElement codeElement : elements) {

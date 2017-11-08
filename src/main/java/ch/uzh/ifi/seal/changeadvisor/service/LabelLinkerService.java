@@ -1,6 +1,5 @@
 package ch.uzh.ifi.seal.changeadvisor.service;
 
-import ch.uzh.ifi.seal.changeadvisor.batch.job.documentclustering.TopicAssignment;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.feedbackprocessing.TransformedFeedback;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.feedbackprocessing.TransformedFeedbackRepository;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.linking.ChangeAdvisorLinker;
@@ -14,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class LabelLinkerService {
@@ -43,9 +41,8 @@ public class LabelLinkerService {
      */
     public List<LinkingResult> link(String token, ReviewsByTopLabelsDto dto) {
         List<TransformedFeedback> feedback = getFeedbackCorrespondingToLabel(token, dto.getApp(), dto.getCategory());
-        List<TopicAssignment> topicAssignments = transformedFeedbackToTopicAssignment(feedback);
         List<CodeElement> codeElements = codeElementRepository.findByAppName(dto.getApp());
-        return linker.process(1, topicAssignments, codeElements);
+        return linker.process(1, feedback, codeElements);
     }
 
     private List<TransformedFeedback> getFeedbackCorrespondingToLabel(final String token, final String appName, final String category) {
@@ -53,12 +50,5 @@ public class LabelLinkerService {
         return transformedFeedbackRepository
                 .findDistinctByArdocResultAppNameAndArdocResultCategoryAndTransformedSentenceContainingIgnoreCase(
                         appName, category, label.getLabel());
-    }
-
-    private List<TopicAssignment> transformedFeedbackToTopicAssignment(List<TransformedFeedback> feedback) {
-        return feedback
-                .stream()
-                .map(f -> new TopicAssignment(f.getSentence(), f.getBagOfWords(), 1))
-                .collect(Collectors.toList());
     }
 }
