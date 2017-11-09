@@ -9,10 +9,16 @@ import java.util.Collection;
 @Document
 public class LinkingResult implements Comparable<LinkingResult> {
 
+    public enum ClusterType {
+        TFIDF, HDP
+    }
+
     @Id
     private String id;
 
-    private int clusterId;
+    private String appName;
+
+    private String clusterId;
 
     private Collection<String> reviews;
 
@@ -24,16 +30,19 @@ public class LinkingResult implements Comparable<LinkingResult> {
 
     private Double similarity;
 
+    private ClusterType clusterType;
+
     public LinkingResult() {
     }
 
-    public LinkingResult(int clusterId, Collection<String> reviews, Collection<String> clusterBag, Collection<String> codeComponentBag, String codeComponentName, Double similarity) {
+    public LinkingResult(String clusterId, Collection<String> reviews, Collection<String> clusterBag, Collection<String> codeComponentBag, String codeComponentName, Double similarity, ClusterType clusterType) {
         this.clusterId = clusterId;
         this.reviews = reviews;
         this.clusterBag = clusterBag;
         this.codeComponentBag = codeComponentBag;
         this.codeComponentName = codeComponentName;
         this.similarity = similarity;
+        this.clusterType = clusterType;
     }
 
     public String getId() {
@@ -44,11 +53,11 @@ public class LinkingResult implements Comparable<LinkingResult> {
         this.id = id;
     }
 
-    public int getClusterId() {
+    public String getClusterId() {
         return clusterId;
     }
 
-    public void setClusterId(int clusterId) {
+    public void setClusterId(String clusterId) {
         this.clusterId = clusterId;
     }
 
@@ -90,6 +99,22 @@ public class LinkingResult implements Comparable<LinkingResult> {
 
     public void setSimilarity(Double similarity) {
         this.similarity = similarity;
+    }
+
+    public ClusterType getClusterType() {
+        return clusterType;
+    }
+
+    public void setClusterType(ClusterType clusterType) {
+        this.clusterType = clusterType;
+    }
+
+    public String getAppName() {
+        return appName;
+    }
+
+    public void setAppName(String appName) {
+        this.appName = appName;
     }
 
     @Override

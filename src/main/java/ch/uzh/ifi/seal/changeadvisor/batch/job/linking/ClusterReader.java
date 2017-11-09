@@ -45,7 +45,7 @@ public class ClusterReader implements ItemReader<Cluster> {
         if (topicIterator.hasNext()) {
             final int topicId = topicIterator.next().getTopic();
             List<TopicAssignment> assignmentsByTopic = topicAssignmentRepository.findByTopic(topicId);
-            return Optional.of(new Cluster(topicId, assignmentsByTopic));
+            return Optional.of(new Cluster(assignmentsByTopic));
         }
         return Optional.empty();
     }

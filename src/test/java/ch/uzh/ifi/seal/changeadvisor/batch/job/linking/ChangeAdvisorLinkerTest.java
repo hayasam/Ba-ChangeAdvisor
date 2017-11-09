@@ -76,7 +76,7 @@ public class ChangeAdvisorLinkerTest {
         Map<Integer, List<TopicAssignment>> clusters = linker.groupByTopic(assignments);
 
         for (Map.Entry<Integer, List<TopicAssignment>> entry : clusters.entrySet()) {
-            List<LinkingResult> clusterResults = linker.process(entry.getKey(), entry.getValue(), codeElements);
+            List<LinkingResult> clusterResults = linker.process(entry.getKey().toString(), entry.getValue(), codeElements);
             results.addAll(clusterResults);
         }
 
@@ -90,7 +90,7 @@ public class ChangeAdvisorLinkerTest {
         Collections.sort(results);
         for (LinkingResult result : results) {
             writer.writeNext(new String[]{
-                    Integer.toString(result.getClusterId()),
+                    result.getClusterId(),
                     Joiner.on(" ").join(result.getClusterBag()),
                     result.getCodeComponentName(),
                     result.getSimilarity().toString(),

@@ -14,5 +14,7 @@ public interface LabelRepository extends MongoRepository<Label, String> {
 
     List<Label> findByAppNameAndNgramSizeOrderByScoreDesc(String appName, Integer ngramSize);
 
+    List<Label> findTop20ByAppNameAndNgramSizeOrderByScoreDesc(String appName, Integer ngramSize);
+
     List<Label> findByAppNameAndCategoryAndNgramSizeOrderByScoreDesc(String appName, String category, Integer ngramSize);
 }

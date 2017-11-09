@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface LinkingResultRepository extends MongoRepository<LinkingResult, String> {
 
+    long deleteByAppName(String appName);
 }

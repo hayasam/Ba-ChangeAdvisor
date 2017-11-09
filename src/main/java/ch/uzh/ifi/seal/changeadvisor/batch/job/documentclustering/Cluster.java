@@ -1,23 +1,31 @@
 package ch.uzh.ifi.seal.changeadvisor.batch.job.documentclustering;
 
+import ch.uzh.ifi.seal.changeadvisor.batch.job.linking.LinkableReview;
+
 import java.util.Collection;
+import java.util.UUID;
 
 public class Cluster {
 
-    private int topicId;
+    private String topicId;
 
-    private Collection<TopicAssignment> assignments;
+    private Collection<? extends LinkableReview> assignments;
 
-    public Cluster(int topicId, Collection<TopicAssignment> assignments) {
+    public Cluster(Collection<? extends LinkableReview> assignments) {
+        this.topicId = UUID.randomUUID().toString();
+        this.assignments = assignments;
+    }
+
+    public Cluster(String topicId, Collection<? extends LinkableReview> assignments) {
         this.topicId = topicId;
         this.assignments = assignments;
     }
 
-    public int getTopicId() {
+    public String getTopicId() {
         return topicId;
     }
 
-    public Collection<TopicAssignment> getAssignments() {
+    public Collection<? extends LinkableReview> getAssignments() {
         return assignments;
     }
 

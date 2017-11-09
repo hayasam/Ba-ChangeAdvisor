@@ -1,9 +1,6 @@
 package ch.uzh.ifi.seal.changeadvisor.batch.job.reviews;
 
-import ch.uzh.ifi.seal.changeadvisor.batch.job.ArdocStepConfig;
-import ch.uzh.ifi.seal.changeadvisor.batch.job.DocumentClusteringStepConfig;
-import ch.uzh.ifi.seal.changeadvisor.batch.job.FeedbackTransformationStepConfig;
-import ch.uzh.ifi.seal.changeadvisor.batch.job.TermFrequencyInverseDocumentFrequencyStepConfig;
+import ch.uzh.ifi.seal.changeadvisor.batch.job.*;
 import ch.uzh.ifi.seal.changeadvisor.project.Project;
 import ch.uzh.ifi.seal.changeadvisor.project.ProjectRepository;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewAnalysisDto;
@@ -44,16 +41,24 @@ public class ReviewImportJobFactory {
 
     private final TermFrequencyInverseDocumentFrequencyStepConfig tfidfStepConfig;
 
+    private final LinkingStepConfig linkingStepConfig;
+
     private final ProjectRepository projectRepository;
 
     @Autowired
-    public ReviewImportJobFactory(StepBuilderFactory stepBuilderFactory, JobBuilderFactory reviewImportJobBuilder, ArdocStepConfig ardocConfig, FeedbackTransformationStepConfig feedbackTransformationStepConfig, DocumentClusteringStepConfig documentClusteringStepConfig, TermFrequencyInverseDocumentFrequencyStepConfig tfidfStepConfig, ProjectRepository projectRepository) {
+    public ReviewImportJobFactory(StepBuilderFactory stepBuilderFactory, JobBuilderFactory reviewImportJobBuilder,
+                                  ArdocStepConfig ardocConfig,
+                                  FeedbackTransformationStepConfig feedbackTransformationStepConfig,
+                                  DocumentClusteringStepConfig documentClusteringStepConfig,
+                                  TermFrequencyInverseDocumentFrequencyStepConfig tfidfStepConfig,
+                                  LinkingStepConfig linkingStepConfig, ProjectRepository projectRepository) {
         this.stepBuilderFactory = stepBuilderFactory;
         this.jobBuilderFactory = reviewImportJobBuilder;
         this.ardocConfig = ardocConfig;
         this.feedbackTransformationStepConfig = feedbackTransformationStepConfig;
         this.documentClusteringStepConfig = documentClusteringStepConfig;
         this.tfidfStepConfig = tfidfStepConfig;
+        this.linkingStepConfig = linkingStepConfig;
         this.projectRepository = projectRepository;
     }
 
@@ -67,6 +72,7 @@ public class ReviewImportJobFactory {
                 .next(feedbackTransformationStepConfig.transformFeedback(googlePlayId))
                 .next(documentClusteringStepConfig.documentsClustering(googlePlayId))
                 .next(tfidfStepConfig.computeLabels(googlePlayId))
+                .next(linkingStepConfig.clusterLinking(googlePlayId))
                 .end()
                 .build();
     }

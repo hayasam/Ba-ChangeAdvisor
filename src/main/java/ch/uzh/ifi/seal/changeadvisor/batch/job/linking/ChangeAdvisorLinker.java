@@ -68,8 +68,8 @@ public class ChangeAdvisorLinker implements Linker {
 
                         if (similarity >= 0.5) {
                             LinkingResult result = new LinkingResult(
-                                    cluster.getKey(), originalReviews, clusterCleanedBag, codeElementBag,
-                                    codeElement.getFullyQualifiedClassName(), similarity);
+                                    cluster.getKey().toString(), originalReviews, clusterCleanedBag, codeElementBag,
+                                    codeElement.getFullyQualifiedClassName(), similarity, LinkingResult.ClusterType.HDP);
                             results.add(result);
                         }
                     }
@@ -82,33 +82,31 @@ public class ChangeAdvisorLinker implements Linker {
     }
 
     @Override
-    public List<LinkingResult> process(int topicId, Collection<? extends LinkableReview> assignments, Collection<CodeElement> codeElements) {
+    public List<LinkingResult> process(String topicId, Collection<? extends LinkableReview> assignments, Collection<CodeElement> codeElements) {
         Assert.notNull(similarityMetric, "No similarity metric set!");
 
         List<LinkingResult> results = new ArrayList<>(assignments.size());
 
-        if (topicId != 0) {
 
-            Collection<CodeElement> candidates = new HashSet<>();
-            Set<String> clusterBag = new HashSet<>();
-            Set<String> originalReviews = new HashSet<>();
+        Collection<CodeElement> candidates = new HashSet<>();
+        Set<String> clusterBag = new HashSet<>();
+        Set<String> originalReviews = new HashSet<>();
 
-            findCandidates(assignments, codeElements, candidates, clusterBag, originalReviews);
+        findCandidates(assignments, codeElements, candidates, clusterBag, originalReviews);
 
-            final Collection<String> clusterCleanedBag = corpusProcessor.transform(clusterBag);
+        final Collection<String> clusterCleanedBag = corpusProcessor.transform(clusterBag);
 
-            logger.debug(String.format("Cluster: %d, size: %d", topicId, assignments.size()));
-            logger.debug(String.format("Candidates size: %d", candidates.size()));
+        logger.debug(String.format("Cluster: %s, size: %d", topicId, assignments.size()));
+        logger.debug(String.format("Candidates size: %d", candidates.size()));
 
-            List<LinkingResult> similarityResults = checkSimilarity(topicId, candidates, clusterCleanedBag, originalReviews);
-            results.addAll(similarityResults);
+        List<LinkingResult> similarityResults = checkSimilarity(topicId, candidates, clusterCleanedBag, originalReviews);
+        results.addAll(similarityResults);
 
-            logger.info(String.format("Finished running topic: %d", topicId));
-        }
+        logger.info(String.format("Finished running topic: %s", topicId));
         return results;
     }
 
-    private List<LinkingResult> checkSimilarity(int topicId, Collection<CodeElement> candidates, Collection<String> clusterBag, Collection<String> reviews) {
+    private List<LinkingResult> checkSimilarity(String topicId, Collection<CodeElement> candidates, Collection<String> clusterBag, Collection<String> reviews) {
         List<LinkingResult> results = new ArrayList<>();
 
         for (CodeElement candidate : candidates) {
@@ -118,7 +116,7 @@ public class ChangeAdvisorLinker implements Linker {
         return results;
     }
 
-    private Optional<LinkingResult> checkSimilarity(int topicId, CodeElement candidate, Collection<String> clusterBag, Collection<String> reviews) {
+    private Optional<LinkingResult> checkSimilarity(String topicId, CodeElement candidate, Collection<String> clusterBag, Collection<String> reviews) {
         final Collection<String> codeElementBag = corpusProcessor.transform(candidate.getBag());
 
         if (!clusterBag.isEmpty() && !codeElementBag.isEmpty()) {
@@ -129,7 +127,7 @@ public class ChangeAdvisorLinker implements Linker {
             if (similarity >= 0.5) {
                 LinkingResult result = new LinkingResult(
                         topicId, reviews, clusterBag, codeElementBag,
-                        candidate.getFullyQualifiedClassName(), similarity);
+                        candidate.getFullyQualifiedClassName(), similarity, null);
                 return Optional.of(result);
             }
         }
