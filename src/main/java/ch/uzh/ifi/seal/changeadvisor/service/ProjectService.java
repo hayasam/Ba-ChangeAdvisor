@@ -25,6 +25,9 @@ public class ProjectService {
     }
 
     public Optional<Project> findById(final String projectId) {
+        if (projectId == null) {
+            return Optional.empty();
+        }
         return repository.findById(projectId);
     }
 
