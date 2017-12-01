@@ -6,17 +6,22 @@ import ch.uzh.ifi.seal.changeadvisor.service.ProjectService;
 import ch.uzh.ifi.seal.changeadvisor.service.SourceCodeService;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.SourceCodeDirectoryDto;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.util.Optional;
 
 @RestController
 public class SourceCodeController {
+
+    private static final Logger logger = Logger.getLogger(SourceCodeController.class);
 
     private final SourceCodeService sourceCodeService;
 
@@ -32,6 +37,24 @@ public class SourceCodeController {
     public long downloadSourceCode(@RequestBody @Valid SourceCodeDirectoryDto dto) throws FailedToRunJobException {
         Assert.isTrue(projectService.projectExists(dto.getProjectName()), "Project doesn't exists!");
         JobExecution jobExecution = sourceCodeService.startSourceCodeDownload(dto);
+        return jobExecution.getJobId();
+    }
+
+    @PostMapping(path = "source/{projectId}")
+    public long downloadSourceCode(@PathVariable("projectId") String projectId) {
+        Assert.notNull(projectId, "Project id cannot be null!");
+        Optional<Project> project = projectService.findById(projectId);
+        JobExecution jobExecution = project.map(p -> {
+            try {
+                JobExecution execution = sourceCodeService.startSourceCodeDownload(new SourceCodeDirectoryDto(p.getRemoteUrl(), p.getAppName()));
+                p.justImportedSource();
+                p = projectService.save(p);
+                return execution;
+            } catch (FailedToRunJobException e) {
+                logger.error("Failed to start source code download and process.", e);
+            }
+            return null;
+        }).orElseThrow(() -> new IllegalArgumentException("No project found for id: [%s]"));
         return jobExecution.getJobId();
     }
 

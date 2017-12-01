@@ -10,12 +10,15 @@ import org.springframework.stereotype.Service;
 @Service
 public class SourceCodeService {
 
+    private final ProjectService projectService;
+
     private final JobService jobService;
 
     private final SourceImportJobFactory sourceImportJobFactory;
 
     @Autowired
-    public SourceCodeService(JobService jobService, SourceImportJobFactory sourceImportJobFactory) {
+    public SourceCodeService(ProjectService projectService, JobService jobService, SourceImportJobFactory sourceImportJobFactory) {
+        this.projectService = projectService;
         this.jobService = jobService;
         this.sourceImportJobFactory = sourceImportJobFactory;
     }
@@ -29,6 +32,7 @@ public class SourceCodeService {
      * @throws ch.uzh.ifi.seal.changeadvisor.service.FailedToRunJobException if an exception occured while starting job.
      */
     public JobExecution startSourceCodeDownload(SourceCodeDirectoryDto dto) throws FailedToRunJobException {
+        projectService.findById(dto.getProjectName());
         Job job = sourceImportJobFactory.importAndProcessingJob(dto);
         return jobService.run(job);
     }

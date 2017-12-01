@@ -9,6 +9,8 @@ import org.springframework.scheduling.support.CronSequenceGenerator;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
+import java.util.Date;
+
 @Document
 public class Project implements Comparable<Project> {
 
@@ -27,6 +29,8 @@ public class Project implements Comparable<Project> {
     private String cronSchedule;
 
     private ReviewsConfig reviewsConfig;
+
+    private SourceConfig sourceConfig;
 
     public Project() {
     }
@@ -102,6 +106,18 @@ public class Project implements Comparable<Project> {
 
     public ReviewsConfig getReviewsConfig() {
         return reviewsConfig;
+    }
+
+    public SourceConfig getSourceConfig() {
+        return sourceConfig;
+    }
+
+    public void setSourceConfig(SourceConfig sourceConfig) {
+        this.sourceConfig = sourceConfig;
+    }
+
+    public void justImportedSource() {
+        this.sourceConfig = new SourceConfig(new Date());
     }
 
     /**
