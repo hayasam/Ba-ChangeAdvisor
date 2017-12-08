@@ -3,11 +3,14 @@ package ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.Review;
 import org.apache.log4j.Logger;
 import org.ardoc.Parser;
+import org.ardoc.Result;
 import org.ardoc.UnknownCombinationException;
 import org.springframework.batch.core.StepExecution;
 import org.springframework.batch.core.annotation.BeforeStep;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.item.ItemProcessor;
+
+import java.util.List;
 
 public class ReviewProcessor implements ItemProcessor<Review, ArdocResults> {
 
@@ -23,7 +26,8 @@ public class ReviewProcessor implements ItemProcessor<Review, ArdocResults> {
 
     @Override
     public ArdocResults process(Review item) throws UnknownCombinationException {
-        ArdocResults result = new ArdocResults(item, parser.extract(ARDOC_METHODS, item.getReviewText()));
+        List<Result> results = parser.extract(ARDOC_METHODS, item.getReviewText());
+        ArdocResults result = new ArdocResults(item, results);
         trackProgress();
         return result;
     }

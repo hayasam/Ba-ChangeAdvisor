@@ -8,6 +8,12 @@ import java.util.regex.Pattern;
  */
 public class ComposedIdentifierSplitter {
 
+    private static final Pattern CAMEL_CASE_PATTERN = Pattern.compile(String.format("%s|%s|%s",
+            "(?<=[A-Z])(?=[A-Z][a-z])",
+            "(?<=[^A-Z])(?=[A-Z])",
+            "(?<=[A-Za-z])(?=[^A-Za-z])"
+    ));
+
     private static final Pattern DIGIT_SEPARATED_TEXT_PATTERN = Pattern.compile("(?<=\\D)(?=\\d)|(?<=\\d)(?=\\D)");
 
     public String split(String text) {
@@ -18,14 +24,7 @@ public class ComposedIdentifierSplitter {
     }
 
     private String splitCamelCase(String s) {
-        return s.replaceAll(
-                String.format("%s|%s|%s",
-                        "(?<=[A-Z])(?=[A-Z][a-z])",
-                        "(?<=[^A-Z])(?=[A-Z])",
-                        "(?<=[A-Za-z])(?=[^A-Za-z])"
-                ),
-                " "
-        );
+        return CAMEL_CASE_PATTERN.matcher(s).replaceAll(" ");
     }
 
     private String splitUnderScoreText(String s) {
@@ -33,6 +32,6 @@ public class ComposedIdentifierSplitter {
     }
 
     private String splitDigitSeparatedText(String s) {
-        return s.replaceAll(DIGIT_SEPARATED_TEXT_PATTERN.toString(), " ");
+        return DIGIT_SEPARATED_TEXT_PATTERN.matcher(s).replaceAll(" ");
     }
 }
