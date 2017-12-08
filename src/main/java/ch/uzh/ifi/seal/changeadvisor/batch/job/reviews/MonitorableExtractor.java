@@ -33,7 +33,8 @@ public class MonitorableExtractor extends Extractor {
 
     @Override
     public void extract() {
-        ExecutorService executor = Executors.newFixedThreadPool(this.configurationManager.getNumberOfThreadToUse());
+        final int numberOfThreadToUse = this.configurationManager.getNumberOfThreadToUse();
+        ExecutorService executor = Executors.newFixedThreadPool(numberOfThreadToUse);
 
         for (String app : appsToMine) {
             GoogleReviewsCrawler crawler = new GoogleReviewsCrawler(app, configurationManager);
@@ -47,9 +48,7 @@ public class MonitorableExtractor extends Extractor {
 
     public Map<String, Integer> getProgress() {
         Map<String, Integer> progress = new ConcurrentHashMap<>(crawlers.size());
-        for (Map.Entry<String, GoogleReviewsCrawler> entry : crawlers.entrySet()) {
-            progress.put(entry.getKey(), getReviewsCounter(entry.getValue()));
-        }
+        crawlers.forEach((key, value) -> progress.put(key, getReviewsCounter(value)));
         return progress;
     }
 
