@@ -191,14 +191,14 @@ public class CorpusProcessorProcessorTest {
         CorpusProcessor corpusProcessor = new CorpusProcessor.Builder()
                 .escapeSpecialChars()
                 .withComposedIdentifierSplit()
-                .withContractionExpander()
                 .removeStopWords()
+                .stem()
                 .lowerCase()
                 .removeTokensShorterThan(3)
                 .build();
 
         Collection<String> processed = corpusProcessor.process(test);
-        Collection<String> expected = Sets.newHashSet("builder", "link", "corpus", "processor");
+        Collection<String> expected = Sets.newHashSet("filter", "chain", "speech", "builder", "tag", "base", "token");
         Assert.assertThat(processed, is(expected));
     }
 }

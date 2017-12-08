@@ -106,7 +106,7 @@ public class CorpusProcessor {
         }
 
         if (shouldRemoveShortTokens) {
-            tokens.removeIf(this::isTooShort);
+            tokens = tokens.stream().filter(token -> !isTooShort(token)).collect(Collectors.toList());
         }
 
         return annotatedTokensToStringTokens(tokens);
