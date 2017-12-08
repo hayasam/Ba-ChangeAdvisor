@@ -179,4 +179,26 @@ public class CorpusProcessorProcessorTest {
         Collection<String> expected = Sets.newHashSet("this", "is", "a", "normal", "text", "and", "this", "probably", "contains", "some", "duplicate", "text");
         Assert.assertThat(transform, is(expected));
     }
+
+    @Test
+    public void test() {
+        final String test = "/**\n" +
+                "         * Will filter tokens based on their Part-Of-Speech tag.\n" +
+                "         *\n" +
+                "         * @return this builder for chaining.\n" +
+                "         */\n" +
+                "        public Builder posFilter() {";
+        CorpusProcessor corpusProcessor = new CorpusProcessor.Builder()
+                .escapeSpecialChars()
+                .withComposedIdentifierSplit()
+                .withContractionExpander()
+                .removeStopWords()
+                .lowerCase()
+                .removeTokensShorterThan(3)
+                .build();
+
+        Collection<String> processed = corpusProcessor.process(test);
+        Collection<String> expected = Sets.newHashSet("builder", "link", "corpus", "processor");
+        Assert.assertThat(processed, is(expected));
+    }
 }

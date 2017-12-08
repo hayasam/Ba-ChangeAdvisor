@@ -16,10 +16,13 @@ public class ComposedIdentifierSplitter {
 
     private static final Pattern DIGIT_SEPARATED_TEXT_PATTERN = Pattern.compile("(?<=\\D)(?=\\d)|(?<=\\d)(?=\\D)");
 
+    private static final Pattern WHITESPACE_PATTERN = Pattern.compile("\\s\\s\\s*");
+
     public String split(String text) {
         text = splitCamelCase(text);
         text = splitUnderScoreText(text);
         text = splitDigitSeparatedText(text);
+        text = cleanupExtraWhiteSpaces(text);
         return text;
     }
 
@@ -33,5 +36,9 @@ public class ComposedIdentifierSplitter {
 
     private String splitDigitSeparatedText(String s) {
         return DIGIT_SEPARATED_TEXT_PATTERN.matcher(s).replaceAll(" ");
+    }
+
+    private String cleanupExtraWhiteSpaces(String s) {
+        return WHITESPACE_PATTERN.matcher(s).replaceAll(" ");
     }
 }
