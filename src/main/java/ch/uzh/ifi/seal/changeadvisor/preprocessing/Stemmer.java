@@ -19,7 +19,7 @@ public class Stemmer {
      * @param token token to stem.
      * @return stemmed token.
      */
-    static String stem(String token, int minWordLength) {
+    public static String stem(String token, int minWordLength) {
         if (token.length() < minWordLength) {
             return token;
         }

@@ -47,7 +47,7 @@ public class BagOfWordsTest {
                 .removeTokensShorterThan(3)
                 .removeDuplicates(true)
                 .build();
-        Collection<String> bag = processor.transform(corpus);
+        Collection<String> bag = processor.process(corpus);
         CodeElement bagOfWords = new CodeElement("", packageName + "." + path.getFileName().toString(), bag);
 
         bagOfWords.writeToFile(Paths.get(TEST_DIRECTORY + "/test_generated/processed_source_components.csv"), false);

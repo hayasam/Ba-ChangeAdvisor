@@ -53,13 +53,13 @@ public class ChangeAdvisorLinker implements Linker {
                 // Find candidates
                 findCandidates(cluster.getValue(), codeComponentWords, candidates, clusterBag, originalReviews);
 
-                final Collection<String> clusterCleanedBag = corpusProcessor.transform(clusterBag);
+                final Collection<String> clusterCleanedBag = corpusProcessor.process(clusterBag);
 
                 logger.debug(String.format("Cluster: %d, size: %d", cluster.getKey(), cluster.getValue().size()));
                 logger.debug(String.format("Candidates size: %d", candidates.size()));
 
                 for (CodeElement codeElement : candidates) {
-                    final Collection<String> codeElementBag = corpusProcessor.transform(codeElement.getBag());
+                    final Collection<String> codeElementBag = corpusProcessor.process(codeElement.getBag());
 
                     if (!clusterCleanedBag.isEmpty() && !codeElementBag.isEmpty()) {
 
@@ -94,7 +94,7 @@ public class ChangeAdvisorLinker implements Linker {
 
         findCandidates(assignments, codeElements, candidates, clusterBag, originalReviews);
 
-        final Collection<String> clusterCleanedBag = corpusProcessor.transform(clusterBag);
+        final Collection<String> clusterCleanedBag = corpusProcessor.process(clusterBag);
 
         logger.debug(String.format("Cluster: %s, size: %d", topicId, assignments.size()));
         logger.debug(String.format("Candidates size: %d", candidates.size()));
@@ -117,7 +117,7 @@ public class ChangeAdvisorLinker implements Linker {
     }
 
     private Optional<LinkingResult> checkSimilarity(String topicId, CodeElement candidate, Collection<String> clusterBag, Collection<String> reviews) {
-        final Collection<String> codeElementBag = corpusProcessor.transform(candidate.getBag());
+        final Collection<String> codeElementBag = corpusProcessor.process(candidate.getBag());
 
         if (!clusterBag.isEmpty() && !codeElementBag.isEmpty()) {
 

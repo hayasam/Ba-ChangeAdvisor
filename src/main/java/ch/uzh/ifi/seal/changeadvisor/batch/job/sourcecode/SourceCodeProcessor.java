@@ -59,7 +59,7 @@ public class SourceCodeProcessor implements ItemProcessor<ClassBean, CodeElement
 
     @Override
     public CodeElement process(ClassBean item) throws Exception {
-        Collection<String> bag = corpusProcessor.transform(item.getPublicCorpus());
+        Collection<String> bag = corpusProcessor.process(item.getPublicCorpus());
         if (isBelowThreshold(bag)) {
             return null;
         }

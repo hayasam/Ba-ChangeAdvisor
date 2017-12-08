@@ -30,7 +30,7 @@ public class CorpusProcessorProcessorTest {
                 .removeTokensShorterThan(3)
                 .build();
 
-        Collection<String> processed = corpusProcessor.transform(testText);
+        Collection<String> processed = corpusProcessor.process(testText);
 
         String stemmedTestText = "Exampl weak yield temptat tell terribl temptat requir strength strength courag yield Oscar Wild".toLowerCase();
         List<String> tokens = ImmutableList.copyOf(Splitter.on(" ").omitEmptyStrings().trimResults().split(stemmedTestText));
@@ -48,18 +48,18 @@ public class CorpusProcessorProcessorTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void processorNull() throws Exception {
-        new CorpusProcessor.Builder().build().transform((Collection<String>) null);
+        new CorpusProcessor.Builder().build().process((Collection<String>) null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void processorNull2() throws Exception {
-        new CorpusProcessor.Builder().build().transform((String) null);
+        new CorpusProcessor.Builder().build().process((String) null);
     }
 
     @Test
     public void processorEmptyString() throws Exception {
         CorpusProcessor processor = new CorpusProcessor.Builder().build();
-        Collection<String> transform = processor.transform("");
+        Collection<String> transform = processor.process("");
         Collection<String> expected = Sets.newHashSet("");
         Assert.assertThat(transform, is(expected));
     }
@@ -67,7 +67,7 @@ public class CorpusProcessorProcessorTest {
     @Test
     public void processorEmptyString2() throws Exception {
         CorpusProcessor processor = new CorpusProcessor.Builder().build();
-        Collection<String> transform = processor.transform(Sets.newHashSet(""));
+        Collection<String> transform = processor.process(Sets.newHashSet(""));
         Collection<String> expected = Sets.newHashSet("");
         Assert.assertThat(transform, is(expected));
     }
@@ -79,7 +79,7 @@ public class CorpusProcessorProcessorTest {
                 .build();
         String text = "camelCase normal words snake_case a1a";
 
-        Set<String> transform = new HashSet<>(processor.transform(text));
+        Set<String> transform = new HashSet<>(processor.process(text));
         Set<String> expected = Sets.newHashSet("camel", "Case", "normal", "words", "snake", "case", "a", "1");
 
         Assert.assertThat(transform, is(expected));
@@ -92,7 +92,7 @@ public class CorpusProcessorProcessorTest {
                 .build();
         String text = "I'd like I hadn't It's normal token don't you think";
 
-        Set<String> transform = new HashSet<>(processor.transform(text));
+        Set<String> transform = new HashSet<>(processor.process(text));
         Set<String> expected = Sets.newHashSet("i", "would", "like", "i", "I", "had", "not", "it", "is", "normal", "token", "do", "you", "think");
 
         Assert.assertThat(transform, is(expected));
@@ -104,7 +104,7 @@ public class CorpusProcessorProcessorTest {
                 .escapeSpecialChars()
                 .build();
         String text = "normal * ** ** ; . , ' ? \"\" token isn't";
-        Collection<String> transform = new HashSet<>(processor.transform(text));
+        Collection<String> transform = new HashSet<>(processor.process(text));
         Collection<String> expected = Sets.newHashSet("normal", "token", "isn", "t");
 
         Assert.assertThat(transform, is(expected));
@@ -116,7 +116,7 @@ public class CorpusProcessorProcessorTest {
                 .lowerCase()
                 .build();
         String text = "CAPS LOCK ENGAGE LOLOLOL lowercase word";
-        Collection<String> transform = new HashSet<>(processor.transform(text));
+        Collection<String> transform = new HashSet<>(processor.process(text));
         Collection<String> expected = Sets.newHashSet("caps", "lock", "engage", "lololol", "lowercase", "word");
 
         Assert.assertThat(transform, is(expected));
@@ -128,7 +128,7 @@ public class CorpusProcessorProcessorTest {
                 .removeStopWords()
                 .build();
         String text = "this and THAT not a stopword public void";
-        Collection<String> transform = new HashSet<>(processor.transform(text));
+        Collection<String> transform = new HashSet<>(processor.process(text));
         Collection<String> expected = Sets.newHashSet("stopword");
 
         Assert.assertThat(transform, is(expected));
@@ -140,7 +140,7 @@ public class CorpusProcessorProcessorTest {
                 .removeTokensShorterThan(3)
                 .build();
         String text = "a ab abc abcd b bc bcd bcde c cd cde cdef";
-        Collection<String> transform = new HashSet<>(processor.transform(text));
+        Collection<String> transform = new HashSet<>(processor.process(text));
         Collection<String> expected = Sets.newHashSet("abc", "abcd", "bcd", "bcde", "cde", "cdef");
 
         Assert.assertThat(transform, is(expected));
@@ -165,7 +165,7 @@ public class CorpusProcessorProcessorTest {
         CorpusProcessor processor = new CorpusProcessor.Builder().lowerCase().removeDuplicates(true).build();
         String text = "This is a normal text and this probably contains some duplicate text";
 
-        Collection<String> transform = processor.transform(text);
+        Collection<String> transform = processor.process(text);
         Collection<String> expected = Sets.newHashSet("this", "is", "a", "normal", "text", "and", "probably", "contains", "some", "duplicate");
         Assert.assertThat(transform, is(expected));
     }
@@ -175,7 +175,7 @@ public class CorpusProcessorProcessorTest {
         CorpusProcessor processor = new CorpusProcessor.Builder().lowerCase().removeDuplicates(true).build();
         String text = "This is a normal text and this probably contains some duplicate text";
 
-        Collection<String> transform = processor.transform(text);
+        Collection<String> transform = processor.process(text);
         Collection<String> expected = Sets.newHashSet("this", "is", "a", "normal", "text", "and", "this", "probably", "contains", "some", "duplicate", "text");
         Assert.assertThat(transform, is(expected));
     }

@@ -50,9 +50,9 @@ public class CorpusProcessor {
      * @param bag bag of words.
      * @return transformed bag of words.
      */
-    public Collection<String> transform(Collection<String> bag) {
+    public Collection<String> process(Collection<String> bag) {
         Assert.notNull(bag, "Text to transform must not be null.");
-        return transform(String.join(" ", bag));
+        return process(String.join(" ", bag));
     }
 
     /**
@@ -61,7 +61,7 @@ public class CorpusProcessor {
      * @param text text as string.
      * @return transformed bag of words.
      */
-    public Collection<String> transform(String text) {
+    public Collection<String> process(String text) {
         Assert.notNull(text, "Text to transform must not be null.");
 
         if (text.isEmpty()) {

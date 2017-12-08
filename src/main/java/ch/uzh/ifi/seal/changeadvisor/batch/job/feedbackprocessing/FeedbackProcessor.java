@@ -22,7 +22,7 @@ public class FeedbackProcessor implements ItemProcessor<ArdocResult, Transformed
 
     @Override
     public TransformedFeedback process(ArdocResult item) throws Exception {
-        Collection<String> bag = corpusProcessor.transform(item.getSentence());
+        Collection<String> bag = corpusProcessor.process(item.getSentence());
         if (bag.size() < threshold) {
             return null;
         }
