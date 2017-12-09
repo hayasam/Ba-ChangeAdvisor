@@ -29,6 +29,15 @@ public class TopLabelTasklet implements Tasklet {
         this.repository = repository;
     }
 
+    /**
+     * TODO: why am I pulling data from the db once outside, and then again in each iteration???
+     *
+     * @param contribution
+     * @param chunkContext
+     * @return
+     * @throws Exception
+     * @see ReviewAggregationService#topNLabels(ReviewsByTopLabelsDto)
+     */
     @Override
     public RepeatStatus execute(StepContribution contribution, ChunkContext chunkContext) throws Exception {
         repository.deleteAllByAppName(appName);
