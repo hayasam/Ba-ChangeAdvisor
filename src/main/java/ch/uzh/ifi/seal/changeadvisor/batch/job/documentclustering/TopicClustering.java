@@ -7,7 +7,6 @@ import ch.uzh.ifi.seal.changeadvisor.ml.DocumentClustererAdapter;
 import org.apache.log4j.Logger;
 import org.springframework.batch.item.ItemProcessor;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -48,8 +47,12 @@ public class TopicClustering implements ItemProcessor<List<TransformedFeedback>,
     }
 
     private Corpus toCorpus(List<TransformedFeedback> feedback) {
-        List<List<String>> documents = feedback.stream().map(f -> new ArrayList<>(f.getBagOfWords())).collect(Collectors.toList());
-        List<String> originalSentences = feedback.stream().map(TransformedFeedback::getSentence).collect(Collectors.toList());
+        List<List<String>> documents = feedback.stream()
+                .map(TransformedFeedback::getBagOfWordsAsList)
+                .collect(Collectors.toList());
+        List<String> originalSentences = feedback.stream()
+                .map(TransformedFeedback::getSentence)
+                .collect(Collectors.toList());
         return new Corpus(originalSentences, documents);
     }
 }

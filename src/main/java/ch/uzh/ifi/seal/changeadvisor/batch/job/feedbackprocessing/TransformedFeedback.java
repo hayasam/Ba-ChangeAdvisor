@@ -9,7 +9,9 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -49,6 +51,10 @@ public class TransformedFeedback implements LinkableReview, Comparable<Transform
 
     public Collection<String> getBagOfWords() {
         return bagOfWords;
+    }
+
+    public List<String> getBagOfWordsAsList() {
+        return new ArrayList<>(bagOfWords);
     }
 
     public String getBagAsString() {
