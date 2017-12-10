@@ -82,7 +82,7 @@ public class ChangeAdvisorLinker implements Linker {
     }
 
     @Override
-    public List<LinkingResult> process(String topicId, Collection<? extends LinkableReview> reviews, Collection<CodeElement> codeElements) {
+    public List<LinkingResult> link(String topicId, Collection<? extends LinkableReview> reviews, Collection<CodeElement> codeElements) {
         Assert.notNull(similarityMetric, "No similarity metric set!");
 
         List<LinkingResult> results = new ArrayList<>(reviews.size());

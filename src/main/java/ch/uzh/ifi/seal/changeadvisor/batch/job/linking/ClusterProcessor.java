@@ -32,6 +32,6 @@ public class ClusterProcessor implements ItemProcessor<Cluster, List<LinkingResu
         if (codeElements == null || codeElements.isEmpty()) {
             codeElements = codeElementRepository.findByAppName(googlePlayId);
         }
-        return linker.process(item.getTopicId(), item.getAssignments(), codeElements);
+        return linker.link(item.getTopicId(), item.getAssignments(), codeElements);
     }
 }
