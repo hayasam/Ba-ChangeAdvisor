@@ -17,7 +17,7 @@ public class FSSourceImporterTest {
     @Test
     public void importSource() throws Exception {
         SourceCodeDirectoryDto dto = new SourceCodeDirectoryDto(IMPORTED_CODE_FOLDER, PROJECT_NAME);
-        FSSourceImporter importer = new FSSourceImporter(dto);
+        FSSourceCodeImporter importer = new FSSourceCodeImporter(dto);
         SourceCodeDirectory directory = importer.importSource();
 
         Assert.assertThat(directory.getProjectName(), is(PROJECT_NAME));
@@ -31,7 +31,7 @@ public class FSSourceImporterTest {
     @Test
     public void importSourceDefaultProjectName() throws Exception {
         SourceCodeDirectoryDto dto = new SourceCodeDirectoryDto(IMPORTED_CODE_FOLDER, "");
-        FSSourceImporter importer = new FSSourceImporter(dto);
+        FSSourceCodeImporter importer = new FSSourceCodeImporter(dto);
         SourceCodeDirectory directory = importer.importSource();
 
         Assert.assertThat(directory.getProjectName(), is(IMPORTED_CODE_FOLDER));

@@ -5,7 +5,7 @@ import ch.uzh.ifi.seal.changeadvisor.web.dto.SourceCodeDirectoryDto;
 
 import java.nio.file.Path;
 
-public class FSSourceImporter implements SourceCodeImporter {
+public class FSSourceCodeImporter implements SourceCodeImporter {
 
     private static final String PATH_NOT_FOUND_OR_NOT_DIRECTORY = "Path [%s] doesn't exist or is not directory";
 
@@ -13,7 +13,7 @@ public class FSSourceImporter implements SourceCodeImporter {
 
     private String projectName;
 
-    FSSourceImporter(SourceCodeDirectoryDto dto) {
+    FSSourceCodeImporter(SourceCodeDirectoryDto dto) {
         this.path = dto.asPath();
         this.projectName = dto.getProjectName();
 
