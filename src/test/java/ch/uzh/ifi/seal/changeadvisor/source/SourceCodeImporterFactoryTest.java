@@ -1,6 +1,6 @@
 package ch.uzh.ifi.seal.changeadvisor.source;
 
-import ch.uzh.ifi.seal.changeadvisor.source.importer.FSSourceImporter;
+import ch.uzh.ifi.seal.changeadvisor.source.importer.FSSourceCodeImporter;
 import ch.uzh.ifi.seal.changeadvisor.source.importer.GitSourceCodeImporter;
 import ch.uzh.ifi.seal.changeadvisor.source.importer.SourceCodeImporter;
 import ch.uzh.ifi.seal.changeadvisor.source.importer.SourceCodeImporterFactory;
@@ -19,7 +19,7 @@ public class SourceCodeImporterFactoryTest {
         final String fileSystemPath = "file://Users/hoal/Document";
         final SourceCodeDirectoryDto dto = new SourceCodeDirectoryDto(fileSystemPath, "");
         SourceCodeImporter importer = SourceCodeImporterFactory.getImporter(dto);
-        Assert.assertThat(importer, is(instanceOf(FSSourceImporter.class)));
+        Assert.assertThat(importer, is(instanceOf(FSSourceCodeImporter.class)));
         Assert.assertThat(importer, not(instanceOf(GitSourceCodeImporter.class)));
     }
 
@@ -28,7 +28,7 @@ public class SourceCodeImporterFactoryTest {
         final String gitPath = "git://https://github.com/a-a-hofmann/SoftwareProject.git";
         final SourceCodeDirectoryDto dto = new SourceCodeDirectoryDto(gitPath, "");
         SourceCodeImporter importer = SourceCodeImporterFactory.getImporter(dto);
-        Assert.assertThat(importer, not(instanceOf(FSSourceImporter.class)));
+        Assert.assertThat(importer, not(instanceOf(FSSourceCodeImporter.class)));
         Assert.assertThat(importer, is(instanceOf(GitSourceCodeImporter.class)));
     }
 

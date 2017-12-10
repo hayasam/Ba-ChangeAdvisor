@@ -14,14 +14,14 @@ public class SourceCodeImporterFactory {
      * @param dto {@link SourceCodeDirectoryDto}
      * @return Source code importer
      * @see SourceCodeImporter
-     * @see FSSourceImporter
+     * @see FSSourceCodeImporter
      * @see GitSourceCodeImporter
      */
     public static SourceCodeImporter getImporter(SourceCodeDirectoryDto dto) {
         validateDto(dto);
 
         if (dto.isFileSystemPath()) {
-            return new FSSourceImporter(dto);
+            return new FSSourceCodeImporter(dto);
         }
 
         if (dto.isGitPath()) {
