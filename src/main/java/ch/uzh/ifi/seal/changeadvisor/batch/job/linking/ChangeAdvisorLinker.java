@@ -82,21 +82,21 @@ public class ChangeAdvisorLinker implements Linker {
     }
 
     @Override
-    public List<LinkingResult> process(String topicId, Collection<? extends LinkableReview> assignments, Collection<CodeElement> codeElements) {
+    public List<LinkingResult> process(String topicId, Collection<? extends LinkableReview> reviews, Collection<CodeElement> codeElements) {
         Assert.notNull(similarityMetric, "No similarity metric set!");
 
-        List<LinkingResult> results = new ArrayList<>(assignments.size());
+        List<LinkingResult> results = new ArrayList<>(reviews.size());
 
 
         Collection<CodeElement> candidates = new HashSet<>();
         Set<String> clusterBag = new HashSet<>();
         Set<String> originalReviews = new HashSet<>();
 
-        findCandidates(assignments, codeElements, candidates, clusterBag, originalReviews);
+        findCandidates(reviews, codeElements, candidates, clusterBag, originalReviews);
 
         final Collection<String> clusterCleanedBag = corpusProcessor.process(clusterBag);
 
-        logger.debug(String.format("Cluster: %s, size: %d", topicId, assignments.size()));
+        logger.debug(String.format("Cluster: %s, size: %d", topicId, reviews.size()));
         logger.debug(String.format("Candidates size: %d", candidates.size()));
 
         List<LinkingResult> similarityResults = checkSimilarity(topicId, candidates, clusterCleanedBag, originalReviews);
