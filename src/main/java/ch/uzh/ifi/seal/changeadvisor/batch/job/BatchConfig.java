@@ -64,18 +64,18 @@ public class BatchConfig {
                 .incrementer(new RunIdIncrementer());
     }
 
-    @Bean
-    public Job changeAdvisor(JobCompletionNotificationListener listener) {
-        documentClusteringStepConfig.setMaxIterations(50);
-        return jobBuilderFactory.get(JOB_NAME)
-                .incrementer(new RunIdIncrementer())
-                .listener(listener)
-                .flow(sourceComponentStepConfig.extractBagOfWords(TEST_DIRECTORY + FROSTWIRE_DIRECTORY))
-                .next(ardocStepConfig.ardocAnalysis())
-                .next(transformationStepConfig.transformFeedback())
-                .next(documentClusteringStepConfig.documentsClustering())
-                .next(linkingStepConfig.clusterLinking())
-                .end()
-                .build();
-    }
+//    @Bean
+//    public Job changeAdvisor(JobCompletionNotificationListener listener) {
+//        documentClusteringStepConfig.setMaxIterations(50);
+//        return jobBuilderFactory.get(JOB_NAME)
+//                .incrementer(new RunIdIncrementer())
+//                .listener(listener)
+//                .flow(sourceComponentStepConfig.extractBagOfWords(TEST_DIRECTORY + FROSTWIRE_DIRECTORY))
+//                .next(ardocStepConfig.ardocAnalysis())
+//                .next(transformationStepConfig.transformFeedback())
+//                .next(documentClusteringStepConfig.documentsClustering())
+//                .next(linkingStepConfig.clusterLinking())
+//                .end()
+//                .build();
+//    }
 }
