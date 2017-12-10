@@ -19,6 +19,8 @@ public class ChangeAdvisorLinker implements Linker {
 
     private static final Logger logger = Logger.getLogger(ChangeAdvisorLinker.class);
 
+    private static final double THRESHOLD = 0.5;
+
     private SimilarityMetric similarityMetric = new AsymmetricDiceIndex();
 
     private CorpusProcessor corpusProcessor = new CorpusProcessor.Builder()
@@ -66,7 +68,7 @@ public class ChangeAdvisorLinker implements Linker {
                         // Compute asymmetric dice index.
                         double similarity = similarityMetric.similarity(clusterCleanedBag, codeElementBag);
 
-                        if (similarity >= 0.5) {
+                        if (similarity >= THRESHOLD) {
                             LinkingResult result = new LinkingResult(
                                     cluster.getKey().toString(), originalReviews, clusterCleanedBag, codeElementBag,
                                     codeElement.getFullyQualifiedClassName(), similarity, LinkingResult.ClusterType.HDP);
@@ -124,7 +126,7 @@ public class ChangeAdvisorLinker implements Linker {
             // Compute asymmetric dice index.
             double similarity = similarityMetric.similarity(clusterBag, codeElementBag);
 
-            if (similarity >= 0.5) {
+            if (similarity >= THRESHOLD) {
                 LinkingResult result = new LinkingResult(
                         topicId, reviews, clusterBag, codeElementBag,
                         candidate.getFullyQualifiedClassName(), similarity, null);
@@ -151,8 +153,7 @@ public class ChangeAdvisorLinker implements Linker {
     }
 
     private <T> Collection<T> intersection(Collection<T> c1, Collection<T> c2) {
-        Set<T> set = new HashSet<>();
-        set.addAll(c1);
+        Set<T> set = new HashSet<>(c1);
         set.retainAll(c2);
         return ImmutableSet.copyOf(set);
     }
