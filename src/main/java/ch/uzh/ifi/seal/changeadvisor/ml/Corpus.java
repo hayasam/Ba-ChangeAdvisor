@@ -1,9 +1,11 @@
 package ch.uzh.ifi.seal.changeadvisor.ml;
 
+import ch.uzh.ifi.seal.changeadvisor.batch.job.feedbackprocessing.TransformedFeedback;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Corpus implements Iterable<List<String>> {
 
@@ -44,5 +46,15 @@ public class Corpus implements Iterable<List<String>> {
     @Override
     public Iterator<List<String>> iterator() {
         return documents.iterator();
+    }
+
+    public static Corpus of(List<TransformedFeedback> feedback) {
+        List<List<String>> documents = feedback.stream()
+                .map(TransformedFeedback::getBagOfWordsAsList)
+                .collect(Collectors.toList());
+        List<String> originalSentences = feedback.stream()
+                .map(TransformedFeedback::getSentence)
+                .collect(Collectors.toList());
+        return new Corpus(originalSentences, documents);
     }
 }
