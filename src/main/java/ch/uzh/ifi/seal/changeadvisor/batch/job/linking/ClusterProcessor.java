@@ -33,6 +33,6 @@ public class ClusterProcessor implements ItemProcessor<Cluster, List<LinkingResu
         if (codeElements == null || codeElements.isEmpty()) {
             codeElements = codeElementRepository.findAll();
         }
-        return linker.process(item.getTopicId(), item.getAssignments(), codeElements);
+        return linker.process(item.getTopicId(), item.getReviews(), codeElements);
     }
 }
