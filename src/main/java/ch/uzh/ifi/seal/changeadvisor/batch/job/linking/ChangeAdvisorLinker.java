@@ -129,7 +129,7 @@ public class ChangeAdvisorLinker implements Linker {
             if (similarity >= THRESHOLD) {
                 LinkingResult result = new LinkingResult(
                         topicId, reviews, clusterBag, codeElementBag,
-                        candidate.getFullyQualifiedClassName(), similarity, null);
+                        candidate.getFullyQualifiedClassName(), similarity, LinkingResult.ClusterType.TFIDF);
                 return Optional.of(result);
             }
         }
