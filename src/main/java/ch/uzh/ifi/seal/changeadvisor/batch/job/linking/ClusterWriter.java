@@ -44,11 +44,9 @@ public class ClusterWriter implements ItemWriter<List<LinkingResult>> {
     }
 
     private void setClusterTypeAndAppNameOnResults(List<? extends List<LinkingResult>> items) {
-        for (List<LinkingResult> results : items) {
-            results.forEach(result -> {
-                result.setClusterType(clusterType);
-                result.setAppName(appName);
-            });
-        }
+        items.forEach(results -> results.forEach(result -> {
+            result.setClusterType(clusterType);
+            result.setAppName(appName);
+        }));
     }
 }
