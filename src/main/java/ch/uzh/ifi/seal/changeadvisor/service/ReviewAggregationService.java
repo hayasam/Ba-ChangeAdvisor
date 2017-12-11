@@ -213,13 +213,13 @@ public class ReviewAggregationService {
      */
     public List<LabelWithReviews> reviewsByTopNLabels(ReviewsByTopLabelsDto dto) {
         final int limit = dto.getLimit();
-        List<Label> labels = labelRepository.findByAppNameAndNgramSizeOrderByScoreDesc(dto.getApp(), dto.getNgrams());
+        List<Label> labels = labelRepository.findByAppNameAndNgramSizeOrderByScoreDesc(dto.getGooglePlayId(), dto.getNgrams());
         labels = getLabelsUpTo(labels, limit);
 
         logger.info(String.format("Fetching reviews for top %d labels: %s", dto.getLimit(), labels));
         List<LabelWithReviews> labelWithReviews = new ArrayList<>(labels.size());
         for (Label label : labels) {
-            List<TransformedFeedback> feedback = transformedFeedbackRepository.findByArdocResultAppNameAndTransformedSentenceContainingIgnoreCase(dto.getApp(), label.getLabel());
+            List<TransformedFeedback> feedback = transformedFeedbackRepository.findByArdocResultAppNameAndTransformedSentenceContainingIgnoreCase(dto.getGooglePlayId(), label.getLabel());
             // Two ardoc results could be mapped to the same review, so in this step we remove duplicate reviews.
             List<ReviewWithCategory> reviews = feedback.stream().map(f -> new ReviewWithCategory(f.getReview(), f.getCategory())).distinct().collect(Collectors.toList());
             java.util.Collections.sort(reviews);

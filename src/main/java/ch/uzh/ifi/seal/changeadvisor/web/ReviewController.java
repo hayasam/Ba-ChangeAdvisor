@@ -5,10 +5,8 @@ import ch.uzh.ifi.seal.changeadvisor.batch.job.ardoc.ArdocResult;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.linking.LinkingResult;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.Review;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.reviews.ReviewRepository;
-import ch.uzh.ifi.seal.changeadvisor.service.ArdocService;
-import ch.uzh.ifi.seal.changeadvisor.service.FailedToRunJobException;
-import ch.uzh.ifi.seal.changeadvisor.service.LabelLinkerService;
-import ch.uzh.ifi.seal.changeadvisor.service.ReviewImportService;
+import ch.uzh.ifi.seal.changeadvisor.project.Project;
+import ch.uzh.ifi.seal.changeadvisor.service.*;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewAnalysisDto;
 import ch.uzh.ifi.seal.changeadvisor.web.dto.ReviewsByTopLabelsDto;
 import org.apache.log4j.Logger;
@@ -37,13 +35,16 @@ public class ReviewController {
 
     private final LabelLinkerService labelLinkerService;
 
+    private final ProjectService projectService;
+
     @Autowired
     public ReviewController(ReviewImportService reviewImportService, ReviewRepository repository,
-                            ArdocService ardocService, LabelLinkerService labelLinkerService) {
+                            ArdocService ardocService, LabelLinkerService labelLinkerService, ProjectService projectService) {
         this.reviewImportService = reviewImportService;
         this.repository = repository;
         this.ardocService = ardocService;
         this.labelLinkerService = labelLinkerService;
+        this.projectService = projectService;
     }
 
     @PostMapping(path = "reviews")
@@ -105,6 +106,8 @@ public class ReviewController {
 
     @PostMapping(path = "reviews/linking")
     public List<LinkingResult> link(@RequestBody ReviewsByTopLabelsDto dto, @RequestParam("label") String label) {
+        Project project = projectService.findByAppName(dto.getApp());
+        dto = new ReviewsByTopLabelsDto(project.getAppName(), project.getGooglePlayId(), dto.getCategory(), dto.getLimit(), dto.getNgrams());
         List<LinkingResult> results = labelLinkerService.link(label, dto);
         results.sort(Comparator.comparing(LinkingResult::getSimilarity).reversed().thenComparing(LinkingResult::getCodeComponentName));
         return results;

@@ -45,7 +45,7 @@ public class TopLabelTasklet implements Tasklet {
         for (ReviewCategoryReport category : reviewCategories) {
             for (int i = 1; i < MAX_NGRAM_SIZE; i++) {
                 ReviewsByTopLabelsDto dto =
-                        new ReviewsByTopLabelsDto(appName, category.getCategory(), MAX_LABELS_TO_COMPUTE, i);
+                        new ReviewsByTopLabelsDto(appName, appName, category.getCategory(), MAX_LABELS_TO_COMPUTE, i);
 
                 List<Label> labels = service.topNLabels(dto);
                 repository.saveAll(labels);
