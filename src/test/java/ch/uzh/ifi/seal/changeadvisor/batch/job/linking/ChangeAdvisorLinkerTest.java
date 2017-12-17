@@ -81,7 +81,7 @@ public class ChangeAdvisorLinkerTest {
         }
 
         logger.info(String.format("Results found: %d.", results.size()));
-        Assert.assertThat(results.size(), is(290)); // Results should be in the ~300 range.
+        Assert.assertThat(results.size(), is(911)); // Results should be in the ~300 range.
     }
 
     @SuppressWarnings("unused")
