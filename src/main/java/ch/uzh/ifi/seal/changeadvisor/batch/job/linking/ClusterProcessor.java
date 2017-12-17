@@ -4,8 +4,6 @@ import ch.uzh.ifi.seal.changeadvisor.batch.job.documentclustering.Cluster;
 import ch.uzh.ifi.seal.changeadvisor.source.model.CodeElement;
 import ch.uzh.ifi.seal.changeadvisor.source.model.CodeElementRepository;
 import org.springframework.batch.item.ItemProcessor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 
@@ -13,7 +11,6 @@ import java.util.List;
  * Processor for document clusters.
  * It processes one cluster at a time and needs all code element informations before starting.
  */
-@Component
 public class ClusterProcessor implements ItemProcessor<Cluster, List<LinkingResult>> {
 
     private Linker linker;
@@ -22,17 +19,19 @@ public class ClusterProcessor implements ItemProcessor<Cluster, List<LinkingResu
 
     private List<CodeElement> codeElements;
 
-    @Autowired
-    public ClusterProcessor(CodeElementRepository codeElementRepository, ChangeAdvisorLinker changeAdvisorLinker) {
+    private final String googlePlayId;
+
+    public ClusterProcessor(CodeElementRepository codeElementRepository, Linker linker, String googlePlayId) {
         this.codeElementRepository = codeElementRepository;
-        this.linker = changeAdvisorLinker;
+        this.linker = linker;
+        this.googlePlayId = googlePlayId;
     }
 
     @Override
-    public List<LinkingResult> process(Cluster item) throws Exception {
+    public List<LinkingResult> process(Cluster item) {
         if (codeElements == null || codeElements.isEmpty()) {
-            codeElements = codeElementRepository.findAll();
+            codeElements = codeElementRepository.findByAppName(googlePlayId);
         }
-        return linker.process(item.getTopicId(), item.getReviews(), codeElements);
+        return linker.link(item.getTopicId(), item.getReviews(), codeElements);
     }
 }

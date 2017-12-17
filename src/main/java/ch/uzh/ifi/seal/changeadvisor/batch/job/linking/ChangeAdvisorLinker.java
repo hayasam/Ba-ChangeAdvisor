@@ -19,6 +19,8 @@ public class ChangeAdvisorLinker implements Linker {
 
     private static final Logger logger = Logger.getLogger(ChangeAdvisorLinker.class);
 
+    private static final double THRESHOLD = 0.5;
+
     private SimilarityMetric similarityMetric = new AsymmetricDiceIndex();
 
     private CorpusProcessor corpusProcessor = new CorpusProcessor.Builder()
@@ -66,7 +68,7 @@ public class ChangeAdvisorLinker implements Linker {
                         // Compute asymmetric dice index.
                         double similarity = similarityMetric.similarity(clusterCleanedBag, codeElementBag);
 
-                        if (similarity >= 0.5) {
+                        if (similarity >= THRESHOLD) {
                             LinkingResult result = new LinkingResult(
                                     cluster.getKey().toString(), originalReviews, clusterCleanedBag, codeElementBag,
                                     codeElement.getFullyQualifiedClassName(), similarity, LinkingResult.ClusterType.HDP);
@@ -82,21 +84,21 @@ public class ChangeAdvisorLinker implements Linker {
     }
 
     @Override
-    public List<LinkingResult> process(String topicId, Collection<? extends LinkableReview> assignments, Collection<CodeElement> codeElements) {
+    public List<LinkingResult> link(String topicId, Collection<? extends LinkableReview> reviews, Collection<CodeElement> codeElements) {
         Assert.notNull(similarityMetric, "No similarity metric set!");
 
-        List<LinkingResult> results = new ArrayList<>(assignments.size());
+        List<LinkingResult> results = new ArrayList<>(reviews.size());
 
 
         Collection<CodeElement> candidates = new HashSet<>();
         Set<String> clusterBag = new HashSet<>();
         Set<String> originalReviews = new HashSet<>();
 
-        findCandidates(assignments, codeElements, candidates, clusterBag, originalReviews);
+        findCandidates(reviews, codeElements, candidates, clusterBag, originalReviews);
 
         final Collection<String> clusterCleanedBag = corpusProcessor.process(clusterBag);
 
-        logger.debug(String.format("Cluster: %s, size: %d", topicId, assignments.size()));
+        logger.debug(String.format("Cluster: %s, size: %d", topicId, reviews.size()));
         logger.debug(String.format("Candidates size: %d", candidates.size()));
 
         List<LinkingResult> similarityResults = checkSimilarity(topicId, candidates, clusterCleanedBag, originalReviews);
@@ -124,7 +126,7 @@ public class ChangeAdvisorLinker implements Linker {
             // Compute asymmetric dice index.
             double similarity = similarityMetric.similarity(clusterBag, codeElementBag);
 
-            if (similarity >= 0.5) {
+            if (similarity >= THRESHOLD) {
                 LinkingResult result = new LinkingResult(
                         topicId, reviews, clusterBag, codeElementBag,
                         candidate.getFullyQualifiedClassName(), similarity, null);
@@ -151,8 +153,7 @@ public class ChangeAdvisorLinker implements Linker {
     }
 
     private <T> Collection<T> intersection(Collection<T> c1, Collection<T> c2) {
-        Set<T> set = new HashSet<>();
-        set.addAll(c1);
+        Set<T> set = new HashSet<>(c1);
         set.retainAll(c2);
         return ImmutableSet.copyOf(set);
     }

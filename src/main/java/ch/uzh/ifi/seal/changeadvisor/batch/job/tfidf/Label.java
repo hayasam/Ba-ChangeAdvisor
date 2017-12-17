@@ -15,7 +15,7 @@ public class Label implements Comparable<Label> {
 
     private String category;
 
-    private Integer ngramSize;
+    private int ngramSize;
 
     private String token;
 
@@ -81,7 +81,7 @@ public class Label implements Comparable<Label> {
         this.category = category;
     }
 
-    public void setNgramSize(Integer ngramSize) {
+    public void setNgramSize(int ngramSize) {
         this.ngramSize = ngramSize;
     }
 

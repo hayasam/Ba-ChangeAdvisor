@@ -10,5 +10,5 @@ public interface Linker {
 
     List<LinkingResult> process(Collection<TopicAssignment> assignments, Collection<CodeElement> codeElements);
 
-    List<LinkingResult> process(String topicId, Collection<? extends LinkableReview> assignments, Collection<CodeElement> codeElements);
+    List<LinkingResult> link(String topicId, Collection<? extends LinkableReview> reviews, Collection<CodeElement> codeElements);
 }

@@ -5,6 +5,7 @@ import ch.uzh.ifi.seal.changeadvisor.batch.job.documentclustering.TopicClusterin
 import ch.uzh.ifi.seal.changeadvisor.batch.job.linking.*;
 import ch.uzh.ifi.seal.changeadvisor.batch.job.linking.labels.LabelFeedbackReader;
 import ch.uzh.ifi.seal.changeadvisor.service.LabelService;
+import ch.uzh.ifi.seal.changeadvisor.source.model.CodeElementRepository;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,24 +28,27 @@ public class LinkingStepConfig {
 
     private final ClusterReader clusterReader;
 
-    private final ClusterProcessor clusterProcessor;
-
     private final LabelService labelService;
 
     private final LinkingResultRepository resultRepository;
 
+    private final Linker linker;
+
+    private final CodeElementRepository codeElementRepository;
+
     @Autowired
     public LinkingStepConfig(StepBuilderFactory stepBuilderFactory, BulkClusterReader bulkClusterReader,
                              BulkClusterProcessor bulkClusterProcessor, ClusterReader clusterReader,
-                             ClusterProcessor clusterProcessor, LabelService labelService,
-                             LinkingResultRepository resultRepository) {
+                             LabelService labelService, LinkingResultRepository resultRepository,
+                             Linker linker, CodeElementRepository codeElementRepository) {
         this.stepBuilderFactory = stepBuilderFactory;
         this.bulkClusterReader = bulkClusterReader;
         this.bulkClusterProcessor = bulkClusterProcessor;
         this.clusterReader = clusterReader;
-        this.clusterProcessor = clusterProcessor;
         this.labelService = labelService;
         this.resultRepository = resultRepository;
+        this.linker = linker;
+        this.codeElementRepository = codeElementRepository;
     }
 
     @Bean
@@ -57,23 +61,17 @@ public class LinkingStepConfig {
                 .build();
     }
 
-    @Bean
-    public Step clusterLinking() {
-        return stepBuilderFactory.get(STEP_NAME)
-                .<Cluster, List<LinkingResult>>chunk(1)
-                .reader(clusterReader)
-                .processor(clusterProcessor)
-                .writer(new ClusterWriter(resultRepository, LinkingResult.ClusterType.HDP, null))
-                .build();
-    }
-
     public Step clusterLinking(final String googlePlayId) {
         return stepBuilderFactory.get(STEP_NAME)
                 .<Cluster, List<LinkingResult>>chunk(1)
                 .reader(labelFeedbackReader(googlePlayId))
-                .processor(clusterProcessor)
+                .processor(clusterProcessor(googlePlayId))
                 .writer(new ClusterWriter(resultRepository, LinkingResult.ClusterType.TFIDF, googlePlayId))
                 .build();
+    }
+
+    private ClusterProcessor clusterProcessor(final String googlePlayId) {
+        return new ClusterProcessor(codeElementRepository, linker, googlePlayId);
     }
 
     private LabelFeedbackReader labelFeedbackReader(final String googlePlayId) {
