@@ -28,7 +28,7 @@ public class ReviewsConfig implements Serializable {
     }
 
     public static ReviewsConfig of(ReviewsConfig config, Date nextReviewImport) {
-        return new ReviewsConfig(config.lastReviewImport, nextReviewImport);
+        return new ReviewsConfig(config == null ? null : config.lastReviewImport, nextReviewImport);
     }
 
     @Override

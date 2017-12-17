@@ -1,6 +1,7 @@
 package ch.uzh.ifi.seal.changeadvisor.web;
 
 import ch.uzh.ifi.seal.changeadvisor.project.Project;
+import ch.uzh.ifi.seal.changeadvisor.project.ReviewsConfig;
 import ch.uzh.ifi.seal.changeadvisor.schedule.ScheduledReviewImportConfig;
 import ch.uzh.ifi.seal.changeadvisor.service.ProjectService;
 import edu.emory.mathcs.backport.java.util.Collections;
@@ -43,14 +44,15 @@ public class ProjectResource {
             return ResponseEntity.badRequest().body(project);
         }
 
-        Optional<Project> previousProject = service.findById(project.getId());
+        if (project.getReviewsConfig() == null) {
+            project.setReviewsConfig(new ReviewsConfig(null, null));
+        }
         Project savedProject = service.save(project);
 
-        previousProject.ifPresent(p -> {
-            if (!p.getCronSchedule().equals(savedProject.getCronSchedule())) {
-                scheduledReviewImportConfig.setSchedule(project);
-            }
-        });
+        if (savedProject.hasCronSchedule()) {
+            scheduledReviewImportConfig.setSchedule(savedProject);
+        }
+
         Optional<Project> updatedProject = service.findById(project.getId());
         return updatedProject.map(ResponseEntity::ok).orElse(ResponseEntity.badRequest().body(project));
     }

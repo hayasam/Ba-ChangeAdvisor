@@ -35,7 +35,7 @@ public class LabelLinkerService {
      * @return changeadvisor linking results.
      */
     public List<LinkingResult> link(String token, ReviewsByTopLabelsDto dto) {
-        List<TransformedFeedback> feedback = labelService.getFeedbackCorrespondingToLabel(token, dto.getApp(), dto.getCategory());
+        List<TransformedFeedback> feedback = labelService.getFeedbackCorrespondingToLabel(token, dto.getGooglePlayId(), dto.getCategory());
         List<CodeElement> codeElements = codeElementRepository.findByAppName(dto.getApp());
         return linker.link(UUID.randomUUID().toString(), feedback, codeElements);
     }

@@ -63,7 +63,8 @@ public class ReviewImportJobFactory {
     }
 
     synchronized public Job job(Map<String, Object> params) {
-        Project project = getApp(params).orElseThrow(() -> new IllegalArgumentException("No project found."));
+        Project project = getApp(params).orElseThrow(() ->
+                new IllegalArgumentException(String.format("No project found for app name [%s].", params.get("apps"))));
         final String googlePlayId = project.getGooglePlayId();
         return jobBuilderFactory.get(REVIEW_IMPORT)
                 .incrementer(RUN_ID_INCREMENTER)

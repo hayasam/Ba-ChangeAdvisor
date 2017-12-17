@@ -57,7 +57,7 @@ public class ReviewReportResource {
     @PostMapping(path = "reviews/labels")
     public ResponseEntity<List<LabelWithReviews>> reviewsByTopNLabels(@RequestBody ReviewsByTopLabelsDto dto) {
         Optional<Project> project = projectService.findById(dto.getApp());
-        Optional<List<LabelWithReviews>> labels = project.map(p -> aggregationService.reviewsByTopNLabels(new ReviewsByTopLabelsDto(p.getGooglePlayId(), dto.getCategory(), dto.getLimit(), dto.getNgrams())));
+        Optional<List<LabelWithReviews>> labels = project.map(p -> aggregationService.reviewsByTopNLabels(new ReviewsByTopLabelsDto(p.getAppName(), p.getGooglePlayId(), dto.getCategory(), dto.getLimit(), dto.getNgrams())));
         return labels.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
