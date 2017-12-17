@@ -115,16 +115,12 @@
             <groupId>it.unisa.sesa.ardoc</groupId>
             <artifactId>ardoc</artifactId>
             <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/src/main/resources/lib/ardoc.jar</systemPath>
         </dependency>
 
         <dependency>
             <groupId>reviewCrawler</groupId>
             <artifactId>reviewCrawler</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/../reviews_crawler/reviewCrawler-1.0-SNAPSHOT.jar</systemPath>
+            <version>1.0</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.mongodb.morphia/morphia -->
